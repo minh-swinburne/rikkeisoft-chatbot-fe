@@ -1,42 +1,39 @@
 <template>
   <div class="main-container">
-    <div class="login-container">
+    <div class="register-container">
       <div class="form-container">
-        <form @submit.prevent="login">
+        <form @submit.prevent="register">
           <div class="logo-container">
             <img alt="Vue logo" src="@/assets/rikkeisoft.png" height="100" />
           </div>
-          <div class="username-container">
-            <div class="label-and-logo-username-container col-4">
-              <div class="username-logo"></div>
-              <label for="username"> Username: </label>
+          <div class="field-container">
+            <div class="label-container col-4">
+              <label for="username">Username:</label>
             </div>
-            <div class="username-input-container col-8">
+            <div class="input-container col-8">
               <input v-model="username" id="username" type="text" class="form-field" required />
             </div>
           </div>
-
-          <div class="password-container">
-            <div class="label-and-logo-password-container col-4">
-              <div class="password-logo"></div>
-              <label for="password"> Password: </label>
+          <div class="field-container">
+            <div class="label-container col-4">
+              <label for="email">Email:</label>
             </div>
-            <div class="password-input-container col-8">
+            <div class="input-container col-8">
+              <input v-model="email" id="email" type="email" class="form-field" required />
+            </div>
+          </div>
+          <div class="field-container">
+            <div class="label-container col-4">
+              <label for="password">Password:</label>
+            </div>
+            <div class="input-container col-8">
               <input v-model="password" id="password" type="password" class="form-field" required />
             </div>
           </div>
           <div class="submit-button-container">
-            <input type="submit" value="Login" class="button" />
+            <input type="submit" value="Register" class="button" />
           </div>
         </form>
-      </div>
-      <div class="login-via-other">
-        <div class="via-gmail-container">
-          <button class="button">Login Via Google</button>
-        </div>
-        <div class="via-microsoft-container">
-          <button class="button">Login Via Microsoft</button>
-        </div>
       </div>
     </div>
   </div>
@@ -45,35 +42,36 @@
 <script setup>
 import axios from "axios";
 import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
-import { compareSync } from "bcryptjs";
-
-const $router = useRouter();
-const authStore = useAuthStore();
+import { hashSync } from "bcryptjs";
 
 const username = ref("");
+const email = ref("");
 const password = ref("");
 
-function login() {
-  axios
-    .get("data/users.json")
-    .then((response) => {
-      const users = response.data;
-      const user = users.find((user) => user.username === username.value);
+async function register() {
+  try {
+    // Hash the password
+    const hashedPassword = hashSync(password.value, 10);
 
-      if (user && compareSync(password.value, user.password)) {
-        alert("Login successfully");
-        authStore.login(user);
-        $router.push("/chat");
-      } else {
-        alert("Login failed");
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      alert("An error occurred during login.");
-    });
+    // Prepare the user data
+    const newUser = {
+      username: username.value,
+      email: email.value,
+      password: hashedPassword,
+    };
+
+    // Send a POST request to the backend
+    const response = await axios.post("http://localhost:3000/users", newUser);
+
+    if (response.status === 201) {
+      alert("Registration successful!");
+    } else {
+      alert("Failed to register. Please try again.");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("An error occurred while registering. Please try again.");
+  }
 }
 </script>
 
@@ -87,7 +85,7 @@ function login() {
   background-color: #ccc;
 }
 
-.login-container {
+.register-container {
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -111,8 +109,7 @@ function login() {
   margin-bottom: 1rem;
 }
 
-.username-container,
-.password-container {
+.field-container {
   margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
@@ -153,13 +150,8 @@ input[type="submit"] {
   border-color: #000000;
 }
 
-/* Login Via Other Services */
-.login-via-other {
-  padding: 1rem;
-  background: #f8f9fa;
-  border-top: 1px solid #dee2e6;
-  display: flex;
-  justify-content: space-around;
+input[type="submit"]:hover {
+  /* transform: scale(1.05); */
 }
 
 button {
@@ -169,20 +161,6 @@ button {
   font-size: 0.9rem;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
-}
-
-.via-gmail-container button {
-  border-color: #a43429;
-}
-
-.via-gmail-container button:hover {
-}
-
-.via-microsoft-container button {
-  border-color: #005bb5;
-}
-
-.via-microsoft-container button:hover {
 }
 
 .button:hover {

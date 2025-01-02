@@ -1,2 +1,3 @@
-# rikkeisoft-chatbot-fe
-Rikkeisoft - Documents Chatbot Assistant for Employees | Frontend
+# Rikkeisoft - Documents Chatbot Assistant for Employees | Frontend
+Language: JavaScript
+Framework: Vue.js - Node.js

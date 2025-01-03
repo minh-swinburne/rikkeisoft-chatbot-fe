@@ -1,60 +1,103 @@
 <template>
-  <div class="d-flex vh-100">
-    <!-- Vertical Navbar -->
-    <div class="d-flex flex-column bg-light border-end" style="width: 250px">
-      <div class="p-3 flex-grow-1">
-        <h4>Chat</h4>
-        <ul class="list-unstyled mt-4">
-          <li class="mb-2">
-            <button class="btn btn-outline-primary w-100">
-              Conversation 1
-            </button>
-          </li>
-          <li class="mb-2">
-            <button class="btn btn-outline-primary w-100">
-              Conversation 2
-            </button>
-          </li>
-        </ul>
+  <div class="d-flex flex-column vh-100">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">ChatApp</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Chat</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Upload</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Profile</a>
+            </li>
+          </ul>
+          <span class="navbar-text">
+            Welcome, {{ username }}
+          </span>
+        </div>
       </div>
-      <div class="p-3">
-        <button class="btn btn-danger w-100" @click="logout">Logout</button>
-      </div>
-    </div>
+    </nav>
 
-    <!-- Chat Interface -->
-    <div class="d-flex flex-column flex-grow-1 justify-content-between">
-      <!-- Chat Stack -->
-      <div class="flex-grow-1 overflow-auto p-3" ref="chatContainer">
-        <div v-for="(message, index) in messages" :key="index" class="mb-3">
-          <div
-            v-if="message.sender === 'bot'"
-            class="d-flex justify-content-start text-start"
-          >
-            <div
-              class="bg-secondary text-white p-2 rounded-end"
-              v-html="message.text"
-            ></div>
-          </div>
-          <div v-else class="d-flex justify-content-end">
-            <div class="bg-primary text-white p-2 rounded-start">
-              {{ message.text }}
-            </div>
-          </div>
+    <div class="d-flex flex-grow-1">
+      <!-- Vertical Navbar -->
+      <div class="d-flex flex-column bg-light border-end" style="width: 250px">
+        <div class="p-3 flex-grow-1">
+          <h4>Chat</h4>
+          <ul class="list-unstyled mt-4">
+            <li class="mb-2">
+              <button class="btn btn-outline-primary w-100">
+                Conversation 1
+              </button>
+            </li>
+            <li class="mb-2">
+              <button class="btn btn-outline-primary w-100">
+                Conversation 2
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div class="p-3">
+          <button class="btn btn-danger w-100" @click="logout">Logout</button>
         </div>
       </div>
 
-      <!-- Input Field -->
-      <div class="border-top p-3 bg-light">
-        <div class="input-group">
-          <input
-            v-model="userInput"
-            type="text"
-            class="form-control"
-            placeholder="Type your message..."
-            @keydown.enter="sendMessage"
-          />
-          <button class="btn btn-primary" @click="sendMessage">Send</button>
+      <!-- Chat Interface -->
+      <div class="d-flex flex-column flex-grow-1 justify-content-between">
+        <!-- Chat Stack -->
+        <div class="flex-grow-1 overflow-auto py-3 px-5" ref="chatContainer">
+          <div v-for="(message, index) in messages" :key="index" class="mb-3">
+            <div
+              v-if="message.sender === 'bot'"
+              class="d-flex justify-content-start text-start"
+            >
+              <div
+                class="bg-secondary text-white p-2 rounded-end message-box"
+                v-html="message.text"
+              ></div>
+            </div>
+            <div v-else class="d-flex justify-content-end text-start">
+              <div class="bg-primary text-white p-2 rounded-start ms-auto message-box">
+                {{ message.text }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Suggestions -->
+        <div class="p-3 bg-light border-top">
+          <div class="d-flex flex-column">
+            <button 
+              v-for="(suggestion, index) in chatSuggestions" 
+              :key="index"
+              class="btn btn-suggestion mb-2"
+              @click="applySuggestion(suggestion)"
+            >
+              {{ suggestion }}
+              <span class="suggestion-arrow">&rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Input Field -->
+        <div class="border-top p-3 bg-light">
+          <div class="input-group">
+            <input
+              v-model="userInput"
+              type="text"
+              class="form-control"
+              placeholder="Type your message..."
+              @keydown.enter="sendMessage"
+            />
+            <button class="btn btn-primary" @click="sendMessage">Send</button>
+          </div>
         </div>
       </div>
     </div>
@@ -72,10 +115,23 @@ const messages = ref([]);
 const userInput = ref("");
 const $router = useRouter();
 const authStore = useAuthStore();
+const username = ref("User"); // You can replace this with the actual username from your auth store
+
+const chatSuggestions = ref([
+  "Tell me more.",
+  "Can you provide an example of how reinforcement learning can be used to generate follow-up questions?",
+  "How can conversation analysis be used to determine common patterns for generating follow-up questions?",
+  "What are some ways to balance the number of follow-up questions to avoid overwhelming the user?"
+]);
 
 function logout() {
   authStore.logout();
   $router.push("/login");
+}
+
+function applySuggestion(suggestion) {
+  userInput.value = suggestion;
+  sendMessage()
 }
 
 async function sendMessage() {
@@ -136,6 +192,11 @@ onMounted(() => {
   overflow-y: auto;
 }
 
+.message-box {
+  max-width: 60vw;
+  word-wrap: break-word;
+}
+
 input::placeholder {
   color: #adb5bd;
 }
@@ -144,5 +205,28 @@ input:focus,
 button:focus {
   outline: none;
   box-shadow: none !important;
+}
+
+/* Chat suggestions styling */
+.btn-suggestion {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #212529;
+  text-align: left;
+  padding: 10px 15px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.btn-suggestion:hover {
+  background-color: #e9ecef;
+}
+
+.suggestion-arrow {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 </style>

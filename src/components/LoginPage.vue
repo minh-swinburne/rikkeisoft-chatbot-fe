@@ -1,5 +1,5 @@
 <template>
-  <div class="main-container">
+  <div class="main-container bg-light">
     <div class="login-container">
       <div class="form-container">
         <form @submit.prevent="login">
@@ -84,7 +84,6 @@ function login() {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #ccc;
 }
 
 .login-container {

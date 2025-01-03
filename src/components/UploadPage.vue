@@ -2,11 +2,19 @@
     <div class="main-container">
         <div class="container">
             <!-- Correctly bind the uploadFile method to the button -->
-            <button id="file-upload-button" @click="uploadFile">File Upload</button>
-            <button id="weblink-upload-button">Weblink Upload</button>
+            <button class="button" id="file-upload-button" @click="uploadFile">File Upload</button>
+            <button class="button" id="weblink-upload-button">Weblink Upload</button>
         </div>
         <div id="file-upload" class="container col-6">
             <form>
+                <div class="input-container">
+                    <label for="file-upload-input">Choose File</label>
+                    <input
+                        id="file-upload-input"
+                        type="file"
+                        class="form-control"
+                        accept=".pdf, .docx, .xlsx">
+                </div>
                 <div class="input-container">
                     <label for="file-document-name">Document Name</label>
                     <input id="file-document-name" type="text" class="form-control">
@@ -14,14 +22,6 @@
                 <div class="input-container">
                     <label for="file-description">Description</label>
                     <textarea id="file-description" class="form-control" rows="3"></textarea>
-                </div>
-                <div class="input-container">
-                    <label for="file-upload-input">Choose File</label>
-                    <input 
-                        id="file-upload-input" 
-                        type="file" 
-                        class="form-control" 
-                        accept=".pdf, .docx, .xlsx">
                 </div>
                 <div class="input-container">
                     <label for="category">Category</label>
@@ -72,42 +72,54 @@
 console.log("hahahahahha");
 
 // // This function will be called when the button is clicked
-// function uploadFile(event) {
-//     console.log("Uploading file...");
-//     const fileInput = document.getElementById("file-upload-input");
-//     const file = fileInput.files[0];  // Access the uploaded file
+function uploadFile(event) {
+    console.log("Uploading file...");
+    console.log("Event:", event.target);
 
-//     if (file) {
-//         console.log("File name:", file.name);
-//         console.log("File size:", file.size);
-//     } else {
-//         console.log("No file selected.");
-//     }
-// }
+    const fileInput = document.getElementById("file-upload-input");
+    const file = fileInput.files[0];  // Access the uploaded file
+
+    if (file) {
+        console.log("File name:", file.name);
+        console.log("File size:", file.size);
+    } else {
+        console.log("No file selected.");
+    }
+}
 </script>
 
 
 <style>
-    .main-container {
-        padding: 20px;
-    }
+.main-container {
+  padding: 20px;
+}
 
-    .container a {
-        margin-right: 20px;
-        cursor: pointer;
-        text-decoration: none;
-        color: inherit;
-    }
+.container a {
+  margin-right: 20px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
 
-    .container a:hover {
-        text-decoration: none;
-    }
+.container a:hover {
+  text-decoration: none;
+}
 
-    .input-container {
-        margin-bottom: 15px;
-    }
+.input-container {
+  margin-bottom: 15px;
+}
 
-    .d-none {
-        display: none;
-    }
+.d-none {
+  display: none;
+}
+
+.button {
+  background-color: #fff;
+  padding: 0.5rem 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
 </style>

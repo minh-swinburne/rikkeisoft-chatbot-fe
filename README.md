@@ -13,7 +13,7 @@ Framework: Vue.js - Node.js
     ```
       npm run serve
     ```
-  4. App should be running at `http://localhost:8080/`
+  4. App should be running at <http://localhost:8080/>
 
 Members:
 - Nguyen Thi Thanh Minh

@@ -5,6 +5,7 @@ const routes = [
   { path: "/login", component: () => import("@/components/LoginPage.vue") },
   { path: "/register", component: () => import("@/components/RegisterPage.vue") },
   { path: "/chat", component: () => import("@/components/ChatPage.vue") },
+  { path: "/upload", component: () => import("@/components/UploadPage.vue") },
   { path: "/", redirect: "/login" }, // Default route
 ];
 

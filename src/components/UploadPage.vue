@@ -71,19 +71,19 @@
 <script setup>
 console.log("hahahahahha");
 
-// This function will be called when the button is clicked
-function uploadFile(event) {
-    console.log("Uploading file...");
-    const fileInput = document.getElementById("file-upload-input");
-    const file = fileInput.files[0];  // Access the uploaded file
+// // This function will be called when the button is clicked
+// function uploadFile(event) {
+//     console.log("Uploading file...");
+//     const fileInput = document.getElementById("file-upload-input");
+//     const file = fileInput.files[0];  // Access the uploaded file
 
-    if (file) {
-        console.log("File name:", file.name);
-        console.log("File size:", file.size);
-    } else {
-        console.log("No file selected.");
-    }
-}
+//     if (file) {
+//         console.log("File name:", file.name);
+//         console.log("File size:", file.size);
+//     } else {
+//         console.log("No file selected.");
+//     }
+// }
 </script>
 
 

@@ -45,11 +45,12 @@
 <script setup>
 import axios from "axios";
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { compareSync } from "bcryptjs";
 
 const $router = useRouter();
+const $route = useRoute();
 const authStore = useAuthStore();
 
 const username = ref("");
@@ -65,7 +66,7 @@ function login() {
       if (user && compareSync(password.value, user.password)) {
         alert("Login successfully");
         authStore.login(user);
-        $router.push("/chat");
+        $router.push($route.query?.redirect ?? "/chat");
       } else {
         alert("Login failed");
       }

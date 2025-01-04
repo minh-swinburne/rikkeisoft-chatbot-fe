@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-light py-3 py-md-5">
+  <section class="bg-light min-vh-100 py-3 py-md-5 d-flex flex-column justify-content-center">
     <div class="container">
       <!-- Title and Description -->
       <div class="row justify-content-md-center">
@@ -18,7 +18,11 @@
       <div class="row justify-content-lg-center">
         <div class="col-12 col-lg-9">
           <div class="bg-white border rounded shadow-sm overflow-hidden">
-            <form @submit.prevent="submitForm">
+            <form
+              v-if="authStore.user?.admin"
+              ref="upload-form"
+              @submit.prevent="submit"
+            >
               <!-- Tabs -->
               <ul class="nav nav-tabs mb-4 px-4 pt-4">
                 <li class="nav-item">
@@ -46,10 +50,10 @@
               <div class="row gy-4 gy-xl-5 px-4 pb-4">
                 <!-- Conditional Input: File or Weblink -->
                 <div class="col-12 field-container required">
-                  <label v-if="activeTab === 'file'" for="file-upload-input">
+                  <label v-if="activeTab === 'file'" for="file-upload-input" class="form-label">
                     Choose File
                   </label>
-                  <label v-else for="weblink-input">
+                  <label v-else for="weblink-input" class="form-label">
                     Enter Weblink
                   </label>
 
@@ -57,14 +61,17 @@
                     v-if="activeTab === 'file'"
                     id="file-upload-input"
                     type="file"
+                    name="file"
                     class="form-control"
                     accept=".pdf, .doc, .docx, .xls, .xlsx"
                     required
+                    @change="handleFileUpload"
                   />
                   <input
                     v-else
                     id="weblink-input"
                     type="url"
+                    name="link"
                     class="form-control"
                     placeholder="https://example.com"
                     required
@@ -73,33 +80,80 @@
 
                 <!-- Shared Fields -->
                 <div class="col-12 field-container required">
-                  <label for="document-name">Document Name</label>
-                  <input id="document-name" type="text" class="form-control" required />
+                  <label for="document-name" class="form-label">Document Name</label>
+                  <input id="document-name" type="text" name="title" class="form-control" required />
                 </div>
                 <div class="col-12 field-container">
-                  <label for="description">Description</label>
-                  <textarea id="description" class="form-control" rows="3"></textarea>
+                  <label for="description" class="form-label">Description</label>
+                  <textarea id="description" name="description" class="form-control" rows="3"></textarea>
                 </div>
                 <div class="col-12 field-container required">
-                  <label for="category">Category</label>
-                  <select id="category" class="form-select">
+                  <label for="category" class="form-label">Category</label>
+                  <select id="category" name="categories" class="form-select">
                     <option value="guidance">Guidance</option>
                     <option value="documents">Documents</option>
                   </select>
                 </div>
                 <div class="col-12 field-container">
-                  <label for="created-date">Day Created</label>
-                  <input id="created-date" type="date" class="form-control" />
+                  <label for="created-date" class="form-label">Day Created</label>
+                  <input
+                    v-model="createdDate"
+                    id="created-date"
+                    type="date"
+                    name="created-date"
+                    class="form-control"
+                  />
+                </div>
+                <div class="col-12 field-container required">
+                  <label for="creator" class="form-label">Creator</label>
+                  <input
+                    v-model="creator"
+                    id="creator"
+                    type="text"
+                    name="creator"
+                    class="form-control"
+                    required
+                  />
+                </div>
+                <div class="col-12 field-container">
+                  <div class="col-12">
+                    <label for="restricted" class="form-label">Access</label>
+                  </div>
+                  <div class="col-12">
+                    <div class="row mx-0 gap-3">
+                      <label class="btn btn-outline-secondary col">
+                        <input v-model="restricted" id="accessAll" type="radio" class="btn-check" name="restricted" value="all" />
+                        Everyone
+                      </label>
+                      <label class="btn btn-outline-secondary col">
+                        <input v-model="restricted" id="accessAdmin" type="radio" class="btn-check" name="restricted" value="admin" />
+                        Admin Only
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Submit Button -->
                 <div class="col-12">
                   <div class="d-grid">
-                    <button class="btn btn-primary btn-lg" type="submit">Upload</button>
+                    <button class="btn btn-danger btn-lg" type="submit">Upload</button>
                   </div>
                 </div>
               </div>
             </form>
+
+            <!-- Access Denied Message -->
+            <div v-else class="text-center py-5">
+              <h3 class="text-danger">Access Denied</h3>
+              <p class="text-secondary">You need to be logged in as an admin to upload documents.</p>
+              <router-link
+                :to="{ path: '/login', query: { redirect: $route.fullPath } }"
+                @click="authStore.logout"
+                class="btn btn-danger"
+              >
+                Login
+              </router-link>
+            </div>
           </div>
         </div>
       </div>
@@ -108,12 +162,59 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import axios from "axios";
+import { ref, useTemplateRef } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import { RouterLink } from "vue-router";
+
+const authStore = useAuthStore();
+const formRef = useTemplateRef("upload-form");
 
 const activeTab = ref("file"); // Default tab is "File Upload"
+const file = ref(null);
+const createdDate = ref(""); // Default date is today
+const creator = ref(authStore.user?.username);
+const restricted = ref("all"); // Default access is "Everyone"
 
-function submitForm() {
-  alert("Form submitted! (Implementation pending)");
+function handleFileUpload(event) {
+  const uploadedFile = event.target.files[0];
+
+  file.value = uploadedFile;
+
+  if (uploadedFile) {
+    const date = new Date(uploadedFile.lastModified);
+    // console.log(uploadedFile);
+
+    createdDate.value = date.toISOString().slice(0, 10); // Format as DD/MM/YYYY
+  }
+}
+
+function submit() {
+  const formData = new FormData(formRef.value);
+
+  formData.append("uploader", authStore.user.username);
+  formData.set("restricted", restricted.value === "all" ? false : true);
+
+  // Log the form data for debugging
+  for (let [key, value] of formData.entries()) {
+    console.log(`${key}: ${value}`);
+  }
+
+  // Submit the form data to the server
+  axios
+    .post("http://127.0.0.1:8000/api/v1/docs", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((response) => {
+      console.log(response.data);
+      alert("Document uploaded successfully!");
+    })
+    .catch((error) => {
+      console.error(error);
+      alert("An error occurred while uploading the document.");
+    });
 }
 </script>
 
@@ -132,5 +233,10 @@ function submitForm() {
 .field-container.required label:after {
   content: " *";
   color: red;
+}
+
+label.btn:has(input[type="radio"]:checked) {
+  background-color: var(--bs-btn-active-bg);
+  color: var(--bs-btn-active-color);
 }
 </style>

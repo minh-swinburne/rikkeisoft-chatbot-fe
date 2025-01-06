@@ -4,7 +4,7 @@
       <div class="form-container">
         <form @submit.prevent="login">
           <div class="logo-container">
-            <img alt="Vue logo" src="@/assets/rikkeisoft.png" height="100" />
+            <img alt="Vue logo" src="rikkeisoft.png" height="100" />
           </div>
           <div class="username-container">
             <div class="label-and-logo-username-container col-4">

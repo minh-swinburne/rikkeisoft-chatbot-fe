@@ -50,9 +50,9 @@
       </div>
 
       <!-- Chat Interface -->
-      <div class="d-flex flex-column flex-grow-1 justify-content-between">
+      <div class="d-flex flex-column flex-grow-1 justify-content-between overflow-auto">
         <!-- Chat Stack -->
-        <div class="flex-grow-1 overflow-auto py-3 px-5" ref="chatContainer">
+        <div class="flex-grow-1 py-3 px-5" ref="chatContainer">
           <div v-for="(message, index) in messages" :key="index" class="mb-3">
             <div
               v-if="message.sender === 'bot'"
@@ -188,8 +188,7 @@ onMounted(() => {
 
 /* Chat styling */
 .overflow-auto {
-  max-height: 80%;
-  overflow-y: auto;
+  overflow-y: visible;
 }
 
 .message-box {
@@ -228,5 +227,9 @@ button:focus {
   right: 15px;
   top: 50%;
   transform: translateY(-50%);
+}
+
+html{
+  overflow: hidden;
 }
 </style>

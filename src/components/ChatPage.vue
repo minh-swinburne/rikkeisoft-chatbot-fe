@@ -186,7 +186,7 @@ async function sendMessage() {
       }
     );
 
-    console.log("Response:", response.data); // Log the response
+  //   console.log("Response:", response.data); // Log the response
 
     // Add bot's response to the chat stack
     const botResponse = marked(response.data.content);
@@ -210,6 +210,7 @@ onMounted(() => {
     content: "<p>Hi there! How can I help you today?</p>",
   });
 });
+
 </script>
 
 <style scoped>

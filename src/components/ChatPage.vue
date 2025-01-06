@@ -56,11 +56,9 @@
       </div>
 
       <!-- Chat Interface -->
-      <div
-        class="d-flex flex-column flex-grow-1"
-      >
+      <div class="d-flex flex-column flex-grow-1">
         <!-- Chat Stack -->
-        <div class="chat-stack flex-grow-1 py-3 px-5 overflow-auto" ref="chatContainer">
+        <div class="chat-stack flex-grow-1 py-3 px-5 overflow-auto" ref="chatContainer" :style="{ maxHeight: chatStackMaxHeight }">
           <div v-for="(message, index) in messages" :key="index" class="mb-3">
             <div
               v-if="message.role === 'assistant'"
@@ -98,14 +96,17 @@
         <!-- Input Field -->
         <div class="border-top p-3 bg-light">
           <div class="input-group">
-            <textarea
-              v-model="userInput"
-              class="form-control"
-              placeholder="Type your message (Markdown supported)..."
-              rows="1"
-              @keydown="handleInputKeydown"
-              @input="adjustTextareaHeight"
-            ></textarea>
+            <div class="textarea-wrapper">
+              <textarea
+                v-model="userInput"
+                class="form-control custom-textarea"
+                placeholder="Type your message (Markdown supported)..."
+                rows="1"
+                @keydown="handleInputKeydown"
+                @input="adjustTextareaHeight"
+                ref="chatTextarea"
+              ></textarea>
+            </div>
             <button class="btn btn-primary" @click="sendMessage">Send</button>
           </div>
         </div>
@@ -118,7 +119,7 @@
 import { useAuthStore } from "@/stores/auth";
 import axios from "axios";
 import { marked } from "marked";
-import { nextTick, onMounted, ref } from "vue";
+import { nextTick, onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 
 const messages = ref([]);
@@ -126,6 +127,8 @@ const userInput = ref("");
 const $router = useRouter();
 const authStore = useAuthStore();
 const username = ref("User"); // You can replace this with the actual username from your auth store
+const chatTextarea = ref(null);
+const textareaLines = ref(1);
 
 const chatSuggestions = ref([
   "Tell me more.",
@@ -144,7 +147,6 @@ function applySuggestion(suggestion) {
   sendMessage();
 }
 
-// Handle keydown for textarea to allow Shift + Enter for new lines
 function handleInputKeydown(event) {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
@@ -152,72 +154,101 @@ function handleInputKeydown(event) {
   }
 }
 
-// Adjust the height of the textarea dynamically
-function adjustTextareaHeight(event) {
-  const textarea = event.target;
-  textarea.style.height = "auto"; // Reset height
-  textarea.style.height = `${textarea.scrollHeight}px`; // Set to new height
+const chatStackMaxHeight = computed(() => {
+  const baseHeight = 337; // Initial max-height value
+  const additionalLines = Math.min(textareaLines.value - 1, 4); // Max 4 additional lines
+  const heightReduction = additionalLines * 22; // 22px per additional line
+  return `calc(100vh - ${baseHeight + heightReduction}px)`;
+});
+
+
+function adjustTextareaHeight() {
+  if (!chatTextarea.value) return;
+
+  const textarea = chatTextarea.value;
+  textarea.style.height = 'auto';
+  
+  const scrollHeight = textarea.scrollHeight;
+  const lineHeight = 24; // Line height in pixels
+  const maxLines = 5;
+  
+  const lines = Math.min(Math.floor(scrollHeight / lineHeight), maxLines);
+  textareaLines.value = lines;
+  
+  if (scrollHeight > maxLines * lineHeight) {
+    textarea.style.height = `${maxLines * lineHeight}px`;
+  } else {
+    textarea.style.height = `${scrollHeight}px`;
+  }
 }
 
 async function sendMessage() {
   if (!userInput.value.trim()) return;
 
-  // Add user's message to the chat stack
   messages.value.push({
     role: "user",
-    content: marked(userInput.value), // Convert markdown to HTML for user input
+    content: marked(userInput.value),
   });
 
   const query = userInput.value;
-  // Clear the input field
   userInput.value = "";
 
-  // Fetch a bot response from mock data
+  // Reset textarea height and lines
+  if (chatTextarea.value) {
+    chatTextarea.value.style.height = 'auto';
+    textareaLines.value = 1;
+  }
+
+  // Force recompute chatStackMaxHeight
+  textareaLines.value = Math.max(1, textareaLines.value); // Ensures it triggers recompute
+
   try {
     const response = await axios.post(
       "http://127.0.0.1:8000/api/v1/chat/test",
-      {
-        query: query,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+      { query: query },
+      { headers: { "Content-Type": "application/json" } }
     );
 
-  //   console.log("Response:", response.data); // Log the response
-
-    // Add bot's response to the chat stack
     const botResponse = marked(response.data.content);
     messages.value.push({ role: response.data.role, content: botResponse });
   } catch (error) {
-    alert("An error occurred while fetching the bot's response.");
     console.error(error);
+    alert("An error occurred while fetching the bot's response.");
   }
 
-  // Scroll to the bottom of the chat
+  // Scroll to the bottom after sending the message
   nextTick(() => {
     const chatContainer = document.querySelector(".overflow-auto");
     chatContainer.scrollTop = chatContainer.scrollHeight;
   });
+
+  // Fetch chat suggestions after sending the message
+  try {
+    const suggestionsResponse = await axios.post('http://127.0.0.1:8000/suggestions', {
+      message: query
+    });
+    chatSuggestions.value = suggestionsResponse.data.suggestions;
+  } catch (error) {
+    console.error("Error fetching suggestions:", error);
+  }
+
+
 }
 
-// Preload a sample conversation
+
 onMounted(() => {
   messages.value.push({
     role: "assistant",
     content: "<p>Hi there! How can I help you today?</p>",
   });
 });
-
 </script>
 
 <style scoped>
 /* Chat stack styling */
 .chat-stack {
   overflow-y: auto;
-  max-height: calc(100vh - 200px); /* Adjust this based on header and input height */
+  transition: max-height 0.05s ease;
 }
 
 .message-box {
@@ -229,20 +260,32 @@ onMounted(() => {
   margin-bottom: 0;
 }
 
-/* Textarea */
-textarea {
+/* Textarea styling */
+.textarea-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.custom-textarea {
   resize: none;
-  overflow: hidden;
+  overflow-y: auto;
+  min-height: 38px; /* Initial height */
+  max-height: 120px; /* 5 lines * 24px line height */
+  width: 100%;
+  line-height: 24px;
+  padding-right: 60px; /* Make space for the send button */
 }
 
-textarea::placeholder {
-  color: #adb5bd;
+/* Input group styling */
+.input-group {
+  position: relative;
 }
 
-textarea:focus,
-button:focus {
-  outline: none;
-  box-shadow: none !important;
+.input-group .btn {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 100%;
 }
 
 /* Navbar styling */
@@ -260,7 +303,7 @@ button:focus {
   border: 1px solid #dee2e6;
   color: #212529;
   text-align: left;
-  padding: 10px 15px;
+  padding: 5px 15px;
   border-radius: 20px;
   transition: all 0.3s ease;
   position: relative;

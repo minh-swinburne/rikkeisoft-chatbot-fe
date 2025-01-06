@@ -3,10 +3,25 @@ import { useAuthStore } from "@/stores/auth";
 
 const routes = [
   { path: "/login", component: () => import("@/components/LoginPage.vue") },
-  { path: "/register", component: () => import("@/components/RegisterPage.vue") },
-  { path: "/chat", component: () => import("@/components/ChatPage.vue") },
-  { path: "/upload", component: () => import("@/components/UploadPage.vue") },
-  { path: "/documents", component: () => import("@/components/DocList.vue") },
+  {
+    path: "/register",
+    component: () => import("@/components/RegisterPage.vue"),
+  },
+  {
+    path: "/chat",
+    component: () => import("@/components/ChatPage.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/upload",
+    component: () => import("@/components/UploadPage.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/docs",
+    component: () => import("@/components/DocList.vue"),
+    meta: { requiresAuth: true },
+  },
   { path: "/", redirect: "/login" }, // Default route
 ];
 
@@ -21,7 +36,7 @@ router.beforeEach((to, from, next) => {
   if (to.path === "/login") {
     if (authStore.user) {
       // Redirect to chat if already logged in
-      next("/chat");
+      next(from.fullPath);
     } else {
       next();
     }

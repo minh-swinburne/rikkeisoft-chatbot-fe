@@ -1,10 +1,10 @@
 <template>
-  <div class="main-container">
+  <div class="main-container bg-light">
     <div class="login-container">
       <div class="form-container">
         <form @submit.prevent="login">
           <div class="logo-container">
-            <img alt="Vue logo" src="@/assets/rikkeisoft.png" height="100" />
+            <img alt="Vue logo" src="rikkeisoft.png" height="100" />
           </div>
           <div class="username-container">
             <div class="label-and-logo-username-container col-4">
@@ -45,11 +45,12 @@
 <script setup>
 import axios from "axios";
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { compareSync } from "bcryptjs";
 
 const $router = useRouter();
+const $route = useRoute();
 const authStore = useAuthStore();
 
 const username = ref("");
@@ -65,7 +66,7 @@ function login() {
       if (user && compareSync(password.value, user.password)) {
         alert("Login successfully");
         authStore.login(user);
-        $router.push("/chat");
+        $router.push($route.query?.redirect ?? "/chat");
       } else {
         alert("Login failed");
       }
@@ -84,7 +85,6 @@ function login() {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #ccc;
 }
 
 .login-container {

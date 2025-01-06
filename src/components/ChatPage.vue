@@ -107,7 +107,7 @@
 <script setup>
 import { useAuthStore } from "@/stores/auth";
 import axios from "axios";
-import { marked } from "marked";
+// import { marked } from "marked";
 import { nextTick, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -117,12 +117,7 @@ const $router = useRouter();
 const authStore = useAuthStore();
 const username = ref("User"); // You can replace this with the actual username from your auth store
 
-const chatSuggestions = ref([
-  "Tell me more.",
-  "Can you provide an example of how reinforcement learning can be used to generate follow-up questions?",
-  "How can conversation analysis be used to determine common patterns for generating follow-up questions?",
-  "What are some ways to balance the number of follow-up questions to avoid overwhelming the user?"
-]);
+const chatSuggestions = ref([]);
 
 function logout() {
   authStore.logout();
@@ -145,26 +140,36 @@ async function sendMessage() {
   userInput.value = "";
 
   // Fetch a bot response from mock data
-  try {
-    const response = await axios.get("http://127.0.0.1:8000/generate-answer", {
-      params: { query: query },
-    });
+  // try {
+  //   const response = await axios.get("http://127.0.0.1:8000/generate-answer", {
+  //     params: { query: query },
+  //   });
 
-    console.log("Response:", response.data); // Log the response
+  //   console.log("Response:", response.data); // Log the response
 
-    // Add bot's response to the chat stack
-    const botResponse = marked(response.data.answer.choices[0].message.content);
-    messages.value.push({ sender: "bot", text: botResponse });
-  } catch (error) {
-    alert("An error occurred while fetching the bot's response.");
-    console.error(error);
-  }
+  //   // Add bot's response to the chat stack
+  //   const botResponse = marked(response.data.answer.choices[0].message.content);
+  //   messages.value.push({ sender: "bot", text: botResponse });
+  // } catch (error) {
+  //   alert("An error occurred while fetching the bot's response.");
+  //   console.error(error);
+  // }
 
   // Scroll to the bottom of the chat
   nextTick(() => {
     const chatContainer = document.querySelector(".overflow-auto");
     chatContainer.scrollTop = chatContainer.scrollHeight;
   });
+
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/suggestions', {
+      message: query
+    });
+    chatSuggestions.value = response.data.suggestions;
+  } catch (error) {
+    console.error("Error fetching suggestions:", error);
+  }
+  
 }
 
 // Preload a sample conversation
@@ -174,6 +179,7 @@ onMounted(() => {
     text: "Hi there! How can I help you today?",
   });
 });
+
 </script>
 
 <style scoped>

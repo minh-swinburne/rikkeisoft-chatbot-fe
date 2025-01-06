@@ -46,35 +46,57 @@
 import axios from "axios";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
-import { compareSync } from "bcryptjs";
+// import { useAuthStore } from "@/stores/auth";
+// import { compareSync } from "bcryptjs";
 
 const $router = useRouter();
-const authStore = useAuthStore();
+// const authStore = useAuthStore();
 
 const username = ref("");
 const password = ref("");
 
-function login() {
-  axios
-    .get("data/users.json")
-    .then((response) => {
-      const users = response.data;
-      const user = users.find((user) => user.username === username.value);
+// function login() {
+//   axios
+//     .get("data/users.json")
+//     .then((response) => {
+//       const users = response.data;
+//       const user = users.find((user) => user.username === username.value);
 
-      if (user && compareSync(password.value, user.password)) {
-        alert("Login successfully");
-        authStore.login(user);
-        $router.push("/chat");
-      } else {
-        alert("Login failed");
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      alert("An error occurred during login.");
+//       if (user && compareSync(password.value, user.password)) {
+//         alert("Login successfully");
+//         authStore.login(user);
+//         $router.push("/chat");
+//       } else {
+//         alert("Login failed");
+//       }
+//     })
+//     .catch((error) => {
+//       console.error(error);
+//       alert("An error occurred during login.");
+//     });
+// }
+
+async function login() {
+  try {
+    const params = new URLSearchParams();
+    params.append('username', username.value);
+    params.append('password', password.value);
+
+    const response = await axios.post('http://127.0.0.1:8000/token', params, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
+    const token = response.data.access_token;
+    localStorage.setItem('jwt', token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    console.error('Login successfully');
+    
+    // Redirect to the /chat route after a successful login
+    $router.push('/chat');
+  } catch (error) {
+    console.error('Login failed', error);
+  }
 }
+
 </script>
 
 <style scoped>

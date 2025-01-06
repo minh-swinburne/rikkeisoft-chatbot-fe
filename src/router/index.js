@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
+// import { useAuthStore } from "@/stores/auth";
 
 const routes = [
   { path: "/login", component: () => import("@/components/LoginPage.vue") },
@@ -16,24 +16,31 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore();
+  // const authStore = useAuthStore();
 
-  if (to.path === "/login") {
-    if (authStore.user) {
-      // Redirect to chat if already logged in
-      next("/chat");
-    } else {
-      next();
-    }
-  } else if (to.path === "/chat") {
-    if (!authStore.user) {
-      // Redirect to login if not logged in
-      next("/login");
-    } else {
-      next();
-    }
+  // if (to.path === "/login") {
+  //   if (authStore.user) {
+  //     // Redirect to chat if already logged in
+  //     next("/chat");
+  //   } else {
+  //     next();
+  //   }
+  // } else if (to.path === "/chat") {
+  //   if (!authStore.user) {
+  //     // Redirect to login if not logged in
+  //     next("/login");
+  //   } else {
+  //     next();
+  //   }
+  // } else {
+  //   next(); // Allow navigation to other routes
+  // }
+
+  const token = localStorage.getItem('jwt');
+  if (to.matched.some(record => record.meta.requiresAuth) && !token) {
+    next('/login');
   } else {
-    next(); // Allow navigation to other routes
+    next();
   }
 });
 

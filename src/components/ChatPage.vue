@@ -4,7 +4,15 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">ChatApp</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -19,9 +27,7 @@
               <a class="nav-link" href="#">Profile</a>
             </li>
           </ul>
-          <span class="navbar-text">
-            Welcome, {{ username }}
-          </span>
+          <span class="navbar-text"> Welcome, {{ username }} </span>
         </div>
       </div>
     </nav>
@@ -50,23 +56,26 @@
       </div>
 
       <!-- Chat Interface -->
-      <div class="d-flex flex-column flex-grow-1 justify-content-between overflow-auto">
+      <div
+        class="d-flex flex-column flex-grow-1"
+      >
         <!-- Chat Stack -->
-        <div class="flex-grow-1 py-3 px-5" ref="chatContainer">
+        <div class="chat-stack flex-grow-1 py-3 px-5 overflow-auto" ref="chatContainer">
           <div v-for="(message, index) in messages" :key="index" class="mb-3">
             <div
-              v-if="message.sender === 'bot'"
+              v-if="message.role === 'assistant'"
               class="d-flex justify-content-start text-start"
             >
               <div
-                class="bg-secondary text-white p-2 rounded-end message-box"
-                v-html="message.text"
+                class="bg-secondary text-white px-3 py-2 rounded-end message-box"
+                v-html="message.content"
               ></div>
             </div>
             <div v-else class="d-flex justify-content-end text-start">
-              <div class="bg-primary text-white p-2 rounded-start ms-auto message-box">
-                {{ message.text }}
-              </div>
+              <div
+                class="bg-primary text-white px-3 py-2 rounded-start ms-auto message-box"
+                v-html="message.content"
+              ></div>
             </div>
           </div>
         </div>
@@ -74,8 +83,8 @@
         <!-- Chat Suggestions -->
         <div class="p-3 bg-light border-top">
           <div class="d-flex flex-column">
-            <button 
-              v-for="(suggestion, index) in chatSuggestions" 
+            <button
+              v-for="(suggestion, index) in chatSuggestions"
               :key="index"
               class="btn btn-suggestion mb-2"
               @click="applySuggestion(suggestion)"
@@ -89,13 +98,14 @@
         <!-- Input Field -->
         <div class="border-top p-3 bg-light">
           <div class="input-group">
-            <input
+            <textarea
               v-model="userInput"
-              type="text"
               class="form-control"
-              placeholder="Type your message..."
-              @keydown.enter="sendMessage"
-            />
+              placeholder="Type your message (Markdown supported)..."
+              rows="1"
+              @keydown="handleInputKeydown"
+              @input="adjustTextareaHeight"
+            ></textarea>
             <button class="btn btn-primary" @click="sendMessage">Send</button>
           </div>
         </div>
@@ -121,7 +131,7 @@ const chatSuggestions = ref([
   "Tell me more.",
   "Can you provide an example of how reinforcement learning can be used to generate follow-up questions?",
   "How can conversation analysis be used to determine common patterns for generating follow-up questions?",
-  "What are some ways to balance the number of follow-up questions to avoid overwhelming the user?"
+  "What are some ways to balance the number of follow-up questions to avoid overwhelming the user?",
 ]);
 
 function logout() {
@@ -131,14 +141,32 @@ function logout() {
 
 function applySuggestion(suggestion) {
   userInput.value = suggestion;
-  sendMessage()
+  sendMessage();
+}
+
+// Handle keydown for textarea to allow Shift + Enter for new lines
+function handleInputKeydown(event) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    sendMessage();
+  }
+}
+
+// Adjust the height of the textarea dynamically
+function adjustTextareaHeight(event) {
+  const textarea = event.target;
+  textarea.style.height = "auto"; // Reset height
+  textarea.style.height = `${textarea.scrollHeight}px`; // Set to new height
 }
 
 async function sendMessage() {
   if (!userInput.value.trim()) return;
 
   // Add user's message to the chat stack
-  messages.value.push({ sender: "user", text: userInput.value });
+  messages.value.push({
+    role: "user",
+    content: marked(userInput.value), // Convert markdown to HTML for user input
+  });
 
   const query = userInput.value;
   // Clear the input field
@@ -146,15 +174,23 @@ async function sendMessage() {
 
   // Fetch a bot response from mock data
   try {
-    const response = await axios.get("http://127.0.0.1:8000/generate-answer", {
-      params: { query: query },
-    });
+    const response = await axios.post(
+      "http://127.0.0.1:8000/api/v1/chat/test",
+      {
+        query: query,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("Response:", response.data); // Log the response
 
     // Add bot's response to the chat stack
-    const botResponse = marked(response.data.answer.choices[0].message.content);
-    messages.value.push({ sender: "bot", text: botResponse });
+    const botResponse = marked(response.data.content);
+    messages.value.push({ role: response.data.role, content: botResponse });
   } catch (error) {
     alert("An error occurred while fetching the bot's response.");
     console.error(error);
@@ -170,25 +206,17 @@ async function sendMessage() {
 // Preload a sample conversation
 onMounted(() => {
   messages.value.push({
-    sender: "bot",
-    text: "Hi there! How can I help you today?",
+    role: "assistant",
+    content: "<p>Hi there! How can I help you today?</p>",
   });
 });
 </script>
 
 <style scoped>
-/* Navbar styling */
-.bg-light {
-  background-color: #f8f9fa !important;
-}
-
-.border-end {
-  border-right: 1px solid #dee2e6 !important;
-}
-
-/* Chat styling */
-.overflow-auto {
-  overflow-y: visible;
+/* Chat stack styling */
+.chat-stack {
+  overflow-y: auto;
+  max-height: calc(100vh - 200px); /* Adjust this based on header and input height */
 }
 
 .message-box {
@@ -196,14 +224,33 @@ onMounted(() => {
   word-wrap: break-word;
 }
 
-input::placeholder {
+.message-box > *:last-child {
+  margin-bottom: 0;
+}
+
+/* Textarea */
+textarea {
+  resize: none;
+  overflow: hidden;
+}
+
+textarea::placeholder {
   color: #adb5bd;
 }
 
-input:focus,
+textarea:focus,
 button:focus {
   outline: none;
   box-shadow: none !important;
+}
+
+/* Navbar styling */
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+.border-end {
+  border-right: 1px solid #dee2e6 !important;
 }
 
 /* Chat suggestions styling */
@@ -227,9 +274,5 @@ button:focus {
   right: 15px;
   top: 50%;
   transform: translateY(-50%);
-}
-
-html{
-  overflow: hidden;
 }
 </style>

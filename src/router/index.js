@@ -22,6 +22,11 @@ const routes = [
     component: () => import("@/components/DocList.vue"),
     meta: { requiresAuth: true },
   },
+  {
+    path: "/config",
+    component: () => import("@/components/ConfigPage.vue"),
+    meta: { requiresAuth: false },
+  },
   { path: "/", redirect: "/login" }, // Default route
 ];
 

@@ -105,16 +105,17 @@
 </template>
 
 <script setup>
-import { useAuthStore } from "@/stores/auth";
+// import { useAuthStore } from "@/stores/auth";
 import axios from "axios";
 import { marked } from "marked";
 import { nextTick, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { googleLogout } from "vue3-google-login"
 
 const messages = ref([]);
 const userInput = ref("");
 const $router = useRouter();
-const authStore = useAuthStore();
+// const authStore = useAuthStore();
 const username = ref("User"); // You can replace this with the actual username from your auth store
 
 const chatSuggestions = ref([
@@ -124,10 +125,30 @@ const chatSuggestions = ref([
   "What are some ways to balance the number of follow-up questions to avoid overwhelming the user?"
 ]);
 
-function logout() {
-  authStore.logout();
-  $router.push("/login");
-}
+// function logout() {
+//   // authStore.logout();
+//   $router.push("/login");
+// }
+
+const logout = async () => {
+  try {
+    // Optional: Call your backend API to invalidate the token
+    // await fetch('your-api-url/logout', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+    //   }
+    // });
+
+    // Clear the JWT token from localStorage
+    localStorage.removeItem('jwt');
+    googleLogout()
+    // Redirect to the login page
+    $router.push('/login');
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+};
 
 function applySuggestion(suggestion) {
   userInput.value = suggestion;

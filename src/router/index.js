@@ -1,12 +1,26 @@
+import { createApp } from 'vue'
 import { createRouter, createWebHistory } from "vue-router";
-// import { useAuthStore } from "@/stores/auth";
+import App from '../App.vue'
+import vue3GoogleLogin from 'vue3-google-login'
 
 const routes = [
   { path: "/login", component: () => import("@/components/LoginPage.vue") },
   { path: "/register", component: () => import("@/components/RegisterPage.vue") },
-  { path: "/chat", component: () => import("@/components/ChatPage.vue") },
-  { path: "/upload", component: () => import("@/components/UploadPage.vue") },
-  { path: "/documents", component: () => import("@/components/DocList.vue") },
+  { 
+    path: "/chat", 
+    component: () => import("@/components/ChatPage.vue"),
+    meta: { requiresAuth: true }
+  },
+  { 
+    path: "/upload", 
+    component: () => import("@/components/UploadPage.vue"),
+    meta: { requiresAuth: true }
+  },
+  { 
+    path: "/documents", 
+    component: () => import("@/components/DocList.vue"),
+    meta: { requiresAuth: true }
+  },
   { path: "/", redirect: "/login" }, // Default route
 ];
 
@@ -16,32 +30,34 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  // const authStore = useAuthStore();
-
-  // if (to.path === "/login") {
-  //   if (authStore.user) {
-  //     // Redirect to chat if already logged in
-  //     next("/chat");
-  //   } else {
-  //     next();
-  //   }
-  // } else if (to.path === "/chat") {
-  //   if (!authStore.user) {
-  //     // Redirect to login if not logged in
-  //     next("/login");
-  //   } else {
-  //     next();
-  //   }
-  // } else {
-  //   next(); // Allow navigation to other routes
-  // }
-
   const token = localStorage.getItem('jwt');
-  if (to.matched.some(record => record.meta.requiresAuth) && !token) {
-    next('/login');
+  
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    // Check if the route requires authentication
+    if (!token) {
+      // If there's no token, redirect to login
+      next('/login');
+    } else {
+      // If there's a token, allow navigation
+      next();
+    }
+  } else if (to.path === '/login' && token) {
+    // If user is already logged in and tries to access login page, redirect to chat
+    next('/chat');
   } else {
+    // For routes that don't require auth (like login and register), allow navigation
     next();
   }
 });
+
+const app = createApp(App)
+
+app.use(router)
+
+app.use(vue3GoogleLogin, {
+  clientId: '1047088098330-2d17mgbf5bdugkvkh69i0ah65c40hp65.apps.googleusercontent.com'
+})
+
+app.mount('#app')
 
 export default router;

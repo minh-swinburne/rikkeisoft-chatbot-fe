@@ -32,20 +32,22 @@
       </div>
       <div class="login-via-other">
         <div class="via-gmail-container">
-          <button class="button">Login Via Google</button>
+          <button class="button" @click="handleGoogleLogin">Login Via Google</button>
         </div>
         <div class="via-microsoft-container">
-          <button class="button">Login Via Microsoft</button>
+          <button class="button" @click="handleMicrosoftLogin">Login Via Microsoft</button>
         </div>
       </div>
     </div>
-  </div>
+  </div>x
 </template>
 
 <script setup>
 import axios from "axios";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { googleAuthCodeLogin } from "vue3-google-login";
+import * as msal from "@azure/msal-browser";
 // import { useAuthStore } from "@/stores/auth";
 // import { compareSync } from "bcryptjs";
 
@@ -96,6 +98,62 @@ async function login() {
     console.error('Login failed', error);
   }
 }
+
+
+const handleGoogleLogin = async () => {
+  try {
+    const googleUser = await googleAuthCodeLogin();  // This returns the code from Google
+
+    // Make sure the frontend correctly sends the code to the backend
+    const response = await axios.get('http://127.0.0.1:8000/google-login', {
+      params: { code: googleUser.code }  // Send the Google code to your backend
+    });
+
+    const token = response.data.access_token;
+    localStorage.setItem('jwt', token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    console.log('Google login successful');
+    $router.push('/chat');
+  } catch (error) {
+    console.error('Google login failed', error);
+  }
+};
+
+
+
+
+const msalInstance = ref(null);
+
+onMounted(() => {
+  msalInstance.value = new msal.PublicClientApplication({
+    auth: {
+      clientId: "1047088098330-2d17mgbf5bdugkvkh69i0ah65c40hp65.apps.googleusercontent.com",
+      authority: "https://login.microsoftonline.com/common",
+      redirectUri: "http://localhost:3000"
+    }
+  });
+});
+
+const handleMicrosoftLogin = async () => {
+  try {
+    const loginResponse = await msalInstance.value.loginPopup({
+      scopes: ["user.read"]
+    });
+    
+    const response = await axios.post('http://127.0.0.1:8000/microsoft-login', { 
+      token: loginResponse.accessToken 
+    });
+    
+    const token = response.data.access_token;
+    localStorage.setItem('jwt', token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    console.log('Microsoft login successful');
+    $router.push('/chat');
+  } catch (error) {
+    console.error('Microsoft login failed', error);
+  }
+};
+
 
 </script>
 

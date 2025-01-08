@@ -11,6 +11,16 @@ const routes = [
     path: "/chat",
     component: () => import("@/components/ChatPage.vue"),
     meta: { requiresAuth: true },
+    children: [
+      {
+        path: "",
+        component: () => import("@/components/ChatStart.vue"),
+      },
+      {
+        path: ":chatId",
+        component: () => import("@/components/ChatDetail.vue"),
+      },
+    ],
   },
   {
     path: "/upload",

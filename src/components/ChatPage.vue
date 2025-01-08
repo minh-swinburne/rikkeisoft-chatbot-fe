@@ -1,148 +1,117 @@
 <template>
-  <div class="d-flex vh-100">
-    <!-- Vertical Navbar -->
-    <div class="d-flex flex-column bg-light border-end" style="width: 250px">
-      <div class="p-3 flex-grow-1">
-        <h4>Chat</h4>
-        <ul class="list-unstyled mt-4">
-          <li class="mb-2">
-            <button class="btn btn-outline-primary w-100">
-              Conversation 1
-            </button>
-          </li>
-          <li class="mb-2">
-            <button class="btn btn-outline-primary w-100">
-              Conversation 2
-            </button>
-          </li>
-        </ul>
+  <div class="d-flex flex-column vh-100">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">ChatApp</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Chat</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Upload</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Profile</a>
+            </li>
+          </ul>
+          <span class="navbar-text"> Welcome, {{ username }} </span>
+        </div>
       </div>
-      <div class="p-3">
-        <button class="btn btn-danger w-100" @click="logout">Logout</button>
-      </div>
-    </div>
+    </nav>
 
-    <!-- Chat Interface -->
-    <div class="d-flex flex-column flex-grow-1 justify-content-between">
-      <!-- Chat Stack -->
-      <div class="flex-grow-1 overflow-auto p-3" ref="chatContainer">
-        <div v-for="(message, index) in messages" :key="index" class="mb-3">
-          <div
-            v-if="message.sender === 'bot'"
-            class="d-flex justify-content-start text-start"
-          >
-            <div
-              class="bg-secondary text-white p-2 rounded-end"
-              v-html="message.text"
-            ></div>
-          </div>
-          <div v-else class="d-flex justify-content-end">
-            <div class="bg-primary text-white p-2 rounded-start">
-              {{ message.text }}
-            </div>
-          </div>
+    <div class="chat-container d-flex flex-grow-1 flex-shrink-1">
+      <!-- Vertical Navbar -->
+      <div class="chat-history d-flex flex-column bg-light border-end" style="width: 250px">
+        <div class="p-3 flex-grow-1">
+          <h4>Chat</h4>
+          <ul class="list-unstyled mt-4">
+            <li
+              v-for="(chat, index) in sortedChats"
+              :key="index"
+              class="mb-2"
+            >
+              <router-link
+                :to="`/chat/${chat.id}`"
+                :class="{ active: $route.params.chatId === chat.id }"
+                class="btn btn-outline-primary w-100"
+              >
+                {{ chat.name }}
+              </router-link>
+            </li>
+          </ul>
+        </div>
+        <div class="p-3">
+          <button class="btn btn-danger w-100" @click="logout">Logout</button>
         </div>
       </div>
 
-      <!-- Input Field -->
-      <div class="border-top p-3 bg-light">
-        <div class="input-group">
-          <input
-            v-model="userInput"
-            type="text"
-            class="form-control"
-            placeholder="Type your message..."
-            @keydown.enter="sendMessage"
-          />
-          <button class="btn btn-primary" @click="sendMessage">Send</button>
-        </div>
-      </div>
+      <!-- Chat Detail / Start -->
+      <router-view />
     </div>
   </div>
 </template>
 
 <script setup>
-import { useAuthStore } from "@/stores/auth";
 import axios from "axios";
-import { marked } from "marked";
-import { nextTick, onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { camelize } from "@/utils";
+import { useAuthStore } from "@/stores/auth";
+import { useRouter, useRoute, RouterView, RouterLink } from "vue-router";
+import { onMounted, ref, computed } from "vue";
 
-const messages = ref([]);
-const userInput = ref("");
 const $router = useRouter();
+const $route = useRoute();
 const authStore = useAuthStore();
+
+console.log($route.params);
+
+const chats = ref([]);
+const username = ref("User"); // You can replace this with the actual username from your auth store
 
 function logout() {
   authStore.logout();
   $router.push("/login");
 }
 
-async function sendMessage() {
-  if (!userInput.value.trim()) return;
+const sortedChats = computed(() => [...chats.value].sort((a, b) => new Date(b.lastAccess) - new Date(a.lastAccess)));
 
-  // Add user's message to the chat stack
-  messages.value.push({ sender: "user", text: userInput.value });
 
-  const query = userInput.value;
-  // Clear the input field
-  userInput.value = "";
+onMounted(async () => {
+  const response = await axios.get("http://127.0.0.1:8000/api/v1/chat");
 
-  // Fetch a bot response from mock data
-  try {
-    const response = await axios.get("http://127.0.0.1:8000/generate-answer", {
-      params: { query: query },
-    });
+  chats.value = camelize(response.data);
 
-    console.log("Response:", response.data); // Log the response
-
-    // Add bot's response to the chat stack
-    const botResponse = marked(response.data.answer.choices[0].message.content);
-    messages.value.push({ sender: "bot", text: botResponse });
-  } catch (error) {
-    alert("An error occurred while fetching the bot's response.");
-    console.error(error);
-  }
-
-  // Scroll to the bottom of the chat
-  nextTick(() => {
-    const chatContainer = document.querySelector(".overflow-auto");
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-  });
-}
-
-// Preload a sample conversation
-onMounted(() => {
-  messages.value.push({
-    sender: "bot",
-    text: "Hi there! How can I help you today?",
-  });
+  console.log(chats.value);
 });
 </script>
 
 <style scoped>
+.chat-container {
+  max-height: calc(100vh - 60px) !important;
+}
+
 /* Navbar styling */
+.navbar {
+  height: 60px !important;
+}
+
 .bg-light {
   background-color: #f8f9fa !important;
 }
 
 .border-end {
   border-right: 1px solid #dee2e6 !important;
-}
-
-/* Chat styling */
-.overflow-auto {
-  max-height: 80%;
-  overflow-y: auto;
-}
-
-input::placeholder {
-  color: #adb5bd;
-}
-
-input:focus,
-button:focus {
-  outline: none;
-  box-shadow: none !important;
 }
 </style>

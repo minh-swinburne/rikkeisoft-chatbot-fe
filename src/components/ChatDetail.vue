@@ -2,7 +2,7 @@
   <div class="d-flex flex-column flex-grow-1 mh-100">
     <!-- Chat Stack -->
     <div class="chat-stack flex-grow-1 py-3 px-5 mh-100 overflow-auto" ref="chatContainer">
-      <div v-for="(message, index) in messages" :key="index" class="mb-3">
+      <div v-for="(message, index) in sortedMessages" :key="index" class="mb-3">
         <div
           v-if="message.role === 'assistant'"
           class="d-flex justify-content-start text-start"
@@ -61,7 +61,7 @@ import axios from "axios";
 import { marked } from "marked";
 import { camelize } from "@/utils";
 import { useRoute } from "vue-router";
-import { ref, onMounted, nextTick, watch } from "vue";
+import { ref, onMounted, nextTick, watch, computed } from "vue";
 
 const $route = useRoute();
 
@@ -70,6 +70,10 @@ const suggestions = ref([]);
 const userInput = ref("");
 const chatTextarea = ref(null);
 const textareaLines = ref(1);
+
+
+const sortedMessages = computed(() => [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time)));
+
 
 function applySuggestion(suggestion) {
   userInput.value = suggestion;
@@ -107,6 +111,8 @@ async function fetchMessages() {
   try {
     const response = await axios.get(`http://127.0.0.1:8000/api/v1/chat/${$route.params.chatId}`);
     messages.value = camelize(response.data);
+
+    console.log(sortedMessages.value);
   } catch (error) {
     console.error("Error fetching messages:", error);
   }
@@ -187,6 +193,17 @@ watch(() => $route.params.chatId, (newChatId, oldChatId) => {
     reloadChat();
   }
 });
+
+watch(() => messages, () => {
+    if (messages.value.length === 0) {
+      messages.value.push({
+        role: "assistant",
+        content: "Hi there! How can I help you today?",
+      });
+    }
+  }, {
+    deep: true
+  });
 
 </script>
 

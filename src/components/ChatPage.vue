@@ -70,7 +70,7 @@
 <script setup>
 import axios from "axios";
 import { camelize } from "@/utils";
-import { useRouter, useRoute, RouterView, RouterLink } from "vue-router";
+import { useRouter, RouterView, RouterLink } from "vue-router";
 import { onMounted, ref, computed } from "vue";
 // import { useAuthStore } from "@/stores/auth";
 import { googleLogout } from "vue3-google-login"
@@ -79,7 +79,7 @@ const $router = useRouter();
 
 // const authStore = useAuthStore();
 
-console.log($route.params);
+// console.log($route.params);
 
 const chats = ref([]);
 const username = ref("User"); // You can replace this with the actual username from your auth store

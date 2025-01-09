@@ -61,18 +61,15 @@ import axios from "axios";
 import { marked } from "marked";
 import { camelize } from "@/utils";
 import { useRoute } from "vue-router";
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick, watch } from "vue";
 
 const $route = useRoute();
-
-console.log($route.params);
 
 const messages = ref([]);
 const suggestions = ref([]);
 const userInput = ref("");
 const chatTextarea = ref(null);
 const textareaLines = ref(1);
-
 
 function applySuggestion(suggestion) {
   userInput.value = suggestion;
@@ -109,7 +106,6 @@ function adjustTextareaHeight() {
 async function fetchMessages() {
   try {
     const response = await axios.get(`http://127.0.0.1:8000/api/v1/chat/${$route.params.chatId}`);
-
     messages.value = camelize(response.data);
   } catch (error) {
     console.error("Error fetching messages:", error);
@@ -169,20 +165,29 @@ async function fetchSuggestions() {
   }
 }
 
+function reloadChat() {
+  fetchMessages();
+  fetchSuggestions();
+}
 
-onMounted(async () => {
-  await fetchMessages();
-  await fetchSuggestions();
+onMounted(() => {
+  reloadChat();
 
-  console.log(messages.value);
+  // Listen for chat-changed events
+  window.addEventListener('chat-changed', (event) => {
+    if (event.detail === $route.params.chatId) {
+      reloadChat();
+    }
+  });
+});
 
-  if (messages.value.length === 0) {
-    messages.value.push({
-      role: "assistant",
-      content: "Hi there! How can I help you today?",
-    });
+// Watch for route changes
+watch(() => $route.params.chatId, (newChatId, oldChatId) => {
+  if (newChatId !== oldChatId) {
+    reloadChat();
   }
 });
+
 </script>
 
 <style scoped>
@@ -260,3 +265,4 @@ onMounted(async () => {
   transform: translateY(-50%);
 }
 </style>
+

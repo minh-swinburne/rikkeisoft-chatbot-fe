@@ -32,11 +32,14 @@
       </div>
     </nav>
 
-    <div class="chat-container d-flex flex-grow-1 flex-shrink-1">
+    <div class="chat-container d-flex flex-grow-1">
       <!-- Vertical Navbar -->
-      <div class="chat-history d-flex flex-column bg-light border-end" style="width: 250px">
-        <div class="p-3 flex-grow-1">
-          <h4>Chat</h4>
+      <div class="chat-sidebar bg-light border-end">
+        <div class="p-3">
+          <button class="btn btn-primary w-100" @click="createNewChat">New Chat</button>
+        </div>
+        <div class="chat-history p-3 flex-grow-1 overflow-auto">
+          <h4>Chat History</h4>
           <ul class="list-unstyled mt-4">
             <li
               v-for="(chat, index) in sortedChats"
@@ -46,14 +49,14 @@
               <router-link
                 :to="`/chat/${chat.id}`"
                 :class="{ active: $route.params.chatId === chat.id }"
-                class="btn btn-outline-primary w-100"
+                class="btn btn-outline-primary w-100 text-start text-truncate"
               >
                 {{ chat.name }}
               </router-link>
             </li>
           </ul>
         </div>
-        <div class="p-3">
+        <div class="p-3 mt-auto">
           <button class="btn btn-danger w-100" @click="logout">Logout</button>
         </div>
       </div>
@@ -87,6 +90,19 @@ function logout() {
 
 const sortedChats = computed(() => [...chats.value].sort((a, b) => new Date(b.lastAccess) - new Date(a.lastAccess)));
 
+async function createNewChat() {
+  try {
+    const send = await axios.post("http://127.0.0.1:8000/api/v1/chat");
+    const newChat = camelize(send.data);
+    chats.value.push(newChat);
+
+    const response = await axios.get("http://127.0.0.1:8000/api/v1/chat");
+    chats.value = camelize(response.data);
+
+  } catch (error) {
+    console.error("Error creating new chat:", error);
+  }
+}
 
 onMounted(async () => {
   const response = await axios.get("http://127.0.0.1:8000/api/v1/chat");
@@ -99,12 +115,12 @@ onMounted(async () => {
 
 <style scoped>
 .chat-container {
-  max-height: calc(100vh - 60px) !important;
+  height: calc(100vh - 60px);
 }
 
 /* Navbar styling */
 .navbar {
-  height: 60px !important;
+  height: 60px;
 }
 
 .bg-light {
@@ -113,5 +129,28 @@ onMounted(async () => {
 
 .border-end {
   border-right: 1px solid #dee2e6 !important;
+}
+
+.chat-sidebar {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.chat-history {
+  height: calc(100% - 120px); /* Adjust based on the height of New Chat button and Logout button */
+}
+
+.chat-content {
+  overflow-y: auto;
+}
+
+.overflow-auto {
+  overflow-y: auto;
+}
+
+.text-truncate {
+  max-width: 100%;
 }
 </style>

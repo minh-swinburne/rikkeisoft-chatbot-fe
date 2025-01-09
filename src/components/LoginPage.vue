@@ -105,7 +105,7 @@ const handleGoogleLogin = async () => {
     const googleUser = await googleAuthCodeLogin();  // This returns the code from Google
 
     // Make sure the frontend correctly sends the code to the backend
-    const response = await axios.get('http://127.0.0.1:8000/google-login', {
+    const response = await axios.get('http://127.0.0.1:8000/login/google', {
       params: { code: googleUser.code }  // Send the Google code to your backend
     });
 

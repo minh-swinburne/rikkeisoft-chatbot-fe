@@ -58,6 +58,7 @@ const authStore = useAuthStore();
 const username = ref("");
 const password = ref("");
 
+
 // function login() {
 //   axios
 //     .get("data/users.json")
@@ -107,11 +108,11 @@ async function login() {
 
 const handleGoogleLogin = async () => {
   try {
-    const googleUser = await googleAuthCodeLogin();  // This returns the code from Google
-
-    // Make sure the frontend correctly sends the code to the backend
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/users/login/google', {
-      params: { code: googleUser.code }  // Send the Google code to your backend
+    const googleUser = await googleAuthCodeLogin();
+    console.log('googleUser Code Here:')
+    console.log(googleUser.code)
+    const response = await axios.get('http://127.0.0.1:8000/api/v1/users/auth/google', {
+      params: { code: googleUser.code }
     });
 
     const token = response.data.access_token;
@@ -130,9 +131,9 @@ const msalInstance = ref(null);
 onMounted(() => {
   msalInstance.value = new msal.PublicClientApplication({
     auth: {
-      clientId: "1047088098330-2d17mgbf5bdugkvkh69i0ah65c40hp65.apps.googleusercontent.com",
-      authority: "https://login.microsoftonline.com/common",
-      redirectUri: "http://localhost:3000"
+      clientId: "",
+      authority: "",
+      redirectUri: ""
     }
   });
 });

@@ -1,7 +1,4 @@
-import { createApp } from 'vue'
 import { createRouter, createWebHistory } from "vue-router";
-import App from '../App.vue'
-import vue3GoogleLogin from 'vue3-google-login'
 
 const routes = [
   { path: "/login", component: () => import("@/components/LoginPage.vue") },
@@ -49,7 +46,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('jwt');
-  
+
   if (to.matched.some(record => record.meta.requiresAuth)) {
     // Check if the route requires authentication
     if (!token) {
@@ -67,15 +64,5 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
-
-const app = createApp(App)
-
-app.use(router)
-
-app.use(vue3GoogleLogin, {
-  clientId: '1047088098330-2d17mgbf5bdugkvkh69i0ah65c40hp65.apps.googleusercontent.com'
-})
-
-app.mount('#app')
 
 export default router;

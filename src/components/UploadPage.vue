@@ -148,7 +148,7 @@
               <p class="text-secondary">You need to be logged in as an admin to upload documents.</p>
               <router-link
                 :to="{ path: '/login', query: { redirect: $route.fullPath } }"
-                @click="authStore.logout"
+                @click="logout"
                 class="btn btn-danger"
               >
                 Login
@@ -165,8 +165,9 @@
 import axios from "axios";
 import { ref, useTemplateRef } from "vue";
 import { useAuthStore } from "@/stores/auth";
-import { RouterLink } from "vue-router";
+import { useRouter, RouterLink } from "vue-router";
 
+const $router = useRouter();
 const authStore = useAuthStore();
 const formRef = useTemplateRef("upload-form");
 
@@ -175,6 +176,11 @@ const file = ref(null);
 const createdDate = ref(""); // Default date is today
 const creator = ref(authStore.user?.username);
 const restricted = ref("all"); // Default access is "Everyone"
+
+function logout() {
+  authStore.logout();
+  $router.push("/login");
+}
 
 function handleFileUpload(event) {
   const uploadedFile = event.target.files[0];

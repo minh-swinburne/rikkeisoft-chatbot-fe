@@ -46,13 +46,14 @@
 import axios from "axios";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { jwtDecode } from "jwt-decode";
+import { useAuthStore } from "@/stores/auth";
 import { googleAuthCodeLogin } from "vue3-google-login";
 import * as msal from "@azure/msal-browser";
-// import { useAuthStore } from "@/stores/auth";
 // import { compareSync } from "bcryptjs";
 
 const $router = useRouter();
-// const authStore = useAuthStore();
+const authStore = useAuthStore();
 
 const username = ref("");
 const password = ref("");
@@ -88,10 +89,14 @@ async function login() {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
     const token = response.data.access_token;
+    const user = jwtDecode(token);
+
     localStorage.setItem('jwt', token);
+    authStore.login(user);
+
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    console.error('Login successfully');
-    
+    console.log('Login successfully');
+
     // Redirect to the /chat route after a successful login
     $router.push('/chat');
   } catch (error) {
@@ -120,8 +125,6 @@ const handleGoogleLogin = async () => {
 };
 
 
-
-
 const msalInstance = ref(null);
 
 onMounted(() => {
@@ -139,11 +142,11 @@ const handleMicrosoftLogin = async () => {
     const loginResponse = await msalInstance.value.loginPopup({
       scopes: ["user.read"]
     });
-    
-    const response = await axios.post('http://127.0.0.1:8000/microsoft-login', { 
-      token: loginResponse.accessToken 
+
+    const response = await axios.post('http://127.0.0.1:8000/microsoft-login', {
+      token: loginResponse.accessToken
     });
-    
+
     const token = response.data.access_token;
     localStorage.setItem('jwt', token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;

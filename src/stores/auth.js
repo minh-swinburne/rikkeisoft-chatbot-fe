@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { googleLogout } from "vue3-google-login";
 
 export const useAuthStore = defineStore("user", {
   state: () => ({
@@ -10,6 +11,9 @@ export const useAuthStore = defineStore("user", {
     },
     logout() {
       this.user = null; // Clear user information upon logout
+      // Clear the JWT token from localStorage
+      localStorage.removeItem("jwt");
+      googleLogout();
     },
   },
 });

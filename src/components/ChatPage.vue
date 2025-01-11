@@ -21,7 +21,8 @@
               <a class="nav-link active" aria-current="page" href="#">Chat</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Upload</a>
+              <router-link class="nav-link" to="/upload">Upload</router-link>
+              <!-- <a class="nav-link" href="#">Upload</a> -->
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#">Profile</a>
@@ -70,34 +71,33 @@
 <script setup>
 import axios from "axios";
 import { camelize } from "@/utils";
-import { useRouter, RouterView, RouterLink } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 import { onMounted, ref, computed } from "vue";
-// import { useAuthStore } from "@/stores/auth";
-import { googleLogout } from "vue3-google-login"
+import { useRouter, RouterView, RouterLink } from "vue-router";
+// import { googleLogout } from "vue3-google-login"
 
 const $router = useRouter();
-
-// const authStore = useAuthStore();
+const authStore = useAuthStore();
 
 // console.log($route.params);
 
 const chats = ref([]);
 const username = ref("User"); // You can replace this with the actual username from your auth store
 
-// function logout() {
-//   // authStore.logout();
-//   $router.push("/login");
-// }
+function logout() {
+  authStore.logout();
+  $router.push("/login");
+}
 
-const logout = async () => {
-  try {
-    // Optional: Call your backend API to invalidate the token
-    // await fetch('your-api-url/logout', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `Bearer ${localStorage.getItem('jwt')}`
-    //   }
-    // });
+// const logout = async () => {
+//   try {
+//     // Optional: Call your backend API to invalidate the token
+//     // await fetch('your-api-url/logout', {
+//     //   method: 'POST',
+//     //   headers: {
+//     //     'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+//     //   }
+//     // });
 
     // Clear the JWT token from localStorage
     localStorage.removeItem('access_token');

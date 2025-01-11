@@ -48,11 +48,10 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { googleTokenLogin  } from "vue3-google-login";
 import * as msal from "@azure/msal-browser";
-// import { useAuthStore } from "@/stores/auth";
 // import { compareSync } from "bcryptjs";
 
 const $router = useRouter();
-// const authStore = useAuthStore();
+const authStore = useAuthStore();
 
 const username = ref("");
 const password = ref("");
@@ -92,6 +91,8 @@ async function login() {
     localStorage.setItem('access_token', token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     console.log('Login successfully');
+
+    // Redirect to the /chat route after a successful login
     $router.push('/chat');
   } catch (error) {
     console.error('Login failed', error);
@@ -154,25 +155,25 @@ onMounted(() => {
   });
 });
 
-// const handleMicrosoftLogin = async () => {
-//   try {
-//     const loginResponse = await msalInstance.value.loginPopup({
-//       scopes: ["user.read"]
-//     });
-    
-//     const response = await axios.post('http://127.0.0.1:8000/microsoft-login', { 
-//       token: loginResponse.accessToken 
-//     });
-    
-//     const token = response.data.access_token;
-//     localStorage.setItem('jwt', token);
-//     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-//     console.log('Microsoft login successful');
-//     $router.push('/chat');
-//   } catch (error) {
-//     console.error('Microsoft login failed', error);
-//   }
-// };
+const handleMicrosoftLogin = async () => {
+  try {
+    const loginResponse = await msalInstance.value.loginPopup({
+      scopes: ["user.read"]
+    });
+
+    const response = await axios.post('http://127.0.0.1:8000/microsoft-login', {
+      token: loginResponse.accessToken
+    });
+
+    const token = response.data.access_token;
+    localStorage.setItem('jwt', token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    console.log('Microsoft login successful');
+    $router.push('/chat');
+  } catch (error) {
+    console.error('Microsoft login failed', error);
+  }
+};
 
 
 </script>

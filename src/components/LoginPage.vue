@@ -46,7 +46,7 @@
 import axios from "axios";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { googleAuthCodeLogin } from "vue3-google-login";
+import { googleTokenLogin  } from "vue3-google-login";
 import * as msal from "@azure/msal-browser";
 // import { useAuthStore } from "@/stores/auth";
 // import { compareSync } from "bcryptjs";
@@ -89,7 +89,7 @@ async function login() {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
     const token = response.data.access_token;
-    localStorage.setItem('jwt', token);
+    localStorage.setItem('access_token', token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     console.log('Login successfully');
     $router.push('/chat');
@@ -99,24 +99,47 @@ async function login() {
 }
 
 
+// const handleGoogleLogin = async () => {
+//   try {
+//     const googleUser = await googleAuthCodeLogin();
+//     console.log('googleUser Code Here:')
+//     console.log(googleUser.code)
+//     const response = await axios.get('http://127.0.0.1:8000/api/v1/users/auth/google', {
+//       params: { code: googleUser.code }
+//     });
+
+//     const token = response.data.access_token;
+//     localStorage.setItem('jwt', token);
+//     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+//     console.log('Google login successful');
+//     $router.push('/chat');
+//   } catch (error) {
+//     console.error('Google login failed', error);
+//   }
+// };
+
 const handleGoogleLogin = async () => {
   try {
-    const googleUser = await googleAuthCodeLogin();
-    console.log('googleUser Code Here:')
-    console.log(googleUser.code)
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/users/auth/google', {
-      params: { code: googleUser.code }
+    const response = await googleTokenLogin();
+    console.log("Handle the response", response.access_token);
+    
+    const info = await axios.get('http://127.0.0.1:8000/api/v1/users/auth/google', {
+      params: { code: response.access_token }
     });
-
-    const token = response.data.access_token;
-    localStorage.setItem('jwt', token);
+    
+    console.log("Info:", info.data);
+    
+    const token = info.data.access_token; // Assuming your backend returns the JWT token here
+    localStorage.setItem('access_token', token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    
     console.log('Google login successful');
     $router.push('/chat');
   } catch (error) {
     console.error('Google login failed', error);
   }
 };
+
 
 
 const msalInstance = ref(null);

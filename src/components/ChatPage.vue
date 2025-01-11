@@ -100,7 +100,7 @@ const logout = async () => {
     // });
 
     // Clear the JWT token from localStorage
-    localStorage.removeItem('jwt');
+    localStorage.removeItem('access_token');
     googleLogout()
     // Redirect to the login page
     $router.push('/login');

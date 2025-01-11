@@ -1,46 +1,44 @@
-import { createApp } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
-import axios from 'axios';
-import App from '../App.vue';
-import vue3GoogleLogin from 'vue3-google-login';
+import axios from "axios";
+import { useAuthStore } from "@/stores/auth";
+import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
-  { path: '/login', component: () => import('@/components/LoginPage.vue'), meta: { requiresAuth: false } },
+  { path: "/login", component: () => import("@/components/LoginPage.vue"), meta: { requiresAuth: false } },
   {
-    path: '/register',
-    component: () => import('@/components/RegisterPage.vue'),
+    path: "/register",
+    component: () => import("@/components/RegisterPage.vue"),
   },
   {
-    path: '/chat',
-    component: () => import('@/components/ChatPage.vue'),
+    path: "/chat",
+    component: () => import("@/components/ChatPage.vue"),
     meta: { requiresAuth: true },
     children: [
       {
-        path: '',
-        component: () => import('@/components/ChatStart.vue'),
+        path: "",
+        component: () => import("@/components/ChatStart.vue"),
       },
       {
-        path: ':chatId',
-        component: () => import('@/components/ChatDetail.vue'),
+        path: ":chatId",
+        component: () => import("@/components/ChatDetail.vue"),
       },
     ],
   },
   {
-    path: '/upload',
-    component: () => import('@/components/UploadPage.vue'),
+    path: "/upload",
+    component: () => import("@/components/UploadPage.vue"),
     meta: { requiresAuth: true },
   },
   {
-    path: '/docs',
-    component: () => import('@/components/DocList.vue'),
+    path: "/docs",
+    component: () => import("@/components/DocList.vue"),
     meta: { requiresAuth: true },
   },
   {
-    path: '/config',
-    component: () => import('@/components/ConfigPage.vue'),
+    path: "/config",
+    component: () => import("@/components/ConfigPage.vue"),
     meta: { requiresAuth: false },
   },
-  { path: '/', redirect: '/login' }, // Default route
+  { path: "/", redirect: "/login" }, // Default route
 ];
 
 const router = createRouter({
@@ -49,49 +47,76 @@ const router = createRouter({
 });
 
 async function checkTokenValidity() {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    try {
-      await axios.get('http://localhost:8000/api/v1/users/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return true;
-    } catch (error) {
-      console.error('Token is invalid:', error);
-      localStorage.removeItem('access_token');
-      return false;
-    }
+  // const hasToken = document.cookie.includes("access_token"); // Check if access_token exists in cookies
+  const hasToken =
+    localStorage.getItem("access_token") !== null &&
+    localStorage.getItem("refresh_token") !== null;
+  if (!hasToken) {
+    console.warn("No token found in cookies. User is not logged in.");
+    return false;
   }
-  return false;
+
+  try {
+    // Send a request to the backend to validate the token
+    const response = await axios.get(
+      "http://localhost:8000/api/v1/auth/validate",
+      {
+        withCredentials: true, // Include cookies in the request
+      }
+    );
+
+    // If the request succeeds, the token is valid
+    return response.data.valid;
+  } catch (error) {
+    console.error("Token validation failed:", error.response?.data || error);
+    return false;
+  }
 }
 
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  
+
   // Check token validity for all pages
   const isValidToken = await checkTokenValidity();
-  
+
   // If the route requires authentication and the token is invalid, redirect to login
   if (requiresAuth && !isValidToken) {
-    next('/login');
-  } else if (to.path === '/login' && isValidToken) {
-    // If already logged in, redirect to the default authenticated route (e.g., chat page)
-    next('/chat');
+    next("/login");
+  // } else if (to.path === "/login" && isValidToken) {
+  //   // If already logged in, redirect to the default authenticated route (e.g., chat page)
+  //   next("/chat");
   } else {
     next(); // Proceed to the route
   }
 });
 
-const app = createApp(App);
+axios.interceptors.response.use(
+  response => response,
+  async error => {
+    const originalRequest = error.config;
 
-app.use(router);
+    if (error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-app.use(vue3GoogleLogin, {
-  clientId: '1047088098330-2d17mgbf5bdugkvkh69i0ah65c40hp65.apps.googleusercontent.com',
-});
+      // Attempt to refresh the token
+      try {
+        // await axios.post("http://localhost:8000/api/v1/auth/refresh", null, {
+        //   withCredentials: true,
+        // });
+        const authStore = useAuthStore();
+        await authStore.refreshToken();
 
-app.mount('#app');
+        // Retry the original request
+        return axios(originalRequest);
+      } catch (refreshError) {
+        console.error("Token refresh failed:", refreshError);
+        router.push("/login"); // Redirect to login
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 
 export default router;

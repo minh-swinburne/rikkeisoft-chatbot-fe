@@ -12,7 +12,13 @@
               <label for="username"> Username: </label>
             </div>
             <div class="username-input-container col-8">
-              <input v-model="username" id="username" type="text" class="form-field" required />
+              <input
+                v-model="username"
+                id="username"
+                type="text"
+                class="form-field"
+                required
+              />
             </div>
           </div>
 
@@ -22,7 +28,13 @@
               <label for="password"> Password: </label>
             </div>
             <div class="password-input-container col-8">
-              <input v-model="password" id="password" type="password" class="form-field" required />
+              <input
+                v-model="password"
+                id="password"
+                type="password"
+                class="form-field"
+                required
+              />
             </div>
           </div>
           <div class="submit-button-container">
@@ -32,23 +44,28 @@
       </div>
       <div class="login-via-other">
         <div class="via-gmail-container">
-          <button class="button" @click="handleGoogleLogin">Login Via Google</button>
+          <button class="button" @click="handleGoogleLogin">
+            Login Via Google
+          </button>
         </div>
         <div class="via-microsoft-container">
-          <button class="button" @click="handleMicrosoftLogin">Login Via Microsoft</button>
+          <button class="button" @click="handleMicrosoftLogin">
+            Login Via Microsoft
+          </button>
         </div>
       </div>
     </div>
-  </div>x
+  </div>
+  x
 </template>
 
 <script setup>
-import axios from "axios";
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { googleTokenLogin  } from "vue3-google-login";
+import { useAuthStore } from "@/stores/auth";
 import * as msal from "@azure/msal-browser";
-// import { compareSync } from "bcryptjs";
+import axios from "axios";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { googleTokenLogin } from "vue3-google-login";
 
 const $router = useRouter();
 const authStore = useAuthStore();
@@ -56,92 +73,53 @@ const authStore = useAuthStore();
 const username = ref("");
 const password = ref("");
 
-
-// function login() {
-//   axios
-//     .get("data/users.json")
-//     .then((response) => {
-//       const users = response.data;
-//       const user = users.find((user) => user.username === username.value);
-
-//       if (user && compareSync(password.value, user.password)) {
-//         alert("Login successfully");
-//         authStore.login(user);
-//         $router.push("/chat");
-//       } else {
-//         alert("Login failed");
-//       }
-//     })
-//     .catch((error) => {
-//       console.error(error);
-//       alert("An error occurred during login.");
-//     });
-// }
-
 async function login() {
   try {
     const params = new URLSearchParams();
-    params.append('username', username.value);
-    params.append('password', password.value);
+    params.append("username", username.value);
+    params.append("password", password.value);
 
-    const response = await axios.post('http://127.0.0.1:8000/api/v1/users/token', params, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-    const token = response.data.access_token;
-    localStorage.setItem('access_token', token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    console.log('Login successfully');
+    const response = await axios.post(
+      "http://127.0.0.1:8000/api/v1/auth/native",
+      params,
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        withCredentials: true, // Ensure cookies are sent with the request
+      }
+    );
+
+    console.log("Response:", response.data);
+    authStore.login(response.data.access_token);
+    console.log("Login successfully");
 
     // Redirect to the /chat route after a successful login
-    $router.push('/chat');
+    $router.push("/chat");
   } catch (error) {
-    console.error('Login failed', error);
+    console.error("Login failed", error);
   }
 }
 
-
-// const handleGoogleLogin = async () => {
-//   try {
-//     const googleUser = await googleAuthCodeLogin();
-//     console.log('googleUser Code Here:')
-//     console.log(googleUser.code)
-//     const response = await axios.get('http://127.0.0.1:8000/api/v1/users/auth/google', {
-//       params: { code: googleUser.code }
-//     });
-
-//     const token = response.data.access_token;
-//     localStorage.setItem('jwt', token);
-//     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-//     console.log('Google login successful');
-//     $router.push('/chat');
-//   } catch (error) {
-//     console.error('Google login failed', error);
-//   }
-// };
-
 const handleGoogleLogin = async () => {
   try {
-    const response = await googleTokenLogin();
-    console.log("Handle the response", response.access_token);
-    
-    const info = await axios.get('http://127.0.0.1:8000/api/v1/users/auth/google', {
-      params: { code: response.access_token }
-    });
-    
-    console.log("Info:", info.data);
-    
-    const token = info.data.access_token; // Assuming your backend returns the JWT token here
-    localStorage.setItem('access_token', token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    
-    console.log('Google login successful');
-    $router.push('/chat');
+    const googleUser = await googleTokenLogin();
+
+    const response = await axios.get(
+      "http://127.0.0.1:8000/api/v1/auth/google",
+      {
+        params: { access_token: googleUser.access_token },
+      }
+    );
+
+    authStore.login(response.data.access_token);
+
+    console.log("Google login successful");
+    console.log("Response:", response.data);
+
+    $router.push("/chat");
   } catch (error) {
-    console.error('Google login failed', error);
+    console.error("Google login failed", error);
   }
 };
-
-
 
 const msalInstance = ref(null);
 
@@ -150,32 +128,30 @@ onMounted(() => {
     auth: {
       clientId: "",
       authority: "",
-      redirectUri: ""
-    }
+      redirectUri: "",
+    },
   });
 });
 
 const handleMicrosoftLogin = async () => {
   try {
     const loginResponse = await msalInstance.value.loginPopup({
-      scopes: ["user.read"]
+      scopes: ["user.read"],
     });
 
-    const response = await axios.post('http://127.0.0.1:8000/microsoft-login', {
-      token: loginResponse.accessToken
+    const response = await axios.post("http://127.0.0.1:8000/microsoft-login", {
+      token: loginResponse.accessToken,
     });
 
     const token = response.data.access_token;
-    localStorage.setItem('jwt', token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    console.log('Microsoft login successful');
-    $router.push('/chat');
+    localStorage.setItem("jwt", token);
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    console.log("Microsoft login successful");
+    $router.push("/chat");
   } catch (error) {
-    console.error('Microsoft login failed', error);
+    console.error("Microsoft login failed", error);
   }
 };
-
-
 </script>
 
 <style scoped>

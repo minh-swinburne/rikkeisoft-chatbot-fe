@@ -89,26 +89,6 @@ function logout() {
   $router.push("/login");
 }
 
-// const logout = async () => {
-//   try {
-//     // Optional: Call your backend API to invalidate the token
-//     // await fetch('your-api-url/logout', {
-//     //   method: 'POST',
-//     //   headers: {
-//     //     'Authorization': `Bearer ${localStorage.getItem('jwt')}`
-//     //   }
-//     // });
-
-    // Clear the JWT token from localStorage
-    localStorage.removeItem('access_token');
-    googleLogout()
-    // Redirect to the login page
-    $router.push('/login');
-  } catch (error) {
-    console.error('Logout failed:', error);
-  }
-};
-
 const sortedChats = computed(() => [...chats.value].sort((a, b) => new Date(b.lastAccess) - new Date(a.lastAccess)));
 
 async function createNewChat() {

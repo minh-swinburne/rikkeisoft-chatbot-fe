@@ -1,4 +1,7 @@
 <template>
+  <!-- Navigation Bar -->
+  <nav-bar></nav-bar>
+  
   <section class="bg-light min-vh-100 py-3 py-md-5 d-flex flex-column justify-content-center">
     <div class="container">
       <!-- Title and Description -->
@@ -19,7 +22,7 @@
         <div class="col-12 col-lg-9">
           <div class="bg-white border rounded shadow-sm overflow-hidden">
             <form
-              v-if="authStore.user?.admin"
+              v-if="authStore.isAdmin"
               ref="upload-form"
               @submit.prevent="submit"
             >
@@ -80,7 +83,7 @@
 
                 <!-- Shared Fields -->
                 <div class="col-12 field-container required">
-                  <label for="document-name" class="form-label">Document Name</label>
+                  <label for="document-name" class="form-label">Document Title</label>
                   <input id="document-name" type="text" name="title" class="form-control" required />
                 </div>
                 <div class="col-12 field-container">
@@ -88,11 +91,24 @@
                   <textarea id="description" name="description" class="form-control" rows="3"></textarea>
                 </div>
                 <div class="col-12 field-container required">
-                  <label for="category" class="form-label">Category</label>
-                  <select id="category" name="categories" class="form-select">
-                    <option value="guidance">Guidance</option>
-                    <option value="documents">Documents</option>
-                  </select>
+                  <label for="categories" class="form-label">Categories</label>
+                  <div class="row">
+                    <div
+                      v-for="(option, index) in categories"
+                      :key="index"
+                      class="col-6 mb-2"
+                    >
+                      <label class="form-check-label">
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          :value="option"
+                          v-model="selectedCategories"
+                        />
+                        {{ option }}
+                      </label>
+                    </div>
+                  </div>
                 </div>
                 <div class="col-12 field-container">
                   <label for="created-date" class="form-label">Day Created</label>
@@ -100,12 +116,12 @@
                     v-model="createdDate"
                     id="created-date"
                     type="date"
-                    name="created-date"
+                    name="createdDate"
                     class="form-control"
                   />
                 </div>
                 <div class="col-12 field-container required">
-                  <label for="creator" class="form-label">Creator</label>
+                  <label for="creator" class="form-label">Creator (Email)</label>
                   <input
                     v-model="creator"
                     id="creator"
@@ -115,14 +131,12 @@
                     required
                   />
                 </div>
-                <div class="col-12 field-container">
-                  <div class="col-12">
-                    <label for="restricted" class="form-label">Access</label>
-                  </div>
+                <div class="col-12 field-container required">
+                  <label for="restricted" class="form-label col-12">Access</label>
                   <div class="col-12">
                     <div class="row mx-0 gap-3">
                       <label class="btn btn-outline-secondary col">
-                        <input v-model="restricted" id="accessAll" type="radio" class="btn-check" name="restricted" value="all" />
+                        <input v-model="restricted" id="accessAll" type="radio" class="btn-check" name="restricted" value="all" required />
                         Everyone
                       </label>
                       <label class="btn btn-outline-secondary col">
@@ -163,6 +177,7 @@
 
 <script setup>
 import axios from "axios";
+import NavBar from "@/components/NavBar.vue";
 import { ref, useTemplateRef } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter, RouterLink } from "vue-router";
@@ -174,8 +189,18 @@ const formRef = useTemplateRef("upload-form");
 const activeTab = ref("file"); // Default tab is "File Upload"
 const file = ref(null);
 const createdDate = ref(""); // Default date is today
-const creator = ref(authStore.user?.username);
+const creator = ref(authStore.user?.email);
 const restricted = ref("all"); // Default access is "Everyone"
+
+const categories = ref([
+  "Guidance",
+  "Policies",
+  "Reports",
+  "Procedures",
+  "Training Materials",
+  "Technical Documentation",
+]);
+const selectedCategories = ref([]); // To store the selected categories
 
 function logout() {
   authStore.logout();
@@ -198,7 +223,8 @@ function handleFileUpload(event) {
 function submit() {
   const formData = new FormData(formRef.value);
 
-  formData.append("uploader", authStore.user.username);
+  formData.append("uploader", authStore.user.email);
+  formData.append("categories", selectedCategories.value.join(","));
   formData.set("restricted", restricted.value === "all" ? false : true);
 
   // Log the form data for debugging
@@ -236,7 +262,7 @@ function submit() {
   color: white;
 }
 
-.field-container.required label:after {
+.field-container.required > label:after {
   content: " *";
   color: red;
 }

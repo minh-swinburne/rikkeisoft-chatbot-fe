@@ -1,5 +1,5 @@
 import axios from "axios";
-// import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth";
 import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
@@ -78,6 +78,9 @@ async function checkTokenValidity() {
 }
 
 router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore();
+  authStore.hydrateUser();
+
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
   // Check token validity for all pages

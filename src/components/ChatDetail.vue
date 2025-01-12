@@ -1,7 +1,10 @@
 <template>
   <div class="d-flex flex-column flex-grow-1 mh-100">
     <!-- Chat Stack -->
-    <div class="chat-stack flex-grow-1 py-3 px-5 mh-100 overflow-auto" ref="chatContainer">
+    <div
+      class="chat-stack flex-grow-1 py-3 px-5 mh-100 overflow-auto"
+      ref="chatContainer"
+    >
       <div v-for="(message, index) in sortedMessages" :key="index" class="mb-3">
         <div
           v-if="message.role === 'assistant'"
@@ -57,11 +60,11 @@
 </template>
 
 <script setup>
+import { camelize } from "@/utils";
 import axios from "axios";
 import { marked } from "marked";
-import { camelize } from "@/utils";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { ref, onMounted, nextTick, watch, computed } from "vue";
 
 const $route = useRoute();
 
@@ -71,9 +74,9 @@ const userInput = ref("");
 const chatTextarea = ref(null);
 const textareaLines = ref(1);
 
-
-const sortedMessages = computed(() => [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time)));
-
+const sortedMessages = computed(() =>
+  [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time))
+);
 
 function applySuggestion(suggestion) {
   userInput.value = suggestion;
@@ -91,7 +94,7 @@ function adjustTextareaHeight() {
   if (!chatTextarea.value) return;
 
   const textarea = chatTextarea.value;
-  textarea.style.height = 'auto';
+  textarea.style.height = "auto";
 
   const scrollHeight = textarea.scrollHeight;
   const lineHeight = 24; // Line height in pixels
@@ -109,7 +112,9 @@ function adjustTextareaHeight() {
 
 async function fetchMessages() {
   try {
-    const response = await axios.get(`http://127.0.0.1:8000/api/v1/chat/${$route.params.chatId}`);
+    const response = await axios.get(
+      `http://127.0.0.1:8000/api/v1/chats/${$route.params.chatId}`
+    );
     messages.value = camelize(response.data);
 
     console.log(sortedMessages.value);
@@ -131,7 +136,7 @@ async function sendMessage() {
 
   // Reset textarea height and lines
   if (chatTextarea.value) {
-    chatTextarea.value.style.height = 'auto';
+    chatTextarea.value.style.height = "auto";
     textareaLines.value = 1;
   }
 
@@ -140,7 +145,7 @@ async function sendMessage() {
 
   try {
     const response = await axios.post(
-      `http://127.0.0.1:8000/api/v1/chat/${$route.params.chatId}`,
+      `http://127.0.0.1:8000/api/v1/chats/${$route.params.chatId}`,
       { query: query },
       { headers: { "Content-Type": "application/json" } }
     );
@@ -164,7 +169,9 @@ async function sendMessage() {
 
 async function fetchSuggestions() {
   try {
-    const response = await axios.post(`http://127.0.0.1:8000/api/v1/chat/${$route.params.chatId}/suggestions`);
+    const response = await axios.post(
+      `http://127.0.0.1:8000/api/v1/chats/${$route.params.chatId}/suggestions`
+    );
     suggestions.value = response.data.suggestions;
   } catch (error) {
     console.error("Error fetching suggestions:", error);
@@ -180,7 +187,7 @@ onMounted(() => {
   reloadChat();
 
   // Listen for chat-changed events
-  window.addEventListener('chat-changed', (event) => {
+  window.addEventListener("chat-changed", (event) => {
     if (event.detail === $route.params.chatId) {
       reloadChat();
     }
@@ -188,23 +195,29 @@ onMounted(() => {
 });
 
 // Watch for route changes
-watch(() => $route.params.chatId, (newChatId, oldChatId) => {
-  if (newChatId !== oldChatId) {
-    reloadChat();
+watch(
+  () => $route.params.chatId,
+  (newChatId, oldChatId) => {
+    if (newChatId !== oldChatId) {
+      reloadChat();
+    }
   }
-});
+);
 
-watch(() => messages, () => {
+watch(
+  () => messages,
+  () => {
     if (messages.value.length === 0) {
       messages.value.push({
         role: "assistant",
         content: "Hi there! How can I help you today?",
       });
     }
-  }, {
-    deep: true
-  });
-
+  },
+  {
+    deep: true,
+  }
+);
 </script>
 
 <style scoped>
@@ -282,4 +295,3 @@ watch(() => messages, () => {
   transform: translateY(-50%);
 }
 </style>
-

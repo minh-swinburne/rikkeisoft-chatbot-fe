@@ -1,52 +1,20 @@
 <template>
   <div class="d-flex flex-column vh-100">
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">ChatApp</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Chat</a>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/upload">Upload</router-link>
-              <!-- <a class="nav-link" href="#">Upload</a> -->
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Profile</a>
-            </li>
-          </ul>
-          <span class="navbar-text"> Welcome, {{ username }} </span>
-        </div>
-      </div>
-    </nav>
+    <nav-bar></nav-bar>
 
     <div class="chat-container d-flex flex-grow-1">
       <!-- Vertical Navbar -->
       <div class="chat-sidebar bg-light border-end">
         <div class="p-3">
-          <button class="btn btn-primary w-100" @click="createNewChat">New Chat</button>
+          <button class="btn btn-primary w-100" @click="createNewChat">
+            + New Chat
+          </button>
         </div>
         <div class="chat-history p-3 flex-grow-1 overflow-auto">
           <h4>Chat History</h4>
           <ul class="list-unstyled mt-4">
-            <li
-              v-for="(chat, index) in sortedChats"
-              :key="index"
-              class="mb-2"
-            >
+            <li v-for="(chat, index) in sortedChats" :key="index" class="mb-2">
               <router-link
                 :to="`/chat/${chat.id}`"
                 :class="{ active: $route.params.chatId === chat.id }"
@@ -70,10 +38,11 @@
 
 <script setup>
 import axios from "axios";
+import NavBar from "@/components/NavBar.vue";
 import { camelize } from "@/utils";
 import { useAuthStore } from "@/stores/auth";
-import { onMounted, ref, computed } from "vue";
-import { useRouter, RouterView, RouterLink } from "vue-router";
+import { computed, onMounted, ref } from "vue";
+import { RouterLink, RouterView, useRouter } from "vue-router";
 // import { googleLogout } from "vue3-google-login"
 
 const $router = useRouter();
@@ -82,31 +51,33 @@ const authStore = useAuthStore();
 // console.log($route.params);
 
 const chats = ref([]);
-const username = ref("User"); // You can replace this with the actual username from your auth store
 
 function logout() {
   authStore.logout();
   $router.push("/login");
 }
 
-const sortedChats = computed(() => [...chats.value].sort((a, b) => new Date(b.lastAccess) - new Date(a.lastAccess)));
+const sortedChats = computed(() =>
+  [...chats.value].sort(
+    (a, b) => new Date(b.lastAccess) - new Date(a.lastAccess)
+  )
+);
 
 async function createNewChat() {
   try {
-    const send = await axios.post("http://127.0.0.1:8000/api/v1/chat");
+    const send = await axios.post("http://127.0.0.1:8000/api/v1/chats");
     const newChat = camelize(send.data);
     chats.value.push(newChat);
 
-    const response = await axios.get("http://127.0.0.1:8000/api/v1/chat");
+    const response = await axios.get("http://127.0.0.1:8000/api/v1/chats");
     chats.value = camelize(response.data);
-
   } catch (error) {
     console.error("Error creating new chat:", error);
   }
 }
 
 onMounted(async () => {
-  const response = await axios.get("http://127.0.0.1:8000/api/v1/chat");
+  const response = await axios.get("http://127.0.0.1:8000/api/v1/chats");
 
   chats.value = camelize(response.data);
 
@@ -140,7 +111,9 @@ onMounted(async () => {
 }
 
 .chat-history {
-  height: calc(100% - 120px); /* Adjust based on the height of New Chat button and Logout button */
+  height: calc(
+    100% - 120px
+  ); /* Adjust based on the height of New Chat button and Logout button */
 }
 
 .chat-content {

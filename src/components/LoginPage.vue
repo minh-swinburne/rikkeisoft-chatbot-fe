@@ -92,6 +92,7 @@ async function handleNativeLogin() {
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);
+    // console.log(authStore.user);
     console.log("Login successfully");
 
     // Redirect to the /chat route after a successful login

@@ -2,7 +2,7 @@
   <div class="main-container bg-light">
     <div class="login-container">
       <div class="form-container">
-        <form @submit.prevent="login">
+        <form @submit.prevent="handleNativeLogin">
           <div class="logo-container">
             <img alt="Vue logo" src="rikkeisoft.png" height="100" />
           </div>
@@ -60,12 +60,12 @@
 </template>
 
 <script setup>
-import { useAuthStore } from "@/stores/auth";
-import * as msal from "@azure/msal-browser";
 import axios from "axios";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 import { googleTokenLogin } from "vue3-google-login";
+import { loginRequest, msalInstance } from "@/config/msalConfig";
 
 const $router = useRouter();
 const authStore = useAuthStore();
@@ -73,7 +73,7 @@ const authStore = useAuthStore();
 const username = ref("");
 const password = ref("");
 
-async function login() {
+async function handleNativeLogin() {
   try {
     const params = new URLSearchParams();
     params.append("username", username.value);
@@ -89,7 +89,9 @@ async function login() {
     );
 
     console.log("Response:", response.data);
-    authStore.login(response.data.access_token);
+
+    const { access_token, refresh_token } = response.data;
+    authStore.login(access_token, refresh_token);
     console.log("Login successfully");
 
     // Redirect to the /chat route after a successful login
@@ -99,18 +101,18 @@ async function login() {
   }
 }
 
-const handleGoogleLogin = async () => {
+async function handleGoogleLogin() {
   try {
     const googleUser = await googleTokenLogin();
 
-    const response = await axios.get(
+    const response = await axios.post(
       "http://127.0.0.1:8000/api/v1/auth/google",
-      {
-        params: { access_token: googleUser.access_token },
-      }
+      { access_token: googleUser.access_token },
+      { headers: { "Content-Type": "application/json" } }
     );
 
-    authStore.login(response.data.access_token);
+    const { access_token, refresh_token } = response.data;
+    authStore.login(access_token, refresh_token);
 
     console.log("Google login successful");
     console.log("Response:", response.data);
@@ -118,40 +120,43 @@ const handleGoogleLogin = async () => {
     $router.push("/chat");
   } catch (error) {
     console.error("Google login failed", error);
+    authStore.logout();
   }
-};
+}
 
-const msalInstance = ref(null);
-
-onMounted(() => {
-  msalInstance.value = new msal.PublicClientApplication({
-    auth: {
-      clientId: "",
-      authority: "",
-      redirectUri: "",
-    },
-  });
-});
-
-const handleMicrosoftLogin = async () => {
+async function handleMicrosoftLogin() {
   try {
-    const loginResponse = await msalInstance.value.loginPopup({
-      scopes: ["user.read"],
-    });
+    await msalInstance.initialize();
+    // console.log(window.location.origin);
+    const loginResponse = await msalInstance.loginPopup(loginRequest);
+    console.log("Login response:", loginResponse);
 
-    const response = await axios.post("http://127.0.0.1:8000/microsoft-login", {
-      token: loginResponse.accessToken,
-    });
+    const response = await axios.post(
+      "http://127.0.0.1:8000/api/v1/auth/microsoft",
+      {
+        access_token: loginResponse.accessToken,
+        id_token: loginResponse.idToken,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${loginResponse.accessToken}`,
+        },
+      }
+    );
 
-    const token = response.data.access_token;
-    localStorage.setItem("jwt", token);
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    const { access_token, refresh_token } = response.data;
+    authStore.login(access_token, refresh_token);
+
     console.log("Microsoft login successful");
+    console.log("Response:", response.data);
+
     $router.push("/chat");
   } catch (error) {
-    console.error("Microsoft login failed", error);
+    authStore.logout();
+    console.error("Microsoft login failed:", error);
   }
-};
+}
 </script>
 
 <style scoped>

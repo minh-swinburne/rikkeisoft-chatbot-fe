@@ -2,6 +2,7 @@ import axios from "axios";
 import { defineStore } from "pinia";
 import { jwtDecode } from "jwt-decode";
 import { googleLogout } from "vue3-google-login";
+import { msalInstance } from "@/config/msalConfig";
 
 export const useAuthStore = defineStore("user", {
   state: () => ({
@@ -11,7 +12,7 @@ export const useAuthStore = defineStore("user", {
     login(accessToken, refreshToken) {
       // const match = document.cookie.match(/access_token=([^;]+)/);
       // const token = match ? match[1] : null; // Get the JWT token from cookies
-      console.log(accessToken);
+      // console.log(accessToken);
       const user = jwtDecode(accessToken); // Decode the JWT token
       this.user = user; // Set user information upon login
       this.accessToken = accessToken; // Save access token
@@ -22,15 +23,20 @@ export const useAuthStore = defineStore("user", {
       axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
     },
     logout() {
+      if (this.user?.provider === "google") {
+        googleLogout(); // Logout from Google
+      } else if (this.user?.provider === "microsoft") {
+        msalInstance.logoutPopup(); // Logout from Microsoft
+      }
+
       this.user = null; // Clear user information upon logout
       this.accessToken = null;
       this.refreshToken = null;
       // Clear the JWT token from localStorage
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
-      googleLogout(); // Logout from Google
     },
-    async refreshToken() {
+    async refreshAccess() {
       // Attempt to refresh the token
       try {
         const response = await axios.post(
@@ -38,6 +44,9 @@ export const useAuthStore = defineStore("user", {
           null,
           {
             withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${this.refreshToken}`,
+            },
           }
         );
         const { access_token, refresh_token } = response.data;

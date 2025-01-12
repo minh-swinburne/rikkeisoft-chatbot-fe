@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useAuthStore } from "@/stores/auth";
+// import { useAuthStore } from "@/stores/auth";
 import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
@@ -49,8 +49,9 @@ const router = createRouter({
 async function checkTokenValidity() {
   // const hasToken = document.cookie.includes("access_token"); // Check if access_token exists in cookies
   const hasToken =
-    localStorage.getItem("access_token") !== null &&
-    localStorage.getItem("refresh_token") !== null;
+    !! localStorage.getItem("access_token") &&
+    !! localStorage.getItem("refresh_token");
+  // console.log(hasToken);
   if (!hasToken) {
     console.warn("No token found in cookies. User is not logged in.");
     return false;
@@ -61,7 +62,10 @@ async function checkTokenValidity() {
     const response = await axios.get(
       "http://localhost:8000/api/v1/auth/validate",
       {
-        withCredentials: true, // Include cookies in the request
+        withCredentials: true, // Include cookies in the request,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
       }
     );
 
@@ -90,33 +94,30 @@ router.beforeEach(async (to, from, next) => {
   }
 });
 
-axios.interceptors.response.use(
-  response => response,
-  async error => {
-    const originalRequest = error.config;
+// axios.interceptors.response.use(
+//   response => response,
+//   async error => {
+//     const originalRequest = error.config;
 
-    if (error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+//     if (error.response.status === 401 && !originalRequest._retry) {
+//       originalRequest._retry = true;
 
-      // Attempt to refresh the token
-      try {
-        // await axios.post("http://localhost:8000/api/v1/auth/refresh", null, {
-        //   withCredentials: true,
-        // });
-        const authStore = useAuthStore();
-        await authStore.refreshToken();
+//       // Attempt to refresh the token
+//       try {
+//         const authStore = useAuthStore();
+//         await authStore.refreshAccess();
 
-        // Retry the original request
-        return axios(originalRequest);
-      } catch (refreshError) {
-        console.error("Token refresh failed:", refreshError);
-        router.push("/login"); // Redirect to login
-      }
-    }
+//         // Retry the original request
+//         return axios(originalRequest);
+//       } catch (refreshError) {
+//         console.error("Token refresh failed:", refreshError);
+//         router.push("/login"); // Redirect to login
+//       }
+//     }
 
-    return Promise.reject(error);
-  }
-);
+//     return Promise.reject(error);
+//   }
+// );
 
 
 export default router;

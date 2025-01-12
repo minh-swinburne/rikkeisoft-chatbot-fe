@@ -65,7 +65,10 @@ const sortedChats = computed(() =>
 
 async function createNewChat() {
   try {
-    const send = await axios.post("http://127.0.0.1:8000/api/v1/chats");
+    const send = await axios.post("http://127.0.0.1:8000/api/v1/chats", {
+      name: "New Chat",
+      user_id: authStore.user.sub,
+    });
     const newChat = camelize(send.data);
     chats.value.push(newChat);
 
@@ -77,7 +80,14 @@ async function createNewChat() {
 }
 
 onMounted(async () => {
-  const response = await axios.get("http://127.0.0.1:8000/api/v1/chats");
+  const response = await axios.get("http://127.0.0.1:8000/api/v1/chats", {
+    params: {
+      user_id: authStore.user.sub,
+    },
+    // headers: {
+    //   Authorization: `Bearer ${authStore.accessToken}`,
+    // },
+  });
 
   chats.value = camelize(response.data);
 

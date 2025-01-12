@@ -28,7 +28,7 @@
             </router-link>
           </li>
         </ul>
-        <span class="navbar-text"> Welcome, {{ authStore.user.firstname }} </span>
+        <span class="navbar-text"> Welcome, {{ authStore.user?.firstname }} </span>
       </div>
     </div>
   </nav>

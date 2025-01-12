@@ -4,24 +4,31 @@ import { jwtDecode } from "jwt-decode";
 import { googleLogout } from "vue3-google-login";
 import { msalInstance } from "@/config/msalConfig";
 
-export const useAuthStore = defineStore("user", {
+export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: null, // Store user information
   }),
+
+  getters: {
+    isAuthenticated: (state) => !!state.user, // Check if the user is authenticated
+    isAdmin: (state) => state.user?.roles.includes("admin"), // Check if the user is an admin
+  },
+
   actions: {
+    hydrateUser() {
+      const accessToken = localStorage.getItem("access_token");
+      this.user = accessToken ? jwtDecode(accessToken) : null;
+    },
+
     login(accessToken, refreshToken) {
-      // const match = document.cookie.match(/access_token=([^;]+)/);
-      // const token = match ? match[1] : null; // Get the JWT token from cookies
-      // console.log(accessToken);
-      const user = jwtDecode(accessToken); // Decode the JWT token
-      this.user = user; // Set user information upon login
-      this.accessToken = accessToken; // Save access token
-      this.refreshToken = refreshToken; // Save refresh token
       localStorage.setItem("access_token", accessToken); // Store the JWT token in localStorage
       localStorage.setItem("refresh_token", refreshToken); // Store the refresh token in
       // Set the Authorization header for all requests
+      this.hydrateUser();
+
       axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
     },
+
     logout() {
       if (this.user?.provider === "google") {
         googleLogout(); // Logout from Google
@@ -36,6 +43,7 @@ export const useAuthStore = defineStore("user", {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
     },
+
     async refreshAccess() {
       // Attempt to refresh the token
       try {

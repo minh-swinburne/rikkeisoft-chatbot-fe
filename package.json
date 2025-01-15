@@ -15,9 +15,11 @@
     "bootstrap": "^5.3.3",
     "core-js": "^3.8.3",
     "jwt-decode": "^4.0.0",
+    "lucide-vue-next": "^0.471.0",
     "marked": "^15.0.5",
     "pinia": "^2.3.0",
     "vue": "^3.2.13",
+    "vue-multiselect": "^3.1.0",
     "vue-router": "^4.5.0",
     "vue3-google-login": "^2.0.33"
   },

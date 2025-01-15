@@ -42,8 +42,9 @@ const $route = useRoute();
 const authStore = useAuthStore();
 const navItems = [
   { name: "Chat", path: "/chat" },
-  { name: "Profile", path: "/profile" },
+  // { name: "Profile", path: "/profile" },
   { name: "Upload", path: "/upload" },
+  { name: "Documents", path: "/docs" },
 ];
 
 </script>

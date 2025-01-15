@@ -97,30 +97,4 @@ router.beforeEach(async (to, from, next) => {
   }
 });
 
-// axios.interceptors.response.use(
-//   response => response,
-//   async error => {
-//     const originalRequest = error.config;
-
-//     if (error.response.status === 401 && !originalRequest._retry) {
-//       originalRequest._retry = true;
-
-//       // Attempt to refresh the token
-//       try {
-//         const authStore = useAuthStore();
-//         await authStore.refreshAccess();
-
-//         // Retry the original request
-//         return axios(originalRequest);
-//       } catch (refreshError) {
-//         console.error("Token refresh failed:", refreshError);
-//         router.push("/login"); // Redirect to login
-//       }
-//     }
-
-//     return Promise.reject(error);
-//   }
-// );
-
-
 export default router;

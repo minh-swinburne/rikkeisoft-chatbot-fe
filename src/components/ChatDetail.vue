@@ -24,18 +24,31 @@
       </div>
     </div>
 
-    <!-- Chat Suggestions -->
-    <div class="p-3 bg-light border-top">
-      <div class="d-flex flex-column">
-        <button
-          v-for="(suggestion, index) in suggestions"
-          :key="index"
-          class="btn btn-suggestion mb-2"
-          @click="applySuggestion(suggestion)"
-        >
-          {{ suggestion }}
-          <span class="suggestion-arrow">&rarr;</span>
-        </button>
+    <!-- Floating Chat Suggestions -->
+    <div class="position-relative">
+      <button
+        class="btn btn-outline-secondary btn-sm position-absolute bottom-100 end-0 mb-2 me-3"
+        @click="toggleSuggestions"
+      >
+        {{ showSuggestions ? 'Hide' : 'Show' }} Suggestions
+      </button>
+      <div
+        class="position-absolute bottom-100 start-0 end-0 mb-2 px-3"
+        v-if="showSuggestions"
+      >
+        <div class="bg-light border rounded p-2">
+          <div class="d-flex flex-wrap">
+            <button
+              v-for="(suggestion, index) in suggestions"
+              :key="index"
+              class="btn btn-suggestion m-1"
+              @click="applySuggestion(suggestion)"
+            >
+              {{ suggestion }}
+              <span class="suggestion-arrow">&rarr;</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -73,10 +86,15 @@ const suggestions = ref([]);
 const userInput = ref("");
 const chatTextarea = ref(null);
 const textareaLines = ref(1);
+const showSuggestions = ref(false);
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time))
 );
+
+function toggleSuggestions() {
+  showSuggestions.value = !showSuggestions.value;
+}
 
 function applySuggestion(suggestion) {
   userInput.value = suggestion;

@@ -93,8 +93,6 @@ const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time))
 );
 
-const showSuggestions = ref(true);
-
 function toggleSuggestions() {
   showSuggestions.value = !showSuggestions.value;
 }

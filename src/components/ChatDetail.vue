@@ -24,32 +24,30 @@
       </div>
     </div>
 
-    <!-- Floating Chat Suggestions -->
-    <div class="position-relative">
-      <button
-        class="btn btn-outline-secondary btn-sm position-absolute bottom-100 end-0 mb-2 me-3"
-        @click="toggleSuggestions"
-      >
-        {{ showSuggestions ? 'Hide' : 'Show' }} Suggestions
-      </button>
-      <div
-        class="position-absolute bottom-100 start-0 end-0 mb-2 px-3"
-        v-if="showSuggestions"
-      >
-        <div class="bg-light border rounded p-2">
-          <div class="d-flex flex-wrap">
-            <button
-              v-for="(suggestion, index) in suggestions"
-              :key="index"
-              class="btn btn-suggestion m-1"
-              @click="applySuggestion(suggestion)"
-            >
-              {{ suggestion }}
-              <span class="suggestion-arrow">&rarr;</span>
-            </button>
-          </div>
-        </div>
+    <!-- Chat Suggestions -->
+    <div v-if="showSuggestions" class="p-3 bg-light border-top">
+      <div class="d-flex flex-column">
+        <button
+          v-for="(suggestion, index) in suggestions"
+          :key="index"
+          class="btn btn-suggestion mb-2"
+          @click="applySuggestion(suggestion)"
+        >
+          {{ suggestion }}
+          <span class="suggestion-arrow">&rarr;</span>
+        </button>
       </div>
+    </div>
+
+    <!-- Toggle Button -->
+    <div class="toggle-suggestions-container text-center border-top bg-light py-2">
+      <button
+        class="btn btn-sm btn-outline-secondary px-2 py-1"
+        :class="{ 'bold-text': !showSuggestions }"
+        @click="toggleSuggestions">
+
+        {{ showSuggestions ? "Hide Suggestions" : "Show Suggestions" }}
+      </button>
     </div>
 
     <!-- Input Field -->
@@ -72,6 +70,8 @@
   </div>
 </template>
 
+
+
 <script setup>
 import { camelize } from "@/utils";
 import axios from "axios";
@@ -86,11 +86,12 @@ const suggestions = ref([]);
 const userInput = ref("");
 const chatTextarea = ref(null);
 const textareaLines = ref(1);
-const showSuggestions = ref(false);
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time))
 );
+
+const showSuggestions = ref(true);
 
 function toggleSuggestions() {
   showSuggestions.value = !showSuggestions.value;
@@ -312,4 +313,25 @@ watch(
   top: 50%;
   transform: translateY(-50%);
 }
+
+/* Toggle suggestions container styling */
+.toggle-suggestions-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Small button styling */
+.btn-sm {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.2rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-sm:hover {
+  background-color: #e9ecef;
+  color: #212529
+}
+
 </style>

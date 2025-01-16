@@ -4,44 +4,78 @@
   <div class="main-container">
     <div class="tabs">
       <button
+        v-for="(tab, key, index) in tabs"
+        :key="index"
         class="btn btn-primary"
-        :class="{ active: activeTab === 'answer-generation' }"
-        @click="activeTab = 'answer-generation'">
-        Answer Generation
-      </button>
-      <button
-        class="btn btn-primary"
-        :class="{ active: activeTab === 'question-suggestion' }"
-        @click="activeTab = 'question-suggestion'">
-        Question Suggestion
-      </button>
-      <button
-        class="btn btn-primary"
-        :class="{ active: activeTab === 'chat-name-generation' }"
-        @click="activeTab = 'chat-name-generation'">
-        Chat Name Generation
+        :class="{ active: activeTab === key }"
+        @click="changeTab(key)"
+      >
+        {{ tab }}
       </button>
     </div>
 
     <div class="tab-content">
-      <!-- Answer Generation Tab -->
-      <div v-if="activeTab === 'answer-generation'">
-        <h2>Answer Generation</h2>
-        <form @submit.prevent="handleSubmit('answer-generation')">
+      <div>
+        <h2>{{ tabs[activeTab] }}</h2>
+        <form @submit.prevent="handleSubmit(activeTab)">
           <div class="input-container">
-            <label for="instructions-answer">Instructions:</label>
+            <label for="instructions">Instructions:</label>
             <textarea
-              id="instructions-answer"
-              v-model="formData.instructions"
-              rows="5"
+              id="instructions"
+              v-model="config.instructions"
+              :readonly="!isEditing"
+              rows="10"
               placeholder="Enter your instructions here..."
             ></textarea>
           </div>
+
+          <div class="input-container" v-if="config.messageTemplate">
+            <label for="message-template">Message Template:</label>
+            <textarea
+              id="message-template"
+              v-model="config.messageTemplate"
+              :readonly="!isEditing"
+              rows="5"
+              placeholder="Enter your message template here..."
+            ></textarea>
+          </div>
+
           <div class="input-container">
-            <label for="temperature-answer">Temperature:</label>
+            <label for="model">Model:</label>
+            <select
+              id="model"
+              v-model="config.model"
+              :disabled="!isEditing"
+            >
+              <option
+                v-for="(option, index) in config.modelOptions"
+                :key="index"
+                :value="option"
+              >
+                {{ option }}
+              </option>
+            </select>
+          </div>
+
+          <div class="input-container">
+            <label for="max-tokens">Max Tokens:</label>
             <input
-              id="temperature-answer"
-              v-model="formData.temperature"
+              id="max-tokens"
+              v-model="config.maxTokens"
+              :readonly="!isEditing"
+              type="number"
+              min="1"
+              max="8192"
+              placeholder="Enter max tokens"
+            />
+          </div>
+
+          <div class="input-container">
+            <label for="temperature">Temperature:</label>
+            <input
+              id="temperature"
+              v-model="config.temperature"
+              :readonly="!isEditing"
               type="number"
               step="0.1"
               min="0"
@@ -49,137 +83,98 @@
               placeholder="Enter temperature (0-1)"
             />
           </div>
-          <div class="input-container">
-            <label for="max-tokens-answer">Max Tokens:</label>
-            <input
-              id="max-tokens-answer"
-              v-model="formData.maxTokens"
-              type="number"
-              min="1"
-              placeholder="Enter max tokens"
-            />
-          </div>
-          <div class="input-container">
-            <label for="ai-model-answer">AI Model:</label>
-            <select id="ai-model-answer" v-model="formData.aiModel">
-              <option value="llama-3.3-70b-versatile">Llama 3.3 - 70B Versatile</option>
-              <option value="llama-3.2-1b-preview">Llama 3.2 - 1B Preview</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-danger">Apply</button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            @click="toggleEdit"
+          >
+            {{ isEditing ? "Apply" : "Edit" }}
+          </button>
         </form>
       </div>
 
-      <!-- Question Suggestion Tab -->
-      <div v-if="activeTab === 'question-suggestion'">
-        <h2>Question Suggestion</h2>
-        <form @submit.prevent="handleSubmit('question-suggestion')">
-          <div class="input-container">
-            <label for="instructions-question">Instructions:</label>
-            <textarea
-              id="instructions-question"
-              v-model="formData.instructions"
-              rows="5"
-              placeholder="Enter your instructions here..."
-            ></textarea>
-          </div>
-          <div class="input-container">
-            <label for="temperature-question">Temperature:</label>
-            <input
-              id="temperature-question"
-              v-model="formData.temperature"
-              type="number"
-              step="0.1"
-              min="0"
-              max="1"
-              placeholder="Enter temperature (0-1)"
-            />
-          </div>
-          <div class="input-container">
-            <label for="max-tokens-question">Max Tokens:</label>
-            <input
-              id="max-tokens-question"
-              v-model="formData.maxTokens"
-              type="number"
-              min="1"
-              placeholder="Enter max tokens"
-            />
-          </div>
-          <div class="input-container">
-            <label for="ai-model-question">AI Model:</label>
-            <select id="ai-model-question" v-model="formData.aiModel">
-              <option value="llama-3.3-70b-versatile">Llama 3.3 - 70B Versatile</option>
-              <option value="llama-3.2-1b-preview">Llama 3.2 - 1B Preview</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-danger">Apply</button>
-        </form>
-      </div>
-
-      <!-- Chat Name Generation Tab -->
-      <div v-if="activeTab === 'chat-name-generation'">
-        <h2>Chat Name Generation</h2>
-        <form @submit.prevent="handleSubmit('chat-name-generation')">
-          <div class="input-container">
-            <label for="instructions-chat-name">Instructions:</label>
-            <textarea
-              id="instructions-chat-name"
-              v-model="formData.instructions"
-              rows="5"
-              placeholder="Enter your instructions here..."
-            ></textarea>
-          </div>
-          <div class="input-container">
-            <label for="temperature-chat-name">Temperature:</label>
-            <input
-              id="temperature-chat-name"
-              v-model="formData.temperature"
-              type="number"
-              step="0.1"
-              min="0"
-              max="1"
-              placeholder="Enter temperature (0-1)"
-            />
-          </div>
-          <div class="input-container">
-            <label for="max-tokens-chat-name">Max Tokens:</label>
-            <input
-              id="max-tokens-chat-name"
-              v-model="formData.maxTokens"
-              type="number"
-              min="1"
-              placeholder="Enter max tokens"
-            />
-          </div>
-          <div class="input-container">
-            <label for="ai-model-chat-name">AI Model:</label>
-            <select id="ai-model-chat-name" v-model="formData.aiModel">
-              <option value="llama-3.3-70b-versatile">Llama 3.3 - 70B Versatile</option>
-              <option value="llama-3.2-1b-preview">Llama 3.2 - 1B Preview</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-danger">Apply</button>
-        </form>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import NavBar from './NavBar.vue';
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import NavBar from "./NavBar.vue";
 
-const activeTab = ref('answer-generation'); // Default active tab
-const formData = ref({
-  instructions: '',
-  temperature: '',
-  maxTokens: '',
-  aiModel: 'llama-3.3-70b-versatile' // Default AI model
+const tabs = {
+  answer_generation: "Answer Generation",
+  question_suggestion: "Question Suggestion",
+  name_generation: "Chat Name Generation",
+};
+const activeTab = ref("answer_generation"); // Default active tab
+const isEditing = ref(false); // Track edit state
+const config = ref({
+  instructions: "",
+  messageTemplate: null,
+  modelOptions: [],
+  model: "",
+  maxTokens: 1,
+  temperature: 0.5,
 });
 
-const handleSubmit = (tab) => {
-  console.log(`Form submitted for ${tab}:`, formData.value);
-  // Add your form submission logic here based on the active tab
+
+// Fetch the configuration for a specific tab
+const loadConfig = async (tab) => {
+  try {
+    const response = await axios.get(`http://localhost:8000/api/v1/config/${tab}`);
+    config.value = {
+      instructions: response.data.system_prompt,
+      messageTemplate: response.data.message_template?.join("\n") || null,
+      modelOptions: response.data.model_options,
+      model: response.data.params.model,
+      maxTokens: response.data.params.max_tokens,
+      temperature: response.data.params.temperature,
+    };
+
+    console.log("Config loaded:", response.data);
+  } catch (error) {
+    console.error("Error fetching config:", error);
+    alert("Failed to load configuration.");
+  }
+};
+
+// Load the config when the page loads or when switching tabs
+onMounted(() => {
+  loadConfig(activeTab.value);
+});
+
+// Switch between tabs
+const changeTab = (tab) => {
+  activeTab.value = tab;
+  loadConfig(tab); // Load the configuration for the selected tab
+};
+
+// Toggle between edit and apply
+const toggleEdit = () => {
+  if (isEditing.value) {
+    handleSubmit(activeTab.value); // Save changes when switching back
+  }
+  isEditing.value = !isEditing.value;
+};
+
+// Submit form data to backend
+const handleSubmit = async (tab) => {
+  try {
+    const response = await axios.put(`http://localhost:8000/api/v1/config/${tab}`, {
+      system_prompt: config.value.instructions,
+      message_template: config.value.messageTemplate?.split("\n") || null,
+      model: config.value.model,
+      max_tokens: parseInt(config.value.maxTokens),
+      temperature: parseFloat(config.value.temperature),
+    });
+
+    console.log("Updated config:", response.data);
+    alert(`${tab} configuration updated successfully.`);
+  } catch (error) {
+    console.error("Error fetching config:", error.response || error);
+    alert("Failed to load configuration.");
+}
 };
 </script>
 
@@ -257,18 +252,20 @@ select:focus {
 }
 
 button {
-  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.5rem 1rem;
-  /* background-color: #007bff; */
-  /* color: white; */
   border: none;
-  border-radius: 4px;
+  background-color: #dc3545;
+  color: white;
   font-size: 1rem;
   cursor: pointer;
+  border-radius: 4px;
   transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #c82333;
 }
 </style>

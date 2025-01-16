@@ -24,30 +24,31 @@
       </div>
     </div>
 
-    <!-- Chat Suggestions -->
-    <div v-if="showSuggestions" class="p-3 bg-light border-top">
-      <div class="d-flex flex-column">
-        <button
-          v-for="(suggestion, index) in suggestions"
-          :key="index"
-          class="btn btn-suggestion mb-2"
-          @click="applySuggestion(suggestion)"
-        >
-          {{ suggestion }}
-          <span class="suggestion-arrow">&rarr;</span>
-        </button>
+    <!-- Floating Chat Suggestions -->
+    <div class="position-relative">
+      <div class="position-absolute bottom-100 start-0 end-0 mb-12 px-3">
+        <div class="bg-light border rounded p-2">
+          <div class="d-flex flex-wrap">
+            <div class="d-flex flex-wrap suggest-container" v-if="showSuggestions">
+              <button
+                v-for="(suggestion, index) in suggestions"
+                :key="index"
+                class="btn btn-suggestion m-1"
+                @click="applySuggestion(suggestion)"
+              >
+                {{ suggestion }}
+              </button>
+            </div>
+            <button
+              class="btn btn-outline-secondary btn-sm position-absolute top-100 end-0 mt-2 me-3 z-10"
+              style="transform: translateY(calc(100% - 85px));"
+              @click="toggleSuggestions"
+            >
+              {{ showSuggestions ? 'Hide' : 'Show' }} Suggestions
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-
-    <!-- Toggle Button -->
-    <div class="toggle-suggestions-container text-center border-top bg-light py-2">
-      <button
-        class="btn btn-sm btn-outline-secondary px-2 py-1"
-        :class="{ 'bold-text': !showSuggestions }"
-        @click="toggleSuggestions">
-
-        {{ showSuggestions ? "Hide Suggestions" : "Show Suggestions" }}
-      </button>
     </div>
 
     <!-- Input Field -->
@@ -86,6 +87,7 @@ const suggestions = ref([]);
 const userInput = ref("");
 const chatTextarea = ref(null);
 const textareaLines = ref(1);
+const showSuggestions = ref(true);
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time))
@@ -307,31 +309,13 @@ watch(
   background-color: #e9ecef;
 }
 
-.suggestion-arrow {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
+.z-10 {
+  z-index: 10;
 }
 
-/* Toggle suggestions container styling */
-.toggle-suggestions-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.suggest-container{
+  width: calc(100% - 130px);
 }
-
-/* Small button styling */
-.btn-sm {
-  font-size: 0.75rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 0.2rem;
-  transition: background-color 0.2s ease;
-}
-
-.btn-sm:hover {
-  background-color: #e9ecef;
-  color: #212529
-}
-
 </style>
+
+

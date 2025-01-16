@@ -26,26 +26,25 @@
 
     <!-- Floating Chat Suggestions -->
     <div class="position-relative">
-      <button
-        class="btn btn-outline-secondary btn-sm position-absolute bottom-100 end-0 mb-2 me-3"
-        @click="toggleSuggestions"
-      >
-        {{ showSuggestions ? 'Hide' : 'Show' }} Suggestions
-      </button>
-      <div
-        class="position-absolute bottom-100 start-0 end-0 mb-2 px-3"
-        v-if="showSuggestions"
-      >
+      <div class="position-absolute bottom-100 start-0 end-0 mb-12 px-3">
         <div class="bg-light border rounded p-2">
           <div class="d-flex flex-wrap">
+            <div class="d-flex flex-wrap suggest-container" v-if="showSuggestions">
+              <button
+                v-for="(suggestion, index) in suggestions"
+                :key="index"
+                class="btn btn-suggestion m-1"
+                @click="applySuggestion(suggestion)"
+              >
+                {{ suggestion }}
+              </button>
+            </div>
             <button
-              v-for="(suggestion, index) in suggestions"
-              :key="index"
-              class="btn btn-suggestion m-1"
-              @click="applySuggestion(suggestion)"
+              class="btn btn-outline-secondary btn-sm position-absolute top-100 end-0 mt-2 me-3 z-10"
+              style="transform: translateY(calc(100% - 85px));"
+              @click="toggleSuggestions"
             >
-              {{ suggestion }}
-              <span class="suggestion-arrow">&rarr;</span>
+              {{ showSuggestions ? 'Hide' : 'Show' }} Suggestions
             </button>
           </div>
         </div>
@@ -86,7 +85,7 @@ const suggestions = ref([]);
 const userInput = ref("");
 const chatTextarea = ref(null);
 const textareaLines = ref(1);
-const showSuggestions = ref(false);
+const showSuggestions = ref(true);
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time))
@@ -306,10 +305,12 @@ watch(
   background-color: #e9ecef;
 }
 
-.suggestion-arrow {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
+.z-10 {
+  z-index: 10;
+}
+
+.suggest-container{
+  width: calc(100% - 130px);
 }
 </style>
+

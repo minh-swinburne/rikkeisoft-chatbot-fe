@@ -3,7 +3,7 @@
     <!-- Chat Stack -->
     <div
       class="chat-stack flex-grow-1 py-3 px-5 mh-100 overflow-auto"
-      ref="chatContainer"
+      ref="chatStack"
     >
       <div v-for="(message, index) in sortedMessages" :key="index" class="mb-3">
         <div
@@ -74,13 +74,14 @@
 
 
 <script setup>
-import { camelize } from "@/utils";
 import axios from "axios";
+import { camelize } from "@/utils";
 import { marked } from "marked";
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { useTemplateRef, computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const $route = useRoute();
+const chatStack = useTemplateRef("chatStack");
 
 const messages = ref([]);
 const suggestions = ref([]);
@@ -136,7 +137,7 @@ async function fetchMessages() {
     );
     messages.value = camelize(response.data);
 
-    console.log(sortedMessages.value);
+    // console.log(sortedMessages.value);
   } catch (error) {
     console.error("Error fetching messages:", error);
   }
@@ -163,14 +164,56 @@ async function sendMessage() {
   textareaLines.value = Math.max(1, textareaLines.value); // Ensures it triggers recompute
 
   try {
-    const response = await axios.post(
-      `http://127.0.0.1:8000/api/v1/chats/${$route.params.chatId}`,
-      { query: query },
-      { headers: { "Content-Type": "application/json" } }
-    );
+    const config = await axios.get("http://localhost:8000/api/v1/config/answer_generation");
+    const streaming = config.data.params.stream;
 
-    const botResponse = response.data.content;
-    messages.value.push({ role: response.data.role, content: botResponse });
+    console.log(streaming)
+
+    const response = await fetch(
+      `http://127.0.0.1:8000/api/v1/chats/${$route.params.chatId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: query }),
+    });
+
+    console.log(response);
+
+    if (streaming) {
+      console.log("Streaming response...");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      let botResponse = "";
+      let done = false;
+
+      messages.value.push({ role: "assistant", content: botResponse });
+
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        if (streamDone) break;
+
+        botResponse += decoder.decode(value, { stream: true });
+        messages.value[messages.value.length - 1].content = botResponse;
+
+        // Optional: Scroll to bottom after each chunk
+        nextTick(() => {
+          if (chatStack.value) {
+            chatStack.value.scrollTop = chatStack.value.scrollHeight;
+          }
+        });
+      }
+
+      console.log("Streaming completed.");
+      console.log(botResponse);
+
+    } else {
+      console.log("Non-streaming response received.");
+
+      const responseData = await response.json();
+      const botResponse = responseData.content;
+      messages.value.push({ role: responseData.role, content: botResponse });
+    }
   } catch (error) {
     console.error(error);
     alert("An error occurred while fetching the bot's response.");
@@ -178,8 +221,9 @@ async function sendMessage() {
 
   // Scroll to the bottom after sending the message
   nextTick(() => {
-    const chatContainer = document.querySelector(".overflow-auto");
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    if (chatStack.value) {
+      chatStack.value.scrollTop = chatStack.value.scrollHeight;
+    }
   });
 
   // Fetch chat suggestions after sending the message

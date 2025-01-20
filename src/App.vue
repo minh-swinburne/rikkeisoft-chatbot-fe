@@ -1,13 +1,15 @@
 <template>
-  <div id="app">
-    <!-- The component for the current route will be rendered here -->
-    <router-view />
-  </div>
+  <q-layout view="hHh Lpr fFf">
+    <q-page-container>
+      <!-- The component for the current route will be rendered here -->
+      <router-view />
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script>
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap';
 
 
 export default {

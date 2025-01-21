@@ -1,51 +1,54 @@
 <template>
-  <q-page class="flex flex-col">
+  <q-page class="flex flex-col" :class="{ 'bg-dark': $q.dark.isActive }">
     <q-scroll-area
       ref="chatScrollArea"
       class="col q-px-md scroll-area-transition"
       :style="{
-        width: '100%',
         maxWidth: leftDrawerOpen ? 'calc(100vw - 285px)' : '100vw',
-        maxHeight: maxHeightScrollArea
+        maxHeight: maxHeightScrollArea,
+        boxShadow: 'none',
+        transition: 'max-width 0.1s ease'
       }"
     >
-      <div class="chat-messages shadow-up-3" :style="{ width: '100%', display: 'flex', flexDirection: 'column', }">
+
+      <div class="chat-messages shadow-up-3" :style="{ width: '100%', display: 'flex', flexDirection: 'column', boxShadow: 'none' }">
         <q-chat-message
           v-for="(message, index) in sortedMessages"
           :key="index"
           :name="message.role === 'assistant' ? 'Bot' : 'You'"
           :text="[marked(message.content)]"
           :sent="message.role !== 'assistant'"
-          :text-color="message.role === 'assistant' ? 'black' : 'black'"
-          :bg-color="message.role === 'assistant' ? 'blue-2' : 'grey-4'"
-          :style="{ maxWidth: '80%', alignSelf: message.role === 'assistant' ? 'flex-start' : 'flex-end' }"
+          :text-color="$q.dark.isActive ? 'white' : 'black'"
+          :bg-color="message.role === 'assistant' ? ($q.dark.isActive ? 'blue-10' : 'blue-2') : ($q.dark.isActive ? 'grey-9' : 'grey-4')"
+          :style="{ maxWidth: '80%', alignSelf: message.role === 'assistant' ? 'flex-start' : 'flex-end', boxShadow: 'none'}"
           stamp="a few moments ago (placeholder)"
           text-html
         />
       </div>
     </q-scroll-area>
 
-    <q-page-sticky position="bottom" expand class="bg-white" :style="{
+    <q-page-sticky position="bottom" expand :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'" :style="{
       width: '100%',
       maxWidth: leftDrawerOpen ? 'calc(100vw - 280px)' : '100vw',
-      transition: 'max-width 0.3s'
       }">
       <q-expansion-item
         v-model="showSuggestions"
         icon="lightbulb"
         label="Suggestions"
-        header-class="bg-primary text-white"
+        :header-class="[$q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-primary text-white']"
         style="width: 100%;"
+        hide-expand-icon
       >
         <q-card
         :style="{ maxHeight: '88px', overflow: 'auto' }"
+        :class="$q.dark.isActive ? 'bg-dark' : ''"
         >
           <q-card-section>
             <div class="row q-col-gutter-sm">
               <div v-for="(suggestion, index) in suggestions" :key="index" class="col-auto">
                 <q-chip
                   :label="suggestion"
-                  :bg-color="'grey-4'"
+                  :bg-color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
                   @click="applySuggestion(suggestion)"
                   clickable
                 />
@@ -67,6 +70,7 @@
           @keydown.enter.prevent="sendMessage"
           class="q-mx-md"
           style="width: calc(100% - 32px);"
+          :dark="$q.dark.isActive"
         >
           <template v-slot:after>
             <q-btn round dense flat icon="send" type="submit" />
@@ -255,7 +259,7 @@ watch(messages, () => {
 }
 
 .scroll-area-transition {
-  transition: max-height 0.5s ease;
+  transition: max-height 0.8s ease-in-out;
 }
 
 </style>

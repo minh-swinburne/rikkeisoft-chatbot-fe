@@ -1,8 +1,8 @@
 <template>
-  <q-page class="flex flex-center">
+  <q-page class="flex flex-center" :class="{ 'bg-dark': $q.dark.isActive }">
     <div class="text-center">
-      <h1 class="text-h3 q-mb-md">Welcome to Chatbot</h1>
-      <p class="text-subtitle1">Select a chat to continue or create a new one</p>
+      <h1 class="text-h3 q-mb-md" :class="{ 'text-white': $q.dark.isActive }">Welcome to Chatbot</h1>
+      <p class="text-subtitle1" :class="{ 'text-grey-5': $q.dark.isActive }">Select a chat to continue or create a new one</p>
       <q-btn color="primary" label="Create New Chat" @click="createNewChat" class="q-mt-lg" />
     </div>
   </q-page>
@@ -34,4 +34,3 @@ async function createNewChat() {
   }
 }
 </script>
-

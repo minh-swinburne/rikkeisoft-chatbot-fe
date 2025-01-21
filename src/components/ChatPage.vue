@@ -1,12 +1,12 @@
 <template>
-  <q-layout view="hHh LpR fFf">
-    <q-header elevated class="bg-primary text-white">
+  <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
+    <q-header elevated :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
       <q-toolbar>
         <q-btn
           flat
           dense
           round
-          icon="menu"
+          :icon="$q.dark.isActive ? 'menu' : 'menu'"
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
@@ -19,7 +19,7 @@
       show-if-above
       elevated
       :width="280"
-      class="bg-grey-1"
+      :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-1'"
     >
       <q-list>
         <q-item-label header>Chat History</q-item-label>
@@ -49,7 +49,7 @@
       </q-list>
       <q-space />
       <q-item>
-        <q-btn color="primary" class="full-width" @click="createNewChat">
+        <q-btn :color="$q.dark.isActive ? 'grey-8' : 'primary'" class="full-width" @click="createNewChat">
           + New Chat
         </q-btn>
       </q-item>
@@ -187,6 +187,8 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
-onMounted(fetchChats);
+onMounted(() => {
+  fetchChats();
+  $q.dark.set(true); // Set dark mode as default
+});
 </script>
-

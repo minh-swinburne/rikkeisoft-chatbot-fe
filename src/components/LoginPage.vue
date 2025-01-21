@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center bg-grey-2">
+  <q-page class="flex flex-center bg-dark">
     <div class="q-pa-xl">
       <q-card class="my-card">
         <q-card-section>
@@ -53,7 +53,18 @@
               </div>
             </template>
           </q-btn>
+
+          <div class="row items-center justify-center q-mt-md">
+            <p class="q-mr-sm">Don't have an account?</p>
+            <q-btn
+              to="/register"
+              flat
+              color="primary"
+              label="Register"
+            />
+          </div>
         </q-card-section>
+
       </q-card>
     </div>
   </q-page>
@@ -61,11 +72,14 @@
 
 <script setup>
 import axios from "axios";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { googleTokenLogin } from "vue3-google-login";
 import { loginRequest, msalInstance } from "@/config/msalConfig";
+import { useQuasar } from 'quasar';
+
+const $q = useQuasar();
 
 const $router = useRouter();
 const authStore = useAuthStore();
@@ -145,6 +159,10 @@ async function handleMicrosoftLogin() {
     console.error("Microsoft login failed:", error);
   }
 }
+
+onMounted(() => {
+  $q.dark.set(false);
+});
 </script>
 
 <style scoped>
@@ -155,12 +173,12 @@ async function handleMicrosoftLogin() {
 
 .q-img {
   max-width: 150px;
-  margin-bottom: 8px; /* Reduced margin */
+  margin-bottom: 8px;
 }
 
 .q-page {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: black; /* Set background to black */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -184,4 +202,7 @@ async function handleMicrosoftLogin() {
   margin-bottom: 10px;
 }
 
+p{
+  margin: 0px;
+}
 </style>

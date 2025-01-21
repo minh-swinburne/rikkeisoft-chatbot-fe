@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center bg-grey-2">
+  <q-page class="flex flex-center bg-dark">
     <div class="q-pa-xl">
       <q-card class="my-card">
         <q-card-section>
@@ -50,11 +50,11 @@
                   ]"
                 />
               </div>
-              <div class="col-auto">
+              <!-- <div class="col-auto">
                 <q-btn label="Send Code" color="primary" @click="sendVerificationCode" :disable="codeSent" />
-              </div>
+              </div> -->
             </div>
-            <div v-if="codeSent" class="row q-col-gutter-sm items-center">
+            <!-- <div v-if="codeSent" class="row q-col-gutter-sm items-center">
               <div class="col">
                 <q-input
                   v-model="verificationCode"
@@ -67,7 +67,7 @@
               <div class="col-auto">
                 <q-btn label="Verify" color="primary" @click="verifyCode" />
               </div>
-            </div>
+            </div> -->
             <div class="row q-col-gutter-sm">
               <div class="col-6">
                 <q-input
@@ -139,11 +139,17 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { useQuasar } from 'quasar';
+import { useAuthStore } from "@/stores/auth";
+import { loginRequest, msalInstance } from "@/config/msalConfig";
+import { googleTokenLogin } from "vue3-google-login";
 
 const $router = useRouter();
+
+const $q = useQuasar();
 
 const username = ref("");
 const firstname = ref("");
@@ -151,38 +157,40 @@ const lastname = ref("");
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
-const verificationCode = ref("");
-const codeSent = ref(false);
+// const verificationCode = ref("");
+// const codeSent = ref(false);
 
-async function sendVerificationCode() {
-  try {
-    // Implement your logic to send verification code
-    // For example:
-    // await axios.post("http://127.0.0.1:8000/api/v1/auth/send-verification", { email: email.value });
-    codeSent.value = true;
-    alert("Verification code sent to your email!");
-  } catch (error) {
-    console.error("Failed to send verification code", error);
-    alert("Failed to send verification code. Please try again.");
-  }
-}
+const authStore = useAuthStore();
 
-async function verifyCode() {
-  try {
-    // Implement your logic to verify the code
-    // For example:
-    // const response = await axios.post("http://127.0.0.1:8000/api/v1/auth/verify-code", { email: email.value, code: verificationCode.value });
-    // if (response.data.verified) {
-    //   alert("Email verified successfully!");
-    // } else {
-    //   alert("Invalid verification code. Please try again.");
-    // }
-    alert("Code verification logic to be implemented");
-  } catch (error) {
-    console.error("Failed to verify code", error);
-    alert("An error occurred while verifying the code. Please try again.");
-  }
-}
+// async function sendVerificationCode() {
+//   try {
+//     // Implement your logic to send verification code
+//     // For example:
+//     // await axios.post("http://127.0.0.1:8000/api/v1/auth/send-verification", { email: email.value });
+//     codeSent.value = true;
+//     alert("Verification code sent to your email!");
+//   } catch (error) {
+//     console.error("Failed to send verification code", error);
+//     alert("Failed to send verification code. Please try again.");
+//   }
+// }
+
+// async function verifyCode() {
+//   try {
+//     // Implement your logic to verify the code
+//     // For example:
+//     // const response = await axios.post("http://127.0.0.1:8000/api/v1/auth/verify-code", { email: email.value, code: verificationCode.value });
+//     // if (response.data.verified) {
+//     //   alert("Email verified successfully!");
+//     // } else {
+//     //   alert("Invalid verification code. Please try again.");
+//     // }
+//     alert("Code verification logic to be implemented");
+//   } catch (error) {
+//     console.error("Failed to verify code", error);
+//     alert("An error occurred while verifying the code. Please try again.");
+//   }
+// }
 
 async function register() {
   if (password.value !== confirmPassword.value) {
@@ -217,15 +225,60 @@ async function register() {
   }
 }
 
-function handleGoogleLogin() {
-  // Implement Google OAuth logic
-  alert("Continue with Google logic to be implemented");
+
+async function handleGoogleLogin() {
+  try {
+    const googleUser = await googleTokenLogin();
+
+    const response = await axios.post(
+      "http://127.0.0.1:8000/api/v1/auth/google",
+      { access_token: googleUser.access_token },
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    const { access_token, refresh_token } = response.data;
+    authStore.login(access_token, refresh_token);
+
+    $router.push("/chat");
+  } catch (error) {
+    console.error("Google login failed", error);
+    authStore.logout();
+  }
 }
 
-function handleMicrosoftLogin() {
-  // Implement Microsoft OAuth logic
-  alert("Continue with Microsoft logic to be implemented");
+async function handleMicrosoftLogin() {
+  try {
+    await msalInstance.initialize();
+    const loginResponse = await msalInstance.loginPopup(loginRequest);
+
+    const response = await axios.post(
+      "http://127.0.0.1:8000/api/v1/auth/microsoft",
+      {
+        access_token: loginResponse.accessToken,
+        id_token: loginResponse.idToken,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${loginResponse.accessToken}`,
+        },
+      }
+    );
+
+    const { access_token, refresh_token } = response.data;
+    authStore.login(access_token, refresh_token);
+
+    $router.push("/chat");
+  } catch (error) {
+    authStore.logout();
+    console.error("Microsoft login failed:", error);
+  }
 }
+
+
+onMounted(() => {
+  $q.dark.set(false);
+});
 </script>
 
 <style scoped>

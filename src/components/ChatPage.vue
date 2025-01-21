@@ -1,13 +1,13 @@
 <template>
   <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
-    <q-header elevated :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
+    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
       <q-toolbar>
         <q-btn
+          :icon="$q.dark.isActive ? 'menu' : 'menu'"
+          aria-label="Menu"
           flat
           dense
           round
-          :icon="$q.dark.isActive ? 'menu' : 'menu'"
-          aria-label="Menu"
           @click="toggleLeftDrawer"
         />
         <nav-bar />
@@ -17,7 +17,6 @@
     <q-drawer
       v-model="leftDrawerOpen"
       show-if-above
-      elevated
       :width="280"
       :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-1'"
     >

@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center" :class="{ 'bg-dark': $q.dark.isActive }">
+  <q-page class="flex flex-center" :class="{ 'bg-grey-10': $q.dark.isActive }">
     <div class="text-center">
       <h1 class="text-h3 q-mb-md" :class="{ 'text-white': $q.dark.isActive }">Welcome to Chatbot</h1>
       <p class="text-subtitle1" :class="{ 'text-grey-5': $q.dark.isActive }">Select a chat to continue or create a new one</p>

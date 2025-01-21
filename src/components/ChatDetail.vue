@@ -1,8 +1,8 @@
 <template>
-  <q-page class="flex flex-col" :class="{ 'bg-dark': $q.dark.isActive }">
+  <q-page class="flex flex-col" :class="{ 'bg-grey-10': $q.dark.isActive }">
     <q-scroll-area
       ref="chatScrollArea"
-      class="col q-px-md scroll-area-transition"
+      class="col q-px-xl scroll-area-transition"
       :style="{
         maxWidth: leftDrawerOpen ? 'calc(100vw - 285px)' : '100vw',
         maxHeight: maxHeightScrollArea,
@@ -27,28 +27,23 @@
       </div>
     </q-scroll-area>
 
-    <q-page-sticky position="bottom" expand :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'" :style="{
+    <q-page-sticky position="bottom" expand :style="{
       width: '100%',
-      maxWidth: leftDrawerOpen ? 'calc(100vw - 280px)' : '100vw',
+  maxWidth: leftDrawerOpen ? 'calc(100vw - 280px)' : '100vw',
+      justifyContent: 'end',
       }">
-      <q-expansion-item
-        v-model="showSuggestions"
-        icon="lightbulb"
-        label="Suggestions"
-        :header-class="[$q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-primary text-white']"
-        style="width: 100%;"
-        hide-expand-icon
-      >
+      <q-fab icon="lightbulb" color="primary" class="q-mx-md" direction="left">
         <q-card
-        :style="{ maxHeight: '88px', overflow: 'auto' }"
-        :class="$q.dark.isActive ? 'bg-dark' : ''"
+          :style="{ width: leftDrawerOpen ? 'calc(100vw - 368px)' : 'calc(100vw - 88px)', alignSelf: 'flex-end' }"
+          :class="'no-shadow ' + ($q.dark.isActive ? 'bg-grey-10' : '')"
+          bordered
         >
           <q-card-section>
             <div class="row q-col-gutter-sm">
               <div v-for="(suggestion, index) in suggestions" :key="index" class="col-auto">
                 <q-chip
                   :label="suggestion"
-                  :bg-color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+                  :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
                   @click="applySuggestion(suggestion)"
                   clickable
                 />
@@ -56,24 +51,24 @@
             </div>
           </q-card-section>
         </q-card>
-
-      </q-expansion-item>
+      </q-fab>
 
       <q-form @submit="sendMessage" class="q-pa-md" style="width: 100%;">
         <q-input
           v-model="userInput"
-          outlined 
+          outlined
+          rounded
           type="textarea"
           placeholder="Type your message (Markdown supported)..."
           :rows="1"
           :max-rows="5"
           @keydown.enter.prevent="sendMessage"
           class="q-mx-md"
-          style="width: calc(100% - 32px);"
+          :style="{width: 'calc(100% - 32px)'}"
           :dark="$q.dark.isActive"
         >
-          <template v-slot:after>
-            <q-btn round dense flat icon="send" type="submit" />
+          <template v-slot:append>
+            <q-btn round flat icon="send" type="submit" />
           </template>
         </q-input>
       </q-form>
@@ -98,7 +93,6 @@ const layoutStore = useLayoutStore();
 const messages = ref([]);
 const suggestions = ref([]);
 const userInput = ref('');
-const showSuggestions = ref(false);
 const chatScrollArea = ref(null);
 
 const leftDrawerOpen = computed(() => layoutStore.leftDrawerOpen);
@@ -109,8 +103,7 @@ const sortedMessages = computed(() =>
 
 const maxHeightScrollArea = computed(() => {
   const textInputHeight = 88; // Adjust according to your actual text input height
-  const suggestionHeight = showSuggestions.value ? 136 : 48; // Adjust according to your actual suggestion height
-  return `calc(100vh - 50px - ${textInputHeight}px - ${suggestionHeight}px)`;
+  return `calc(100vh - 50px - ${textInputHeight}px)`;
 });
 
 function applySuggestion(suggestion) {

@@ -150,32 +150,38 @@
                   </div>
                 </div>
 
-                <!-- Submit Button -->
-                <div class="col-12">
-                  <div class="d-grid">
-                    <button class="btn btn-danger btn-lg" type="submit">Upload</button>
-                  </div>
-                </div>
-              </div>
-            </form>
+              <!-- Submit Button -->
+              <q-btn label="Upload" color="primary" type="submit" class="full-width" />
+            </q-form>
 
             <!-- Access Denied Message -->
-            <div v-else class="text-center py-5">
-              <h3 class="text-danger">Access Denied</h3>
-              <p class="text-secondary">You need to be logged in as an admin to upload documents.</p>
-              <router-link
-                :to="{ path: '/login', query: { redirect: $route.fullPath } }"
+            <q-banner v-else class="q-pa-md">
+              <q-item-label class="text-center text-danger" style="font-weight: 600">
+                Access Denied
+              </q-item-label>
+              <q-item-label class="text-center text-grey-7">
+                You need to be logged in as an admin to upload documents.
+              </q-item-label>
+
+              <!-- Login Button using RouterLink -->
+              <RouterLink :to="{ path: '/login', query: { redirect: $route.fullPath } }">
+                <q-btn label="Login" color="secondary" class="full-width" />
+              </RouterLink>
+
+              <!-- Logout Button (if the user is already logged in) -->
+              <q-btn
+                v-if="authStore.user"
+                label="Logout"
+                color="negative"
                 @click="logout"
-                class="btn btn-danger"
-              >
-                Login
-              </router-link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+                class="full-width q-mt-md"
+              />
+            </q-banner>
+          </q-card>
+        </q-col>
+      </q-row>
+    </q-container>
+  </q-page>
 </template>
 
 <script setup>
@@ -211,67 +217,75 @@ function logout() {
 }
 
 function handleFileUpload(event) {
-  const uploadedFile = event.target.files[0];
+  const input = event.target; // Ensure we are targeting the input element
+  if (input && input.files && input.files.length > 0) {
+    const uploadedFile = input.files[0]; // Get the first uploaded file
+    file.value = uploadedFile;
 
-  file.value = uploadedFile;
-
-  if (uploadedFile) {
     const date = new Date(uploadedFile.lastModified);
-    // console.log(uploadedFile);
-
-    createdDate.value = date.toISOString().slice(0, 10); // Format as DD/MM/YYYY
+    createdDate.value = date.toISOString().slice(0, 10); // Set the created date
+  } else {
+    alert("No file selected or input is invalid!");
   }
 }
 
 function submit() {
-  const formData = new FormData(formRef.value);
+  try {
+    const formData = new FormData(formRef.value);
+    formData.append("uploader", authStore.user.email);
+    formData.append("categories", selectedCategories.value.join(","));
+    formData.set("restricted", restricted.value === "all" ? false : true);
 
-  formData.append("uploader", authStore.user.email);
-  formData.append("categories", selectedCategories.value.join(","));
-  formData.set("restricted", restricted.value === "all" ? false : true);
+    console.log("Submitting form with data:", Array.from(formData.entries()));
 
-  // Log the form data for debugging
-  for (let [key, value] of formData.entries()) {
-    console.log(`${key}: ${value}`);
+    axios
+      .post("http://127.0.0.1:8000/api/v1/docs", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((response) => {
+        console.log(response.data);
+        alert("Document uploaded successfully!");
+      })
+      .catch((error) => {
+        console.error("Upload error:", error);
+        alert("An error occurred while uploading the document.");
+      });
+  } catch (err) {
+    console.error("Form submission error:", err);
+    alert("Error in form submission.");
   }
-
-  // Submit the form data to the server
-  axios
-    .post("http://127.0.0.1:8000/api/v1/docs", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    })
-    .then((response) => {
-      console.log(response.data);
-      alert("Document uploaded successfully!");
-    })
-    .catch((error) => {
-      console.error(error);
-      alert("An error occurred while uploading the document.");
-    });
 }
 </script>
 
 <style scoped>
 /* Align text to the left for field-container */
-.field-container {
-  text-align: left;
+.form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 64px); /* Adjust for header height */
 }
 
-/* Active tab styling */
-.nav-tabs .nav-link.active {
-  background-color: #007bff;
-  color: white;
+q-row {
+width: 60%;
 }
 
-.field-container.required > label:after {
-  content: " *";
-  color: red;
+
+.q-col {
+  max-width: 70%; /* Set your max width */
+  margin: 0 auto;
 }
 
-label.btn:has(input[type="radio"]:checked) {
-  background-color: var(--bs-btn-active-bg);
-  color: var(--bs-btn-active-color);
+/* Custom styles for form fields */
+.q-input,
+.q-select,
+.q-radio {
+  width: 100%;
+}
+
+.q-banner {
+  background-color: var(--q-banner-bg-color, #f7f7f7);
+  padding: 16px;
+  border-radius: 8px;
 }
 </style>

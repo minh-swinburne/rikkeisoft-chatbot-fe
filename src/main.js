@@ -3,13 +3,13 @@ import { createPinia } from "pinia";
 import App from "@/App.vue";
 import router from "@/router";
 import vue3GoogleLogin from "vue3-google-login";
-import { Quasar } from "quasar";
-import quasarUserOptions from "./quasar-user-options";
 
 // Import Quasar CSS and additional styles
 import "quasar/dist/quasar.css";
+import { Quasar } from 'quasar';
+import quasarUserOptions from './quasar-user-options'
 
-const app = createApp(App)
+const app = createApp(App).use(Quasar, quasarUserOptions)
   .use(Quasar, quasarUserOptions) // Use quasarUserOptions here
   .use(router)
   .use(createPinia())

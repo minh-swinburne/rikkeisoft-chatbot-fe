@@ -1,5 +1,9 @@
 <template>
-  <nav-bar></nav-bar>
+  <q-header elevated class="bg-primary text-white">
+    <q-toolbar>
+      <nav-bar />
+    </q-toolbar>
+  </q-header>
 
   <div class="document-list">
     <ul>
@@ -494,6 +498,10 @@ ul {
 
 ::v-deep .multiselect__content-wrapper {
   border-radius: 0 0 4px 4px;
+}
+
+p{
+  text-align: center;
 }
 </style>
 

@@ -1,6 +1,9 @@
 <template>
-  <!-- Navigation Bar -->
-  <NavBar />
+  <q-header elevated class="bg-primary text-white">
+    <q-toolbar>
+      <nav-bar />
+    </q-toolbar>
+  </q-header>
 
   <!-- Main Content -->
   <q-page class="bg-light q-pa-md min-h-screen">

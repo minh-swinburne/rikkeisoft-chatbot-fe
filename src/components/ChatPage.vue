@@ -1,207 +1,192 @@
 <template>
-  <div class="d-flex flex-column vh-100">
-    <!-- Navigation Bar -->
-    <nav-bar></nav-bar>
+  <q-layout view="hHh LpR fFf">
+    <q-header elevated class="bg-primary text-white">
+      <q-toolbar>
+        <q-btn
+          flat
+          dense
+          round
+          icon="menu"
+          aria-label="Menu"
+          @click="toggleLeftDrawer"
+        />
+        <nav-bar />
+      </q-toolbar>
+    </q-header>
 
-    <div class="chat-container d-flex flex-grow-1">
-      <!-- Vertical Navbar -->
-      <div class="chat-sidebar bg-light border-end">
-        <div class="p-3">
-          <button class="btn btn-primary w-100" @click="createNewChat">
-            + New Chat
-          </button>
-        </div>
-        <div class="chat-history p-3 flex-grow-1 overflow-auto">
-          <h4>Chat History</h4>
-          <ul class="list-unstyled mt-4">
-            <li v-for="(chat, index) in sortedChats" :key="index" class="mb-2 position-relative">
-              <router-link
-                :to="`/chat/${chat.id}`"
-                :class="{ active: $route.params.chatId === chat.id }"
-                class="btn btn-outline-primary w-100 text-start text-truncate"
-              >
-                {{ chat.name }}
-              </router-link>
-              <div class="dropdown position-absolute top-0 end-0 h-100">
-                <button class="btn btn-sm btn-outline-primary h-100" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                  ...
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <li><a class="dropdown-item" href="#" @click="renameChat(chat)">Rename</a></li>
-                  <li><a class="dropdown-item" href="#" @click="deleteChat(chat)">Delete</a></li>
-                </ul>
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div class="p-3 mt-auto">
-          <button class="btn btn-danger w-100" @click="logout">Logout</button>
-        </div>
-      </div>
+    <q-drawer
+      v-model="leftDrawerOpen"
+      show-if-above
+      elevated
+      :width="280"
+      class="bg-grey-1"
+    >
+      <q-list>
+        <q-item-label header>Chat History</q-item-label>
+        <q-item
+          v-for="chat in sortedChats"
+          :key="chat.id"
+          :to="`/chat/${chat.id}`"
+          clickable
+          v-ripple
+        >
+          <q-item-section>
+            <q-item-label>{{ chat.name }}</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-btn-dropdown flat dense size="sm">
+              <q-list>
+                <q-item clickable v-close-popup @click="renameChat(chat)">
+                  <q-item-section>Rename</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="deleteChat(chat)">
+                  <q-item-section>Delete</q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
+          </q-item-section>
+        </q-item>
+      </q-list>
+      <q-space />
+      <q-item>
+        <q-btn color="primary" class="full-width" @click="createNewChat">
+          + New Chat
+        </q-btn>
+      </q-item>
+      <q-item>
+        <q-btn color="negative" class="full-width" @click="logout">
+          Logout
+        </q-btn>
+      </q-item>
+    </q-drawer>
 
-      <!-- Chat Detail / Start -->
+    <q-page-container>
       <router-view />
-    </div>
-  </div>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script setup>
-import axios from "axios";
-import NavBar from "@/components/NavBar.vue";
-import { camelize } from "@/utils";
-import { useAuthStore } from "@/stores/auth";
-import { computed, onMounted, ref } from "vue";
-import { RouterLink, RouterView, useRouter } from "vue-router";
+import { ref, computed, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+import { useLayoutStore } from '@/stores/layout';
+import NavBar from '@/components/NavBar.vue';
+import axios from 'axios';
+import { camelize } from '@/utils';
 
+const $q = useQuasar();
 const $router = useRouter();
 const authStore = useAuthStore();
+const layoutStore = useLayoutStore();
+
+const leftDrawerOpen = computed({
+  get: () => layoutStore.leftDrawerOpen,
+  set: (value) => layoutStore.setLeftDrawerOpen(value)
+});
 
 const chats = ref([]);
 
-function logout() {
-  authStore.logout();
-  $router.push("/login");
-}
-
 const sortedChats = computed(() =>
-  [...chats.value].sort(
-    (a, b) => new Date(b.lastAccess) - new Date(a.lastAccess)
-  )
+  [...chats.value].sort((a, b) => new Date(b.lastAccess) - new Date(a.lastAccess))
 );
 
 async function createNewChat() {
   try {
-    const send = await axios.post("http://127.0.0.1:8000/api/v1/chats", {
-      name: "New Chat",
+    const response = await axios.post('http://127.0.0.1:8000/api/v1/chats', {
+      name: 'New Chat',
       user_id: authStore.user.sub,
     });
-    const newChat = camelize(send.data);
+    const newChat = camelize(response.data);
     chats.value.push(newChat);
-
-    const response = await axios.get("http://127.0.0.1:8000/api/v1/chats", {
-    params: {
-      user_id: authStore.user.sub,
-    },
-  });
-    chats.value = camelize(response.data);
+    await fetchChats();
+    $router.push(`/chat/${newChat.id}`);
   } catch (error) {
-    console.error("Error creating new chat:", error);
+    $q.notify({
+      color: 'negative',
+      message: 'Error creating new chat',
+      icon: 'error',
+    });
   }
 }
 
+
 async function renameChat(chat) {
-  const newName = prompt("Enter new chat name:", chat.name);
+  const newName = await $q.dialog({
+    title: 'Rename Chat',
+    message: 'Enter new chat name:',
+    prompt: {
+      model: chat.name,
+      type: 'text',
+    },
+    cancel: true,
+    persistent: true,
+  });
 
   if (newName && newName !== chat.name) {
     try {
-      // Send name and user_id in the request body
-
-      console.log("Name:", newName)
       await axios.put(`http://127.0.0.1:8000/api/v1/chats/${chat.id}/rename`, {
         name: newName,
         user_id: authStore.user.sub,
       });
-      chat.name = newName;
-      
-      const response = await axios.get("http://127.0.0.1:8000/api/v1/chats", {
-    params: {
-      user_id: authStore.user.sub,
-    },
-  });
-      chats.value = camelize(response.data);
+      await fetchChats();
     } catch (error) {
-      console.error("Error renaming chat:", error);
+      $q.notify({
+        color: 'negative',
+        message: 'Error renaming chat',
+        icon: 'error',
+      });
     }
   }
 }
 
 async function deleteChat(chat) {
   try {
-    console.log("chatId to delete:", chat.id); // Debugging line
-    await axios.delete(`http://127.0.0.1:8000/api/v1/chats/${chat.id}/delete`);
-    chats.value = chats.value.filter(chat => chat.id !== chat.id);
+    await $q.dialog({
+      title: 'Confirm Deletion',
+      message: 'Are you sure you want to delete this chat?',
+      ok: 'Yes',
+      cancel: 'No',
+    });
 
-    const response = await axios.get("http://127.0.0.1:8000/api/v1/chats", {
-    params: {
-      user_id: authStore.user.sub,
-    },
-  });
-    chats.value = camelize(response.data);
+    await axios.delete(`http://127.0.0.1:8000/api/v1/chats/${chat.id}/delete`);
+    await fetchChats();
   } catch (error) {
-    console.error("Error deleting chat:", error);
+    if (error) {
+      $q.notify({
+        color: 'negative',
+        message: 'Error deleting chat',
+        icon: 'error',
+      });
+    }
   }
 }
 
+async function fetchChats() {
+  try {
+    const response = await axios.get('http://127.0.0.1:8000/api/v1/chats', {
+      params: { user_id: authStore.user.sub },
+    });
+    chats.value = camelize(response.data);
+  } catch (error) {
+    $q.notify({
+      color: 'negative',
+      message: 'Error fetching chats',
+      icon: 'error',
+    });
+  }
+}
 
+function logout() {
+  authStore.logout();
+  $router.push('/login');
+}
 
-onMounted(async () => {
-  const response = await axios.get("http://127.0.0.1:8000/api/v1/chats", {
-    params: {
-      user_id: authStore.user.sub,
-    },
-  });
+function toggleLeftDrawer() {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+}
 
-  chats.value = camelize(response.data);
-
-  console.log(chats.value);
-});
+onMounted(fetchChats);
 </script>
 
-<style scoped>
-.chat-container {
-  height: calc(100vh - 60px);
-}
-
-/* Navbar styling */
-.navbar {
-  height: 60px;
-}
-
-.bg-light {
-  background-color: #f8f9fa !important;
-}
-
-.border-end {
-  border-right: 1px solid #dee2e6 !important;
-}
-
-.chat-sidebar {
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.chat-history {
-  height: calc(100% - 120px);
-}
-
-.chat-content {
-  overflow-y: auto;
-}
-
-.overflow-auto {
-  overflow-y: auto;
-}
-
-.text-truncate {
-  max-width: 100%;
-}
-
-.dropdown {
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-li:hover .dropdown {
-  opacity: 1;
-}
-
-.dropdown-menu {
-  min-width: 100px;
-}
-
-.h-100{
-  height: 100%
-}
-</style>

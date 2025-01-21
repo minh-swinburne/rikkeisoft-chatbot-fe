@@ -1,131 +1,184 @@
 <template>
-  <div class="d-flex flex-column flex-grow-1 mh-100">
-    <!-- Chat Stack -->
-    <div
-      class="chat-stack flex-grow-1 py-3 px-5 mh-100 overflow-auto"
-      ref="chatContainer"
+  <q-page class="flex flex-col">
+    <q-scroll-area
+      ref="chatScrollArea"
+      class="col q-px-md scroll-area-transition"
+      :style="{
+        width: '100%',
+        maxWidth: leftDrawerOpen ? 'calc(100vw - 285px)' : '100vw',
+        maxHeight: maxHeightScrollArea
+      }"
     >
-      <div v-for="(message, index) in sortedMessages" :key="index" class="mb-3">
-        <div
-          v-if="message.role === 'assistant'"
-          class="d-flex justify-content-start text-start"
+      <div class="chat-messages shadow-up-3" :style="{ width: '100%', display: 'flex', flexDirection: 'column', }">
+        <q-chat-message
+          v-for="(message, index) in sortedMessages"
+          :key="index"
+          :name="message.role === 'assistant' ? 'Bot' : 'You'"
+          :text="[marked(message.content)]"
+          :sent="message.role !== 'assistant'"
+          :text-color="message.role === 'assistant' ? 'black' : 'black'"
+          :bg-color="message.role === 'assistant' ? 'blue-2' : 'grey-4'"
+          :style="{ maxWidth: '80%', alignSelf: message.role === 'assistant' ? 'flex-start' : 'flex-end' }"
+          stamp="a few moments ago (placeholder)"
+          text-html
+        />
+      </div>
+    </q-scroll-area>
+
+    <q-page-sticky position="bottom" expand class="bg-white" :style="{
+      width: '100%',
+      maxWidth: leftDrawerOpen ? 'calc(100vw - 280px)' : '100vw',
+      transition: 'max-width 0.3s'
+      }">
+      <q-expansion-item
+        v-model="showSuggestions"
+        icon="lightbulb"
+        label="Suggestions"
+        header-class="bg-primary text-white"
+        style="width: 100%;"
+      >
+        <q-card
+        :style="{ maxHeight: '88px', overflow: 'auto' }"
         >
-          <div
-            class="bg-secondary text-white px-3 py-2 rounded-end message-box"
-            v-html="marked(message.content)"
-          ></div>
-        </div>
-        <div v-else class="d-flex justify-content-end text-start">
-          <div
-            class="bg-primary text-white px-3 py-2 rounded-start ms-auto message-box"
-            v-html="marked(message.content)"
-          ></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Floating Chat Suggestions -->
-    <div class="position-relative">
-      <div class="position-absolute bottom-100 start-0 end-0 mb-12 px-3">
-        <div class="bg-light border rounded p-2">
-          <div class="d-flex flex-wrap">
-            <div class="d-flex flex-wrap suggest-container" v-if="showSuggestions">
-              <button
-                v-for="(suggestion, index) in suggestions"
-                :key="index"
-                class="btn btn-suggestion m-1"
-                @click="applySuggestion(suggestion)"
-              >
-                {{ suggestion }}
-              </button>
+          <q-card-section>
+            <div class="row q-col-gutter-sm">
+              <div v-for="(suggestion, index) in suggestions" :key="index" class="col-auto">
+                <q-chip
+                  :label="suggestion"
+                  :bg-color="'grey-4'"
+                  @click="applySuggestion(suggestion)"
+                  clickable
+                />
+              </div>
             </div>
-            <button
-              class="btn btn-outline-secondary btn-sm position-absolute top-100 end-0 mt-2 me-3 z-10"
-              style="transform: translateY(calc(100% - 85px));"
-              @click="toggleSuggestions"
-            >
-              {{ showSuggestions ? 'Hide' : 'Show' }} Suggestions
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+          </q-card-section>
+        </q-card>
 
-    <!-- Input Field -->
-    <div class="border-top p-3 bg-light">
-      <div class="input-group">
-        <div class="textarea-wrapper">
-          <textarea
-            v-model="userInput"
-            class="form-control custom-textarea"
-            placeholder="Type your message (Markdown supported)..."
-            rows="1"
-            @keydown="handleInputKeydown"
-            @input="adjustTextareaHeight"
-            ref="chatTextarea"
-          ></textarea>
-        </div>
-        <button class="btn btn-primary" @click="sendMessage">Send</button>
-      </div>
-    </div>
-  </div>
+      </q-expansion-item>
+
+      <q-form @submit="sendMessage" class="q-pa-md" style="width: 100%;">
+        <q-input
+          v-model="userInput"
+          outlined 
+          type="textarea"
+          placeholder="Type your message (Markdown supported)..."
+          :rows="1"
+          :max-rows="5"
+          @keydown.enter.prevent="sendMessage"
+          class="q-mx-md"
+          style="width: calc(100% - 32px);"
+        >
+          <template v-slot:after>
+            <q-btn round dense flat icon="send" type="submit" />
+          </template>
+        </q-input>
+      </q-form>
+    </q-page-sticky>
+  </q-page>
 </template>
 
-
-
 <script setup>
-import { camelize } from "@/utils";
-import axios from "axios";
-import { marked } from "marked";
-import { computed, nextTick, onMounted, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import axios from 'axios';
+import { marked } from 'marked';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { useQuasar } from 'quasar';
+import { camelize } from '@/utils';
+import { useLayoutStore } from '@/stores/layout';
+import { nextTick } from 'vue';
 
 const $route = useRoute();
+const $q = useQuasar();
+const layoutStore = useLayoutStore();
 
 const messages = ref([]);
 const suggestions = ref([]);
-const userInput = ref("");
-const chatTextarea = ref(null);
-const textareaLines = ref(1);
-const showSuggestions = ref(true);
+const userInput = ref('');
+const showSuggestions = ref(false);
+const chatScrollArea = ref(null);
+
+const leftDrawerOpen = computed(() => layoutStore.leftDrawerOpen);
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time))
 );
 
-function toggleSuggestions() {
-  showSuggestions.value = !showSuggestions.value;
-}
+const maxHeightScrollArea = computed(() => {
+  const textInputHeight = 88; // Adjust according to your actual text input height
+  const suggestionHeight = showSuggestions.value ? 136 : 48; // Adjust according to your actual suggestion height
+  return `calc(100vh - 50px - ${textInputHeight}px - ${suggestionHeight}px)`;
+});
 
 function applySuggestion(suggestion) {
   userInput.value = suggestion;
   sendMessage();
 }
 
-function handleInputKeydown(event) {
-  if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault();
-    sendMessage();
-  }
-}
+async function sendMessage() {
+  if (!userInput.value.trim()) return;
 
-function adjustTextareaHeight() {
-  if (!chatTextarea.value) return;
+  const query = userInput.value;
+  userInput.value = '';
 
-  const textarea = chatTextarea.value;
-  textarea.style.height = "auto";
+  messages.value.push({
+    role: 'user',
+    content: query,
+  });
 
-  const scrollHeight = textarea.scrollHeight;
-  const lineHeight = 24; // Line height in pixels
-  const maxLines = 5;
 
-  const lines = Math.min(Math.floor(scrollHeight / lineHeight), maxLines);
-  textareaLines.value = lines;
 
-  if (scrollHeight > maxLines * lineHeight) {
-    textarea.style.height = `${maxLines * lineHeight}px`;
-  } else {
-    textarea.style.height = `${scrollHeight}px`;
+  try {
+    const config = await axios.get("http://localhost:8000/api/v1/config/answer_generation");
+    const streaming = config.data.params.stream;
+
+    const response = await fetch(
+      `http://127.0.0.1:8000/api/v1/chats/${$route.params.chatId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: query }),
+    });
+
+    if (streaming) {
+      console.log("Streaming response...");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      let botResponse = "";
+      let done = false;
+
+      messages.value.push({ role: "assistant", content: botResponse });
+
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        if (streamDone) break;
+
+        botResponse += decoder.decode(value, { stream: true });
+        messages.value[messages.value.length - 1].content = botResponse;
+
+        // Optional: Scroll to bottom after each chunk
+        scrollToBottom();
+      }
+
+      console.log("Streaming completed.");
+      console.log(botResponse);
+
+    } else {
+      console.log("Non-streaming response received.");
+
+      const responseData = await response.json();
+      const botResponse = responseData.content;
+      messages.value.push({ role: responseData.role, content: botResponse });
+      scrollToBottom();
+    }
+
+    fetchSuggestions();
+  } catch (error) {
+    $q.notify({
+      color: 'negative',
+      message: 'An error occurred while fetching the bot\'s response.',
+      icon: 'error',
+    });
   }
 }
 
@@ -135,55 +188,14 @@ async function fetchMessages() {
       `http://127.0.0.1:8000/api/v1/chats/${$route.params.chatId}`
     );
     messages.value = camelize(response.data);
-
-    console.log(sortedMessages.value);
+    scrollToBottom();
   } catch (error) {
-    console.error("Error fetching messages:", error);
+    $q.notify({
+      color: 'negative',
+      message: 'Error fetching messages',
+      icon: 'error',
+    });
   }
-}
-
-async function sendMessage() {
-  if (!userInput.value.trim()) return;
-
-  messages.value.push({
-    role: "user",
-    content: userInput.value,
-  });
-
-  const query = userInput.value;
-  userInput.value = "";
-
-  // Reset textarea height and lines
-  if (chatTextarea.value) {
-    chatTextarea.value.style.height = "auto";
-    textareaLines.value = 1;
-  }
-
-  // Force recompute chatStackMaxHeight
-  textareaLines.value = Math.max(1, textareaLines.value); // Ensures it triggers recompute
-
-  try {
-    const response = await axios.post(
-      `http://127.0.0.1:8000/api/v1/chats/${$route.params.chatId}`,
-      { query: query },
-      { headers: { "Content-Type": "application/json" } }
-    );
-
-    const botResponse = response.data.content;
-    messages.value.push({ role: response.data.role, content: botResponse });
-  } catch (error) {
-    console.error(error);
-    alert("An error occurred while fetching the bot's response.");
-  }
-
-  // Scroll to the bottom after sending the message
-  nextTick(() => {
-    const chatContainer = document.querySelector(".overflow-auto");
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-  });
-
-  // Fetch chat suggestions after sending the message
-  fetchSuggestions();
 }
 
 async function fetchSuggestions() {
@@ -193,8 +205,16 @@ async function fetchSuggestions() {
     );
     suggestions.value = response.data.suggestions;
   } catch (error) {
-    console.error("Error fetching suggestions:", error);
+    console.error('Error fetching suggestions:', error);
   }
+}
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (chatScrollArea.value) {
+      chatScrollArea.value.setScrollPosition('vertical', 99999);
+    }
+  });
 }
 
 function reloadChat() {
@@ -204,116 +224,38 @@ function reloadChat() {
 
 onMounted(() => {
   reloadChat();
-
-  // Listen for chat-changed events
-  window.addEventListener("chat-changed", (event) => {
+  window.addEventListener('chat-changed', (event) => {
     if (event.detail === $route.params.chatId) {
       reloadChat();
     }
   });
 });
 
-// Watch for route changes
-watch(
-  () => $route.params.chatId,
-  (newChatId, oldChatId) => {
-    if (newChatId !== oldChatId) {
-      reloadChat();
-    }
+watch(() => $route.params.chatId, (newChatId, oldChatId) => {
+  if (newChatId !== oldChatId) {
+    reloadChat();
   }
-);
+});
 
-watch(
-  () => messages,
-  () => {
-    if (messages.value.length === 0) {
-      messages.value.push({
-        role: "assistant",
-        content: "Hi there! How can I help you today?",
-      });
-    }
-  },
-  {
-    deep: true,
+watch(messages, () => {
+  if (messages.value.length === 0) {
+    messages.value.push({
+      role: 'assistant',
+      content: 'Hi there! How can I help you today?',
+    });
   }
-);
+  scrollToBottom();
+}, { deep: true });
 </script>
 
 <style scoped>
-/* Chat stack styling */
-.chat-stack {
-  transition: max-height 0.05s ease;
+.chat-messages {
+  display: flex;
+  flex-direction: column;
 }
 
-.message-box {
-  max-width: 60vw;
-  word-wrap: break-word;
+.scroll-area-transition {
+  transition: max-height 0.5s ease;
 }
 
-.message-box > *:last-child {
-  margin-bottom: 0;
-}
-
-/* Textarea styling */
-.textarea-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-.custom-textarea {
-  resize: none;
-  overflow-y: auto;
-  min-height: 38px; /* Initial height */
-  max-height: 120px; /* 5 lines * 24px line height */
-  width: 100%;
-  line-height: 24px;
-  padding-right: 60px; /* Make space for the send button */
-}
-
-/* Input group styling */
-.input-group {
-  position: relative;
-}
-
-.input-group .btn {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  height: 100%;
-}
-
-/* Navbar styling */
-.bg-light {
-  background-color: #f8f9fa !important;
-}
-
-.border-end {
-  border-right: 1px solid #dee2e6 !important;
-}
-
-/* Chat suggestions styling */
-.btn-suggestion {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  color: #212529;
-  text-align: left;
-  padding: 5px 15px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.btn-suggestion:hover {
-  background-color: #e9ecef;
-}
-
-.z-10 {
-  z-index: 10;
-}
-
-.suggest-container{
-  width: calc(100% - 130px);
-}
 </style>
-
-

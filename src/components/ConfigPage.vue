@@ -1,5 +1,9 @@
 <template>
-  <nav-bar></nav-bar>
+  <q-header elevated class="bg-primary text-white">
+    <q-toolbar>
+      <nav-bar />
+    </q-toolbar>
+  </q-header>
 
   <div class="main-container">
     <div class="tabs">

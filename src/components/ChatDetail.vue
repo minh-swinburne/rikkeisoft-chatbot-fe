@@ -35,15 +35,15 @@
       <q-fab icon="lightbulb" color="primary" class="q-mx-md" direction="left">
         <q-card
           :style="{ width: leftDrawerOpen ? 'calc(100vw - 368px)' : 'calc(100vw - 88px)', alignSelf: 'flex-end' }"
-          :class="'no-shadow ' + ($q.dark.isActive ? 'bg-grey-10' : '')"
+          class="no-shadow"
           bordered
         >
-          <q-card-section>
+          <q-card-section class="q-pa-sm">
             <div class="row q-col-gutter-sm">
               <div v-for="(suggestion, index) in suggestions" :key="index" class="col-auto">
                 <q-chip
                   :label="suggestion"
-                  :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+                  :color="$q.dark.isActive ? 'grey-9' : 'grey-3'"
                   @click="applySuggestion(suggestion)"
                   clickable
                 />

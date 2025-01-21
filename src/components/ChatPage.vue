@@ -18,7 +18,7 @@
       v-model="leftDrawerOpen"
       show-if-above
       :width="280"
-      :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-1'"
+      :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-2'"
     >
       <q-list>
         <q-item-label header>Chat History</q-item-label>
@@ -26,14 +26,17 @@
           v-for="chat in sortedChats"
           :key="chat.id"
           :to="`/chat/${chat.id}`"
+          :active-class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-4'"
+          :style="{ borderRadius: '5px' }"
+          class="q-ma-sm"
           clickable
           v-ripple
         >
           <q-item-section>
-            <q-item-label>{{ chat.name }}</q-item-label>
+            <q-item-label lines="1">{{ chat.name }}</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-btn-dropdown flat dense size="sm">
+            <q-btn-dropdown flat dense rounded no-icon-animation size="sm" dropdown-icon="more_horiz">
               <q-list>
                 <q-item clickable v-close-popup @click="renameChat(chat)">
                   <q-item-section>Rename</q-item-section>

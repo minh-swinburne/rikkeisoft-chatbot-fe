@@ -55,7 +55,7 @@
           </q-btn>
 
           <div class="row items-center justify-center q-mt-md">
-            <p class="q-mr-sm">Don't have an account?</p>
+            <p>Don't have an account?</p>
             <q-btn
               to="/register"
               flat

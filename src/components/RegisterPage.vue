@@ -124,7 +124,7 @@
           </q-btn>
 
           <div class="row items-center justify-center q-mt-md">
-            <p class="q-mr-sm">Already have an account?</p>
+            <p>Already have an account?</p>
             <q-btn
               to="/login"
               flat
@@ -314,8 +314,6 @@ onMounted(() => {
   margin-bottom: 10px;
 }
 
-p{
-  margin: 0px;
-}
+
 </style>
 

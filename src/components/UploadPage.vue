@@ -4,151 +4,112 @@
       <nav-bar />
     </q-toolbar>
   </q-header>
-  
-  <section class="bg-light min-vh-100 py-3 py-md-5 d-flex flex-column justify-content-center">
-    <div class="container">
-      <!-- Title and Description -->
-      <div class="row justify-content-md-center">
-        <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
-          <h2 class="mb-4 display-5 text-center">Document Upload</h2>
-          <p class="text-secondary mb-4 text-center">
-            Use this form to upload a document or provide a web link. Fill in the required fields to ensure proper categorization and access control.
-          </p>
-          <hr class="w-50 mx-auto mb-4 mb-xl-9 border-dark-subtle">
-        </div>
-      </div>
-    </div>
 
-    <!-- Form Section -->
-    <div class="container">
-      <div class="row justify-content-lg-center">
-        <div class="col-12 col-lg-9">
-          <div class="bg-white border rounded shadow-sm overflow-hidden">
-            <form
-              v-if="authStore.isAdmin"
-              ref="upload-form"
-              @submit.prevent="submit"
-            >
-              <!-- Tabs -->
-              <ul class="nav nav-tabs mb-4 px-4 pt-4">
-                <li class="nav-item">
-                  <a
-                    class="nav-link"
-                    :class="{ active: activeTab === 'file' }"
-                    @click.prevent="activeTab = 'file'"
-                    href="#"
-                  >
-                    File Upload
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a
-                    class="nav-link"
-                    :class="{ active: activeTab === 'weblink' }"
-                    @click.prevent="activeTab = 'weblink'"
-                    href="#"
-                  >
-                    Weblink Upload
-                  </a>
-                </li>
-              </ul>
+  <!-- Main Content -->
+  <q-page class="bg-light q-pa-md min-h-screen">
+    <q-container class="form-container">
+      <q-row justify="center">
+        <q-col :cols="12" :md="8" :lg="6" :xl="5" :xxl="4">
+          <q-card flat bordered class="q-pa-md">
+            <!-- Form Section -->
+            <q-form v-if="authStore.isAdmin"
+                    ref="uploadForm"
+                    @submit.prevent="submit">
+              <!-- Tabs for File or Weblink Upload -->
+              <q-tabs v-model="activeTab" class="q-mb-md" dense>
+                <q-tab name="file" label="File Upload" />
+                <q-tab name="link" label="Web Link Upload" />
+              </q-tabs>
 
-              <div class="row gy-4 gy-xl-5 px-4 pb-4">
-                <!-- Conditional Input: File or Weblink -->
-                <div class="col-12 field-container required">
-                  <label v-if="activeTab === 'file'" for="file-upload-input" class="form-label">
-                    Choose File
-                  </label>
-                  <label v-else for="weblink-input" class="form-label">
-                    Enter Weblink
-                  </label>
+              <q-separator />
 
-                  <input
-                    v-if="activeTab === 'file'"
-                    id="file-upload-input"
-                    type="file"
-                    name="file"
-                    class="form-control"
-                    accept=".pdf, .doc, .docx, .xls, .xlsx"
-                    required
-                    @change="handleFileUpload"
-                  />
-                  <input
-                    v-else
-                    id="weblink-input"
-                    type="url"
-                    name="link"
-                    class="form-control"
-                    placeholder="https://example.com"
-                    required
-                  />
-                </div>
+              <!-- File / Weblink Input Section -->
+              <q-file
+                v-if="activeTab === 'file'"
+                v-model="file"
+                name="file"
+                label="Choose File"
+                accept=".pdf, .doc, .docx, .xls, .xlsx"
+                class="q-mb-md"
+                filled
+                outlined
+                required
+                @input="handleFileUpload"
+                :rules="[val => !!val || 'Field is required']"
+              >
+                <template v-slot:append>
+                  <q-icon name="attach_file" />
+                </template>
 
-                <!-- Shared Fields -->
-                <div class="col-12 field-container required">
-                  <label for="document-name" class="form-label">Document Title</label>
-                  <input id="document-name" type="text" name="title" class="form-control" required />
-                </div>
-                <div class="col-12 field-container">
-                  <label for="description" class="form-label">Description</label>
-                  <textarea id="description" name="description" class="form-control" rows="3"></textarea>
-                </div>
-                <div class="col-12 field-container required">
-                  <label for="categories" class="form-label">Categories</label>
-                  <div class="row">
-                    <div
-                      v-for="(option, index) in categories"
-                      :key="index"
-                      class="col-6 mb-2"
-                    >
-                      <label class="form-check-label">
-                        <input
-                          type="checkbox"
-                          class="form-check-input"
-                          :value="option"
-                          v-model="selectedCategories"
-                        />
-                        {{ option }}
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-12 field-container">
-                  <label for="created-date" class="form-label">Day Created</label>
-                  <input
-                    v-model="createdDate"
-                    id="created-date"
-                    type="date"
-                    name="createdDate"
-                    class="form-control"
-                  />
-                </div>
-                <div class="col-12 field-container required">
-                  <label for="creator" class="form-label">Creator (Email)</label>
-                  <input
-                    v-model="creator"
-                    id="creator"
-                    type="text"
-                    name="creator"
-                    class="form-control"
-                    required
-                  />
-                </div>
-                <div class="col-12 field-container required">
-                  <label for="restricted" class="form-label col-12">Access</label>
-                  <div class="col-12">
-                    <div class="row mx-0 gap-3">
-                      <label class="btn btn-outline-secondary col">
-                        <input v-model="restricted" id="accessAll" type="radio" class="btn-check" name="restricted" value="all" required />
-                        Everyone
-                      </label>
-                      <label class="btn btn-outline-secondary col">
-                        <input v-model="restricted" id="accessAdmin" type="radio" class="btn-check" name="restricted" value="admin" />
-                        Admin Only
-                      </label>
-                    </div>
-                  </div>
-                </div>
+              </q-file>
+
+              <q-input
+                v-else
+                v-model="link"
+                name="link"
+                label="Enter Weblink"
+                placeholder="https://example.com"
+                class="q-mb-md"
+                filled
+                required
+                :rules="[val => !!val || 'Field is required']"
+              />
+
+              <!-- Shared Fields Section -->
+              <q-input
+                v-model="documentTitle"
+                name="title"
+                label="Document Title"
+                class="q-mb-md"
+                filled
+                required
+                :rules="[val => !!val || 'Field is required']"
+              />
+
+              <q-input
+                v-model="description"
+                name="description"
+                label="Description"
+                type="textarea"
+                class="q-mb-md"
+                filled
+                required
+              />
+
+              <q-select
+                v-model="selectedCategories"
+                :options="categories"
+                name="categories"
+                label="Categories"
+                class="q-mb-md"
+                type="checkbox"
+                multiple
+                filled
+                required
+                :rules="[val => !!val || 'Field is required']"
+              />
+
+              <q-input v-model="createdDate" name="createdDate" label="Day Created" type="date" class="q-mb-md" filled />
+
+              <q-input v-model="creator" name="creator" label="Creator (Email)" class="q-mb-md" filled required :rules="[val => !!val || 'Field is required']"/>
+
+              <!-- Access Control Section -->
+              <q-radio
+                v-model="restricted"
+                name="restricted"
+                label="Everyone"
+                val="all"
+                class="q-mb-md"
+                inline
+              />
+              <q-radio
+                v-model="restricted"
+                name="restricted"
+                label="Admin Only"
+                val="admin"
+                class="q-mb-md"
+                inline
+              />
 
               <!-- Submit Button -->
               <q-btn label="Upload" color="primary" type="submit" class="full-width" />
@@ -187,19 +148,25 @@
 <script setup>
 import axios from "axios";
 import NavBar from "@/components/NavBar.vue";
-import { ref, useTemplateRef } from "vue";
+import { ref } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter, RouterLink } from "vue-router";
+import { useQuasar } from "quasar";
 
+const $quasar = useQuasar();
 const $router = useRouter();
 const authStore = useAuthStore();
-const formRef = useTemplateRef("upload-form");
+// const formRef = useTemplateRef("uploadForm"); // Reference to the form element
 
+const uploadForm = ref(null); // Reference to the form element
 const activeTab = ref("file"); // Default tab is "File Upload"
 const file = ref(null);
+const link = ref(""); // For "Weblink Upload"
 const createdDate = ref(""); // Default date is today
 const creator = ref(authStore.user?.email);
-const restricted = ref("all"); // Default access is "Everyone"
+const restricted = ref("admin"); // Default access is "Everyone"
+const documentTitle = ref(""); // For "Document Title"
+const description = ref("");   // For "Description"
 
 const categories = ref([
   "Guidance",
@@ -217,44 +184,79 @@ function logout() {
 }
 
 function handleFileUpload(event) {
-  const input = event.target; // Ensure we are targeting the input element
-  if (input && input.files && input.files.length > 0) {
-    const uploadedFile = input.files[0]; // Get the first uploaded file
-    file.value = uploadedFile;
+  const uploadedFile = event.target.files[0];
 
+
+  if (uploadedFile) {
     const date = new Date(uploadedFile.lastModified);
-    createdDate.value = date.toISOString().slice(0, 10); // Set the created date
-  } else {
-    alert("No file selected or input is invalid!");
+    // console.log(uploadedFile);
+
+    createdDate.value = date.toISOString().slice(0, 10); // Format as DD/MM/YYYY
   }
 }
 
 function submit() {
-  try {
-    const formData = new FormData(formRef.value);
-    formData.append("uploader", authStore.user.email);
-    formData.append("categories", selectedCategories.value.join(","));
-    formData.set("restricted", restricted.value === "all" ? false : true);
+  uploadForm.value.validate().then((success) => {
+    if (success) {
+      console.log("Form submitted successfully!");
 
-    console.log("Submitting form with data:", Array.from(formData.entries()));
+      // Construct FormData
+      const formData = new FormData();
 
-    axios
-      .post("http://127.0.0.1:8000/api/v1/docs", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((response) => {
-        console.log(response.data);
-        alert("Document uploaded successfully!");
-      })
-      .catch((error) => {
-        console.error("Upload error:", error);
-        alert("An error occurred while uploading the document.");
+      // Append form data fields
+      if (file.value && activeTab.value === "file") {
+        formData.append("file", file.value);
+      } else if (activeTab.value === "link" && link.value) {
+          formData.append("link", link.value);
+      }
+
+      formData.append("title", documentTitle.value);
+      formData.append("description", description.value || ""); // Optional
+      formData.append("categories", selectedCategories.value.join(","));
+      formData.append("createdDate", createdDate.value || new Date().toISOString().slice(0, 10)); // Use today as default
+      formData.append("creator", creator.value);
+      formData.append("restricted", restricted.value === "all" ? "false" : "true");
+      formData.append("uploader", authStore.user.email);
+
+      // Debug FormData entries
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+      // Submit form data via Axios
+      axios
+        .post("http://127.0.0.1:8000/api/v1/docs", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
+          console.log("Upload success:", response.data);
+          $quasar.notify({
+            type: "positive",
+            message: "Document uploaded successfully!",
+          });
+        })
+        .catch((error) => {
+          console.error("Upload failed:", error.response || error);
+          if (error.response) {
+            console.error("Error details:", error.response.data);  // Log error details from server response
+          }
+          $quasar.notify({
+            type: "negative",
+            message: "An error occurred while uploading the document.",
+          });
+        });
+    } else {
+      $quasar.notify({
+        type: "negative",
+        message: "Please fill in all required fields.",
       });
-  } catch (err) {
-    console.error("Form submission error:", err);
-    alert("Error in form submission.");
-  }
+    }
+  });
+
+  console.log($quasar.notify);
 }
+
 </script>
 
 <style scoped>

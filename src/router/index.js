@@ -58,6 +58,7 @@ async function checkTokenValidity() {
   }
 
   try {
+    console.log("Checking token validity...");
     // Send a request to the backend to validate the token
     const response = await axios.get(
       "http://localhost:8000/api/v1/auth/validate",
@@ -68,9 +69,10 @@ async function checkTokenValidity() {
         },
       }
     );
+    console.log(response.data);
 
     // If the request succeeds, the token is valid
-    return response.data.valid;
+    return response.data.status === "valid";
   } catch (error) {
     console.error("Token validation failed:", error.response?.data || error);
     return false;
@@ -78,6 +80,7 @@ async function checkTokenValidity() {
 }
 
 router.beforeEach(async (to, from, next) => {
+  console.log("Navigating to", to.path);
   const authStore = useAuthStore();
   authStore.hydrateUser();
 

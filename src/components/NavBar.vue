@@ -7,7 +7,13 @@
     <q-space />
 
     <q-tabs v-model="tab" inline-label>
-      <q-tab v-for="item in filteredNavItems" :key="item.path" :name="item.path" :label="item.name" :to="item.path" />
+      <q-tab 
+        v-for="item in filteredNavItems" 
+        :key="item.path" 
+        :name="item.path" 
+        :label="item.name"
+        @click="navigateTo(item.path)" 
+      />
     </q-tabs>
 
     <q-space />
@@ -21,10 +27,11 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
 const $route = useRoute();
+const router = useRouter();
 const authStore = useAuthStore();
 
 const tab = ref($route.path);
@@ -42,5 +49,8 @@ const filteredNavItems = computed(() => {
     ? navItems
     : navItems.filter((item) => !item.requiresAdmin);
 });
-</script>
 
+function navigateTo(path) {
+  router.push(path);
+}
+</script>

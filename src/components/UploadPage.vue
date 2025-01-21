@@ -1,6 +1,9 @@
 <template>
-  <!-- Navigation Bar -->
-  <nav-bar></nav-bar>
+  <q-header elevated class="bg-primary text-white">
+    <q-toolbar>
+      <nav-bar />
+    </q-toolbar>
+  </q-header>
   
   <section class="bg-light min-vh-100 py-3 py-md-5 d-flex flex-column justify-content-center">
     <div class="container">

@@ -146,12 +146,12 @@
 </template>
 
 <script setup>
-import axios from "axios";
 import NavBar from "@/components/NavBar.vue";
 import { ref } from "vue";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/plugins/stores/auth";
 import { useRouter, RouterLink } from "vue-router";
 import { useQuasar } from "quasar";
+import APIClient from '@/api.js'
 
 const $quasar = useQuasar();
 const $router = useRouter();
@@ -223,12 +223,7 @@ function submit() {
         console.log(`${key}:`, value);
       }
       // Submit form data via Axios
-      axios
-        .post("http://127.0.0.1:8000/api/v1/docs", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
+      APIClient.uploadDocs(formData)
         .then((response) => {
           console.log("Upload success:", response.data);
           $quasar.notify({

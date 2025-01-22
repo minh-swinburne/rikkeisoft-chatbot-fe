@@ -17,13 +17,20 @@
               :rules="[val => val && val.length > 0 || 'Username is required']"
             />
             <q-input
-              v-model="password"
-              label="Password"
-              type="password"
-              filled
-              required
-              :rules="[val => val && val.length > 0 || 'Password is required']"
-            />
+            v-model="password"
+            label="Password"
+            :type="isPwd ? 'password' : 'text'"
+            filled
+            required
+            :rules="[val => val && val.length > 0 || 'Password is required']">
+              <template v-slot:append>
+                <q-icon
+                  :name="isPwd ? 'visibility_off' : 'visibility'"
+                  class="cursor-pointer"
+                  @click="isPwd = !isPwd"
+                />
+              </template>
+            </q-input>
             <div class="q-mt-md login-btn">
               <q-btn type="submit" label="Login" color="primary" class="full-width" />
             </div>
@@ -71,13 +78,13 @@
 </template>
 
 <script setup>
-import axios from "axios";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/plugins/stores/auth";
 import { googleTokenLogin } from "vue3-google-login";
-import { loginRequest, msalInstance } from "@/config/msalConfig";
+import { loginRequest, msalInstance } from "@/plugins/config/msalConfig";
 import { useQuasar } from 'quasar';
+import APIClient from '@/api.js';
 
 const $q = useQuasar();
 
@@ -86,6 +93,7 @@ const authStore = useAuthStore();
 
 const username = ref("");
 const password = ref("");
+const isPwd = ref(true);
 
 async function handleNativeLogin() {
   try {
@@ -93,14 +101,7 @@ async function handleNativeLogin() {
     params.append("username", username.value);
     params.append("password", password.value);
 
-    const response = await axios.post(
-      "http://127.0.0.1:8000/api/v1/auth/native",
-      params,
-      {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        withCredentials: true,
-      }
-    );
+    const response = await APIClient.authenticateNative(params);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);
@@ -115,11 +116,7 @@ async function handleGoogleLogin() {
   try {
     const googleUser = await googleTokenLogin();
 
-    const response = await axios.post(
-      "http://127.0.0.1:8000/api/v1/auth/google",
-      { access_token: googleUser.access_token },
-      { headers: { "Content-Type": "application/json" } }
-    );
+    const response = await APIClient.authenticateGoogle(googleUser.access_token);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);
@@ -136,19 +133,7 @@ async function handleMicrosoftLogin() {
     await msalInstance.initialize();
     const loginResponse = await msalInstance.loginPopup(loginRequest);
 
-    const response = await axios.post(
-      "http://127.0.0.1:8000/api/v1/auth/microsoft",
-      {
-        access_token: loginResponse.accessToken,
-        id_token: loginResponse.idToken,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${loginResponse.accessToken}`,
-        },
-      }
-    );
+    const response = await APIClient.authenticateMicrosoft(loginResponse);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);

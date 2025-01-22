@@ -31,7 +31,7 @@
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/plugins/stores/auth';
 
 const $route = useRoute();
 const router = useRouter();

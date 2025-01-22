@@ -1,8 +1,9 @@
-import axios from "axios";
 import { defineStore } from "pinia";
 import { jwtDecode } from "jwt-decode";
 import { googleLogout } from "vue3-google-login";
-import { msalInstance } from "@/config/msalConfig";
+import { msalInstance } from "@/plugins/config/msalConfig";
+import APIClient from '@/api.js'
+import axios from "axios";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -47,16 +48,7 @@ export const useAuthStore = defineStore("auth", {
     async refreshAccess() {
       // Attempt to refresh the token
       try {
-        const response = await axios.post(
-          "http://localhost:8000/api/v1/auth/refresh",
-          null,
-          {
-            withCredentials: true,
-            headers: {
-              Authorization: `Bearer ${this.refreshToken}`,
-            },
-          }
-        );
+        const response = await APIClient.refreshToken();
         const { access_token, refresh_token } = response.data;
         this.login(access_token, refresh_token); // Log in with the new tokens
       } catch (error) {

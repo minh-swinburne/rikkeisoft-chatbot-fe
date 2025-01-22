@@ -21,22 +21,32 @@
       :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-2'"
     >
       <q-list>
-        <q-item-label header>Chat History</q-item-label>
+        <q-item-label header class="flex justify-between items-center">
+          Chat History
+          <q-btn
+            flat
+            round
+            icon="add"
+            size="sm"
+            :color="$q.dark.isActive ? 'grey-5' : 'grey-8'"
+            @click="createNewChat"
+          />
+        </q-item-label>
         <q-item
           v-for="chat in sortedChats"
           :key="chat.id"
-          :to="`/chat/${chat.id}`"
           :active-class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-4'"
           :style="{ borderRadius: '5px' }"
           class="q-ma-sm"
           clickable
           v-ripple
+          @click="$router.push(`/chat/${chat.id}`)"
         >
           <q-item-section>
             <q-item-label lines="1">{{ chat.name }}</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-btn-dropdown flat dense rounded no-icon-animation size="sm" dropdown-icon="more_horiz">
+            <q-btn-dropdown flat dense rounded no-icon-animation size="sm" dropdown-icon="more_horiz" @click.stop>
               <q-list>
                 <q-item clickable v-close-popup @click="renameChat(chat)">
                   <q-item-section>Rename</q-item-section>
@@ -51,11 +61,6 @@
       </q-list>
       <q-space />
       <q-item>
-        <q-btn :color="$q.dark.isActive ? 'grey-8' : 'primary'" class="full-width" @click="createNewChat">
-          + New Chat
-        </q-btn>
-      </q-item>
-      <q-item>
         <q-btn color="negative" class="full-width" @click="logout">
           Logout
         </q-btn>
@@ -63,7 +68,7 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view @send="fetchChats" />
     </q-page-container>
   </q-layout>
 </template>
@@ -72,11 +77,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-import { useLayoutStore } from '@/stores/layout';
+import { useAuthStore } from '@/plugins/stores/auth';
+import { useLayoutStore } from '@/plugins/stores/layout';
 import NavBar from '@/components/NavBar.vue';
-import axios from 'axios';
 import { camelize } from '@/utils';
+
+import APIClient from '@/api.js'
 
 const $q = useQuasar();
 const $router = useRouter();
@@ -95,22 +101,7 @@ const sortedChats = computed(() =>
 );
 
 async function createNewChat() {
-  try {
-    const response = await axios.post('http://127.0.0.1:8000/api/v1/chats', {
-      name: 'New Chat',
-      user_id: authStore.user.sub,
-    });
-    const newChat = camelize(response.data);
-    chats.value.push(newChat);
-    await fetchChats();
-    $router.push(`/chat/${newChat.id}`);
-  } catch (error) {
-    $q.notify({
-      color: 'negative',
-      message: 'Error creating new chat',
-      icon: 'error',
-    });
-  }
+  $router.push('/chat');
 }
 
 
@@ -128,10 +119,7 @@ async function renameChat(chat) {
 
   if (newName && newName !== chat.name) {
     try {
-      await axios.put(`http://127.0.0.1:8000/api/v1/chats/${chat.id}/rename`, {
-        name: newName,
-        user_id: authStore.user.sub,
-      });
+      await APIClient.renameChat(chat.id, newName, authStore.user.sub);
       await fetchChats();
     } catch (error) {
       $q.notify({
@@ -150,26 +138,38 @@ async function deleteChat(chat) {
       message: 'Are you sure you want to delete this chat?',
       ok: 'Yes',
       cancel: 'No',
+    }).onOk(async () => {
+      try {
+        await APIClient.deleteChat(chat.id);
+        await fetchChats();
+
+        // Check if the current chat's ID is the same as the deleted chat's ID
+        if ($router.currentRoute.value.params.chatId === chat.id) {
+          await $router.push(`/chat`);
+        }
+      } catch (deleteError) {
+        $q.notify({
+          color: 'negative',
+          message: 'Error deleting chat',
+          icon: 'error',
+        });
+      }
     });
 
-    await axios.delete(`http://127.0.0.1:8000/api/v1/chats/${chat.id}/delete`);
-    await fetchChats();
   } catch (error) {
-    if (error) {
-      $q.notify({
-        color: 'negative',
-        message: 'Error deleting chat',
-        icon: 'error',
-      });
-    }
+    $q.notify({
+      color: 'negative',
+      message: 'Error with the deletion confirmation dialog',
+      icon: 'error',
+    });
   }
 }
 
+
+
 async function fetchChats() {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/chats', {
-      params: { user_id: authStore.user.sub },
-    });
+    const response = await APIClient.getChats(authStore.user.sub);
     chats.value = camelize(response.data);
   } catch (error) {
     $q.notify({

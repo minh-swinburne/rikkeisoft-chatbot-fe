@@ -53,16 +53,17 @@
         </q-card>
       </q-fab>
 
-      <q-form @submit="sendMessage" class="q-pa-md" style="width: 100%;">
+      <q-form @submit="sendMessage()" class="q-pa-md" style="width: 100%;">
         <q-input
           v-model="userInput"
           outlined
           rounded
+          autogrow
           type="textarea"
           placeholder="Type your message (Markdown supported)..."
           :rows="1"
-          :max-rows="5"
-          @keydown.enter.prevent="sendMessage"
+          :max-rows="1"
+          @keydown="handleKeydown"
           class="q-mx-md"
           :style="{width: 'calc(100% - 32px)'}"
           :dark="$q.dark.isActive"
@@ -77,16 +78,17 @@
 </template>
 
 <script setup>
-import axios from 'axios';
 import { marked } from 'marked';
 import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { camelize } from '@/utils';
-import { useLayoutStore } from '@/stores/layout';
+import { useLayoutStore } from '@/plugins/stores/layout';
 import { nextTick } from 'vue';
+import APIClient from '@/api.js'
 
 const $route = useRoute();
+const $router = useRouter();
 const $q = useQuasar();
 const layoutStore = useLayoutStore();
 
@@ -106,35 +108,40 @@ const maxHeightScrollArea = computed(() => {
   return `calc(100vh - 50px - ${textInputHeight}px)`;
 });
 
+function handleKeydown(event) {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    // If Enter is pressed without Shift, send the message
+    event.preventDefault();  // Prevent the default Enter behavior (form submission)
+    sendMessage();
+  } else if (event.key === 'Enter' && event.shiftKey) {
+    // If Enter is pressed with Shift, allow the input to break the line
+    // No action needed, just let the text area handle the line break
+  }
+}
+
 function applySuggestion(suggestion) {
   userInput.value = suggestion;
   sendMessage();
 }
 
-async function sendMessage() {
-  if (!userInput.value.trim()) return;
+async function sendMessage(initialMessage = null) {
+  const query = initialMessage || userInput.value.trim();
+  if (!query) return;
 
-  const query = userInput.value;
-  userInput.value = '';
+  if (!initialMessage) {
+    userInput.value = '';
+  }
 
   messages.value.push({
     role: 'user',
     content: query,
   });
 
-
-
   try {
-    const config = await axios.get("http://localhost:8000/api/v1/config/answer_generation");
+    const config = await APIClient.getConfig('answer_generation');
     const streaming = config.data.params.stream;
 
-    const response = await fetch(
-      `http://127.0.0.1:8000/api/v1/chats/${$route.params.chatId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query }),
-    });
-
+    const response = await ( APIClient.sendMessage($route.params.chatId, query));
     if (streaming) {
       console.log("Streaming response...");
 
@@ -181,9 +188,8 @@ async function sendMessage() {
 
 async function fetchMessages() {
   try {
-    const response = await axios.get(
-      `http://127.0.0.1:8000/api/v1/chats/${$route.params.chatId}`
-    );
+    console.log("Fetching messages...")
+    const response = await APIClient.getMessage($route.params.chatId);
     messages.value = camelize(response.data);
     scrollToBottom();
   } catch (error) {
@@ -197,9 +203,7 @@ async function fetchMessages() {
 
 async function fetchSuggestions() {
   try {
-    const response = await axios.post(
-      `http://127.0.0.1:8000/api/v1/chats/${$route.params.chatId}/suggestions`
-    );
+    const response = await APIClient.getSuggestion($route.params.chatId);
     suggestions.value = response.data.suggestions;
   } catch (error) {
     console.error('Error fetching suggestions:', error);
@@ -220,29 +224,30 @@ function reloadChat() {
 }
 
 onMounted(() => {
-  reloadChat();
+  // reloadChat();
+
   window.addEventListener('chat-changed', (event) => {
     if (event.detail === $route.params.chatId) {
+      console.log("hehehe")
       reloadChat();
     }
   });
+
+  // Check for initialMessage in the route query and send it if present
+  const initialMessage = $route.query.initialMessage;
+  if (initialMessage) {
+    sendMessage(decodeURIComponent(initialMessage));
+    // Remove the initialMessage from the query parameters
+    $router.replace({ query: {} });
+  }
 });
 
 watch(() => $route.params.chatId, (newChatId, oldChatId) => {
   if (newChatId !== oldChatId) {
+    console.log("hahaha")
     reloadChat();
   }
 });
-
-watch(messages, () => {
-  if (messages.value.length === 0) {
-    messages.value.push({
-      role: 'assistant',
-      content: 'Hi there! How can I help you today?',
-    });
-  }
-  scrollToBottom();
-}, { deep: true });
 </script>
 
 <style scoped>
@@ -254,5 +259,4 @@ watch(messages, () => {
 .scroll-area-transition {
   transition: max-height 0.8s ease-in-out;
 }
-
 </style>

@@ -103,8 +103,8 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
-import NavBar from "./NavBar.vue";
+import NavBar from "@/components/NavBar.vue";
+import APIClient from '@/api.js'
 
 const tabs = {
   answer_generation: "Answer Generation",
@@ -126,7 +126,7 @@ const config = ref({
 // Fetch the configuration for a specific tab
 const loadConfig = async (tab) => {
   try {
-    const response = await axios.get(`http://localhost:8000/api/v1/config/${tab}`);
+    const response = await APIClient.getConfig(tab)
     config.value = {
       instructions: response.data.system_prompt,
       messageTemplate: response.data.message_template?.join("\n") || null,
@@ -165,13 +165,7 @@ const toggleEdit = () => {
 // Submit form data to backend
 const handleSubmit = async (tab) => {
   try {
-    const response = await axios.put(`http://localhost:8000/api/v1/config/${tab}`, {
-      system_prompt: config.value.instructions,
-      message_template: config.value.messageTemplate?.split("\n") || null,
-      model: config.value.model,
-      max_tokens: parseInt(config.value.maxTokens),
-      temperature: parseFloat(config.value.temperature),
-    });
+    const response = await APIClient.updateConfig(tab, config);
 
     console.log("Updated config:", response.data);
     alert(`${tab} configuration updated successfully.`);

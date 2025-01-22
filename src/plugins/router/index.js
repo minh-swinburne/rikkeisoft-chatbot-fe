@@ -1,41 +1,41 @@
-import axios from "axios";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/plugins/stores/auth";
 import { createRouter, createWebHistory } from "vue-router";
+import APIClient from '@/api.js'
 
 const routes = [
-  { path: "/login", component: () => import("@/components/LoginPage.vue"), meta: { requiresAuth: false } },
+  { path: "/login", component: () => import("@/pages/LoginPage.vue"), meta: { requiresAuth: false } },
   {
     path: "/register",
-    component: () => import("@/components/RegisterPage.vue"),
+    component: () => import("@/pages/RegisterPage.vue"),
   },
   {
     path: "/chat",
-    component: () => import("@/components/ChatPage.vue"),
+    component: () => import("@/pages/chats/ChatPage.vue"),
     meta: { requiresAuth: true },
     children: [
       {
         path: "",
-        component: () => import("@/components/ChatStart.vue"),
+        component: () => import("@/pages/chats/ChatStart.vue"),
       },
       {
         path: ":chatId",
-        component: () => import("@/components/ChatDetail.vue"),
+        component: () => import("@/pages/chats/ChatDetail.vue"),
       },
     ],
   },
   {
     path: "/upload",
-    component: () => import("@/components/UploadPage.vue"),
+    component: () => import("@/pages/UploadPage.vue"),
     meta: { requiresAuth: true },
   },
   {
     path: "/docs",
-    component: () => import("@/components/DocList.vue"),
+    component: () => import("@/pages/DocList.vue"),
     meta: { requiresAuth: true },
   },
   {
     path: "/config",
-    component: () => import("@/components/ConfigPage.vue"),
+    component: () => import("@/pages/ConfigPage.vue"),
     meta: { requiresAuth: false },
   },
   { path: "/", redirect: "/login" }, // Default route
@@ -57,15 +57,7 @@ async function checkTokenValidity() {
   }
 
   try {
-    const response = await axios.get(
-      "http://localhost:8000/api/v1/auth/validate",
-      {
-        withCredentials: true, 
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      }
-    );
+    const response = await APIClient.validateToken();
     return response.data.valid;
   } catch (error) {
     console.error("Token validation failed:", error.response?.data || error);

@@ -40,7 +40,7 @@
             </div>
           </div>
 
-          <q-list bordered separator>
+          <q-list bordered separator class="max-width-70">
             <q-item v-for="document in paginatedDocuments" :key="document.id" class="q-my-sm">
               <q-item-section>
                 <q-item-label class="text-h6">{{ document.title }}</q-item-label>
@@ -331,3 +331,11 @@ const deleteDocument = async (document) => {
   }
 };
 </script>
+
+<style>
+  .max-width-70 {
+    max-width: 70%;
+    margin: 0 auto; /* Optional: centers the list */
+  }
+</style>
+

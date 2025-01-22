@@ -224,8 +224,7 @@ function reloadChat() {
 }
 
 onMounted(() => {
-  // reloadChat();
-
+  
   window.addEventListener('chat-changed', (event) => {
     if (event.detail === $route.params.chatId) {
       console.log("hehehe")
@@ -239,6 +238,9 @@ onMounted(() => {
     sendMessage(decodeURIComponent(initialMessage));
     // Remove the initialMessage from the query parameters
     $router.replace({ query: {} });
+  }
+  else {
+    reloadChat();
   }
 });
 

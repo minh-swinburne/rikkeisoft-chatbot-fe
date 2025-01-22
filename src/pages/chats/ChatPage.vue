@@ -59,12 +59,6 @@
           </q-item-section>
         </q-item>
       </q-list>
-      <q-space />
-      <q-item>
-        <q-btn color="negative" class="full-width" @click="logout">
-          Logout
-        </q-btn>
-      </q-item>
     </q-drawer>
 
     <q-page-container>
@@ -178,11 +172,6 @@ async function fetchChats() {
       icon: 'error',
     });
   }
-}
-
-function logout() {
-  authStore.logout();
-  $router.push('/login');
 }
 
 function toggleLeftDrawer() {

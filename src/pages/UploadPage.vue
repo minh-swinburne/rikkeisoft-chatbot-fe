@@ -6,156 +6,159 @@
       </q-toolbar>
     </q-header>
 
-    <!-- Main Content -->
-    <q-page class="bg-light q-pa-md min-h-screen">
-      <q-container class="form-container">
-        <q-row justify="center">
-          <q-col :cols="12" :md="8" :lg="6" :xl="5" :xxl="4">
-            <q-card flat bordered class="q-pa-md">
-              <!-- Form Section -->
-              <q-form v-if="authStore.isAdmin"
-                      ref="uploadForm"
-                      @submit.prevent="submit">
-                <!-- Tabs for File or Weblink Upload -->
-                <q-tabs v-model="activeTab" class="q-mb-md" dense>
-                  <q-tab name="file" label="File Upload" />
-                  <q-tab name="link" label="Web Link Upload" />
-                </q-tabs>
+    <q-page-container>
 
-                <q-separator />
-
-                <!-- File / Weblink Input Section -->
-                <q-file
-                  v-if="activeTab === 'file'"
-                  v-model="file"
-                  name="file"
-                  label="Choose File"
-                  accept=".pdf, .doc, .docx, .xls, .xlsx"
-                  class="q-mb-md"
-                  filled
-                  outlined
-                  required
-                  @input="handleFileUpload"
-                  :rules="[val => !!val || 'Field is required']"
-                >
-                  <template v-slot:append>
-                    <q-icon name="attach_file" />
-                  </template>
-
-                </q-file>
-
-                <q-input
-                  v-else
-                  v-model="link"
-                  name="link"
-                  label="Enter Weblink"
-                  placeholder="https://example.com"
-                  class="q-mb-md"
-                  filled
-                  required
-                  :rules="[val => !!val || 'Field is required']"
-                />
-
-                <!-- Shared Fields Section -->
-                <q-input
-                  v-model="documentTitle"
-                  name="title"
-                  label="Document Title"
-                  class="q-mb-md"
-                  filled
-                  required
-                  :rules="[val => !!val || 'Field is required']"
-                />
-
-                <q-input
-                  v-model="description"
-                  name="description"
-                  label="Description"
-                  type="textarea"
-                  class="q-mb-md"
-                  filled
-                  required
-                />
-
-                <q-select
-                  v-model="selectedCategories"
-                  :options="categories"
-                  name="categories"
-                  label="Categories"
-                  class="q-mb-md"
-                  type="checkbox"
-                  multiple
-                  filled
-                  required
-                  :rules="[val => !!val || 'Field is required']"
-                />
-
-                <q-input v-model="createdDate" name="createdDate" label="Day Created" type="date" class="q-mb-md" filled />
-
-                <q-input v-model="creator" name="creator" label="Creator (Email)" class="q-mb-md" filled required :rules="[val => !!val || 'Field is required']"/>
-
-                <!-- Access Control Section -->
-                <q-radio
-                  v-model="restricted"
-                  name="restricted"
-                  label="Everyone"
-                  val="all"
-                  class="q-mb-md"
-                  inline
-                />
-                <q-radio
-                  v-model="restricted"
-                  name="restricted"
-                  label="Admin Only"
-                  val="admin"
-                  class="q-mb-md"
-                  inline
-                />
-
-                <!-- Submit Button -->
-                <q-btn label="Upload" color="primary" type="submit" class="full-width" />
-              </q-form>
-
-              <!-- Access Denied Message -->
-              <q-banner v-else class="q-pa-md">
-                <q-item-label class="text-center text-danger" style="font-weight: 600">
-                  Access Denied
-                </q-item-label>
-                <q-item-label class="text-center text-grey-7">
-                  You need to be logged in as an admin to upload documents.
-                </q-item-label>
-
-                <!-- Login Button using RouterLink -->
-                <RouterLink :to="{ path: '/login', query: { redirect: $route.fullPath } }">
-                  <q-btn label="Login" color="secondary" class="full-width" />
-                </RouterLink>
-
-                <!-- Logout Button (if the user is already logged in) -->
-                <q-btn
-                  v-if="authStore.user"
-                  label="Logout"
-                  color="negative"
-                  @click="logout"
-                  class="full-width q-mt-md"
-                />
-              </q-banner>
-            </q-card>
-          </q-col>
-        </q-row>
-      </q-container>
-    </q-page>
+      <q-page class="bg-light q-pa-md min-h-screen">
+        <q-container class="form-container">
+          <q-row justify="center">
+            <q-col :cols="12" :md="8" :lg="6" :xl="5" :xxl="4">
+              <q-card flat bordered class="q-pa-md">
+                <!-- Form Section -->
+                <q-form v-if="authStore.isAdmin"
+                        ref="uploadForm"
+                        @submit.prevent="submit">
+                  <!-- Tabs for File or Weblink Upload -->
+                  <q-tabs v-model="activeTab" class="q-mb-md" dense>
+                    <q-tab name="file" label="File Upload" />
+                    <q-tab name="link" label="Web Link Upload" />
+                  </q-tabs>
+  
+                  <q-separator />
+  
+                  <!-- File / Weblink Input Section -->
+                  <q-file
+                    v-if="activeTab === 'file'"
+                    v-model="file"
+                    name="file"
+                    label="Choose File"
+                    accept=".pdf, .doc, .docx, .xls, .xlsx"
+                    class="q-mb-md"
+                    filled
+                    outlined
+                    required
+                    @input="handleFileUpload"
+                    :rules="[val => !!val || 'Field is required']"
+                  >
+                    <template v-slot:append>
+                      <q-icon name="attach_file" />
+                    </template>
+  
+                  </q-file>
+  
+                  <q-input
+                    v-else
+                    v-model="link"
+                    name="link"
+                    label="Enter Weblink"
+                    placeholder="https://example.com"
+                    class="q-mb-md"
+                    filled
+                    required
+                    :rules="[val => !!val || 'Field is required']"
+                  />
+  
+                  <!-- Shared Fields Section -->
+                  <q-input
+                    v-model="documentTitle"
+                    name="title"
+                    label="Document Title"
+                    class="q-mb-md"
+                    filled
+                    required
+                    :rules="[val => !!val || 'Field is required']"
+                  />
+  
+                  <q-input
+                    v-model="description"
+                    name="description"
+                    label="Description"
+                    type="textarea"
+                    class="q-mb-md"
+                    filled
+                    required
+                  />
+  
+                  <q-select
+                    v-model="selectedCategories"
+                    :options="categories"
+                    name="categories"
+                    label="Categories"
+                    class="q-mb-md"
+                    type="checkbox"
+                    multiple
+                    filled
+                    required
+                    :rules="[val => !!val || 'Field is required']"
+                  />
+  
+                  <q-input v-model="createdDate" name="createdDate" label="Day Created" type="date" class="q-mb-md" filled />
+  
+                  <q-input v-model="creator" name="creator" label="Creator (Email)" class="q-mb-md" filled required :rules="[val => !!val || 'Field is required']"/>
+  
+                  <!-- Access Control Section -->
+                  <q-radio
+                    v-model="restricted"
+                    name="restricted"
+                    label="Everyone"
+                    val="all"
+                    class="q-mb-md"
+                    inline
+                  />
+                  <q-radio
+                    v-model="restricted"
+                    name="restricted"
+                    label="Admin Only"
+                    val="admin"
+                    class="q-mb-md"
+                    inline
+                  />
+  
+                  <!-- Submit Button -->
+                  <q-btn label="Upload" color="primary" type="submit" class="full-width" />
+                </q-form>
+  
+                <!-- Access Denied Message -->
+                <q-banner v-else class="q-pa-md">
+                  <q-item-label class="text-center text-danger" style="font-weight: 600">
+                    Access Denied
+                  </q-item-label>
+                  <q-item-label class="text-center text-grey-7">
+                    You need to be logged in as an admin to upload documents.
+                  </q-item-label>
+  
+                  <!-- Login Button using RouterLink -->
+                  <RouterLink :to="{ path: '/login', query: { redirect: $route.fullPath } }">
+                    <q-btn label="Login" color="secondary" class="full-width" />
+                  </RouterLink>
+  
+                  <!-- Logout Button (if the user is already logged in) -->
+                  <q-btn
+                    v-if="authStore.user"
+                    label="Logout"
+                    color="negative"
+                    @click="logout"
+                    class="full-width q-mt-md"
+                  />
+                </q-banner>
+              </q-card>
+            </q-col>
+          </q-row>
+        </q-container>
+      </q-page>
+    </q-page-container>
   </q-layout>
 </template>
 
 <script setup>
 import NavBar from "@/components/NavBar.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useAuthStore } from "@/plugins/stores/auth";
 import { useRouter, RouterLink } from "vue-router";
 import { useQuasar } from "quasar";
 import APIClient from '@/api.js'
 
-const $quasar = useQuasar();
+
+const $q = useQuasar();
 const $router = useRouter();
 const authStore = useAuthStore();
 // const formRef = useTemplateRef("uploadForm"); // Reference to the form element
@@ -228,7 +231,7 @@ function submit() {
       APIClient.uploadDocs(formData)
         .then((response) => {
           console.log("Upload success:", response.data);
-          $quasar.notify({
+          $q.notify({
             type: "positive",
             message: "Document uploaded successfully!",
           });
@@ -238,22 +241,25 @@ function submit() {
           if (error.response) {
             console.error("Error details:", error.response.data);  // Log error details from server response
           }
-          $quasar.notify({
+          $q.notify({
             type: "negative",
             message: "An error occurred while uploading the document.",
           });
         });
     } else {
-      $quasar.notify({
+      $q.notify({
         type: "negative",
         message: "Please fill in all required fields.",
       });
     }
   });
 
-  console.log($quasar.notify);
+  console.log($q.notify);
 }
 
+onMounted(() => {
+  $q.dark.set(true);
+});
 </script>
 
 <style scoped>
@@ -266,7 +272,7 @@ function submit() {
 }
 
 q-row {
-width: 60%;
+width: 70%;
 }
 
 

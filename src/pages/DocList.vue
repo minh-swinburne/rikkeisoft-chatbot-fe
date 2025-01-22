@@ -2,14 +2,6 @@
   <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
     <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
       <q-toolbar>
-        <q-btn
-          :icon="$q.dark.isActive ? 'menu' : 'menu'"
-          aria-label="Menu"
-          flat
-          dense
-          round
-          @click="toggleLeftDrawer"
-        />
         <nav-bar />
       </q-toolbar>
     </q-header>

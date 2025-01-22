@@ -3,7 +3,7 @@
     <div class="text-center">
       <h1 class="text-h3 q-mb-md" :class="{ 'text-white': $q.dark.isActive }">Welcome to Chatbot</h1>
       <p class="text-subtitle1" :class="{ 'text-grey-5': $q.dark.isActive }">Enter a message to start a new chat</p>
-      <q-form @submit="createNewChat" class="q-mt-lg" style="width: 100%; max-width: 400px;">
+      <q-form @submit="createNewChat" class="q-pa-md" style="width: 100%; min-width: 800px;" >
         <q-input
           v-model="userInput"
           outlined
@@ -12,9 +12,8 @@
           type="textarea"
           placeholder="Type your message..."
           :rows="1"
-          :max-rows="5"
           @keydown="handleKeydown"
-          class="q-mx-md"
+          class="q-pa-md input-autogrow"
           :dark="$q.dark.isActive"
         >
           <template v-slot:append>

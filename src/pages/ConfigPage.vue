@@ -1,104 +1,106 @@
 <template>
-  <q-header elevated class="bg-primary text-white">
-    <q-toolbar>
-      <nav-bar />
-    </q-toolbar>
-  </q-header>
+  <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
+    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
+      <q-toolbar>
+        <nav-bar />
+      </q-toolbar>
+    </q-header>
 
-  <div class="main-container">
-    <div class="tabs">
-      <button
-        v-for="(tab, key, index) in tabs"
-        :key="index"
-        class="btn btn-primary"
-        :class="{ active: activeTab === key }"
-        @click="changeTab(key)"
-      >
-        {{ tab }}
-      </button>
-    </div>
-
-    <div class="tab-content">
-      <div>
-        <h2>{{ tabs[activeTab] }}</h2>
-        <form @submit.prevent="handleSubmit(activeTab)">
-          <div class="input-container">
-            <label for="instructions">Instructions:</label>
-            <textarea
-              id="instructions"
-              v-model="config.instructions"
-              :readonly="!isEditing"
-              rows="10"
-              placeholder="Enter your instructions here..."
-            ></textarea>
-          </div>
-
-          <div class="input-container" v-if="config.messageTemplate">
-            <label for="message-template">Message Template:</label>
-            <textarea
-              id="message-template"
-              v-model="config.messageTemplate"
-              :readonly="!isEditing"
-              rows="5"
-              placeholder="Enter your message template here..."
-            ></textarea>
-          </div>
-
-          <div class="input-container">
-            <label for="model">Model:</label>
-            <select
-              id="model"
-              v-model="config.model"
-              :disabled="!isEditing"
-            >
-              <option
-                v-for="(option, index) in config.modelOptions"
-                :key="index"
-                :value="option"
-              >
-                {{ option }}
-              </option>
-            </select>
-          </div>
-
-          <div class="input-container">
-            <label for="max-tokens">Max Tokens:</label>
-            <input
-              id="max-tokens"
-              v-model="config.maxTokens"
-              :readonly="!isEditing"
-              type="number"
-              min="1"
-              max="8192"
-              placeholder="Enter max tokens"
-            />
-          </div>
-
-          <div class="input-container">
-            <label for="temperature">Temperature:</label>
-            <input
-              id="temperature"
-              v-model="config.temperature"
-              :readonly="!isEditing"
-              type="number"
-              step="0.1"
-              min="0"
-              max="1"
-              placeholder="Enter temperature (0-1)"
-            />
-          </div>
-          <button
-            type="button"
-            class="btn btn-primary"
-            @click="toggleEdit"
-          >
-            {{ isEditing ? "Apply" : "Edit" }}
-          </button>
-        </form>
+    <div class="main-container">
+      <div class="tabs">
+        <button
+          v-for="(tab, key, index) in tabs"
+          :key="index"
+          class="btn btn-primary"
+          :class="{ active: activeTab === key }"
+          @click="changeTab(key)"
+        >
+          {{ tab }}
+        </button>
       </div>
 
+      <div class="tab-content">
+        <div>
+          <h2>{{ tabs[activeTab] }}</h2>
+          <form @submit.prevent="handleSubmit(activeTab)">
+            <div class="input-container">
+              <label for="instructions">Instructions:</label>
+              <textarea
+                id="instructions"
+                v-model="config.instructions"
+                :readonly="!isEditing"
+                rows="10"
+                placeholder="Enter your instructions here..."
+              ></textarea>
+            </div>
+
+            <div class="input-container" v-if="config.messageTemplate">
+              <label for="message-template">Message Template:</label>
+              <textarea
+                id="message-template"
+                v-model="config.messageTemplate"
+                :readonly="!isEditing"
+                rows="5"
+                placeholder="Enter your message template here..."
+              ></textarea>
+            </div>
+
+            <div class="input-container">
+              <label for="model">Model:</label>
+              <select
+                id="model"
+                v-model="config.model"
+                :disabled="!isEditing"
+              >
+                <option
+                  v-for="(option, index) in config.modelOptions"
+                  :key="index"
+                  :value="option"
+                >
+                  {{ option }}
+                </option>
+              </select>
+            </div>
+
+            <div class="input-container">
+              <label for="max-tokens">Max Tokens:</label>
+              <input
+                id="max-tokens"
+                v-model="config.maxTokens"
+                :readonly="!isEditing"
+                type="number"
+                min="1"
+                max="8192"
+                placeholder="Enter max tokens"
+              />
+            </div>
+
+            <div class="input-container">
+              <label for="temperature">Temperature:</label>
+              <input
+                id="temperature"
+                v-model="config.temperature"
+                :readonly="!isEditing"
+                type="number"
+                step="0.1"
+                min="0"
+                max="1"
+                placeholder="Enter temperature (0-1)"
+              />
+            </div>
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click="toggleEdit"
+            >
+              {{ isEditing ? "Apply" : "Edit" }}
+            </button>
+          </form>
+        </div>
+
+      </div>
     </div>
-  </div>
+  </q-layout>
 </template>
 
 <script setup>

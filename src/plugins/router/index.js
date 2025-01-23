@@ -62,6 +62,9 @@ async function checkTokenValidity() {
   }
 
   try {
+    if (!apiClient.client.getToken()) {
+      apiClient.client.setToken(localStorage.getItem("access_token"));
+    }
     const response = await apiClient.auth.validateToken();
     return response.data.valid;
   } catch (error) {

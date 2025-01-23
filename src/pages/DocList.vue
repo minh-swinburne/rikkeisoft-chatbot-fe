@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
-    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
+    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-secondary'">
       <q-toolbar>
         <nav-bar />
       </q-toolbar>
@@ -18,7 +18,7 @@
               </q-input>
             </div>
             <div class="col-auto">
-              <q-btn-dropdown color="primary" label="Filter" icon="filter_list">
+              <q-btn-dropdown color="secondary" label="Filter" icon="filter_list">
                 <q-card>
                   <q-card-section>
                     <div class="text-h6">Filter by Categories</div>
@@ -32,8 +32,8 @@
                     />
                   </q-card-section>
                   <q-card-actions align="right">
-                    <q-btn flat label="Clear" color="primary" @click="clearFilters" />
-                    <q-btn flat label="Apply" color="primary" v-close-popup />
+                    <q-btn flat label="Clear" color="secondary" @click="clearFilters" />
+                    <q-btn flat label="Apply" color="secondary" v-close-popup />
                   </q-card-actions>
                 </q-card>
               </q-btn-dropdown>
@@ -68,8 +68,8 @@
               </q-item-section>
               <q-item-section side>
                 <div class="row q-gutter-sm">
-                  <q-btn color="primary" icon="visibility" @click="previewDocument(document)" label="Preview" />
-                  <q-btn color="secondary" icon="edit" @click="editDocument(document)" label="Edit" />
+                  <q-btn color="secondary" icon="visibility" @click="previewDocument(document)" label="Preview" />
+                  <q-btn color="warning" icon="edit" @click="editDocument(document)" label="Edit" />
                   <q-btn color="positive" icon="download" @click="downloadDocument(document)" label="Download" />
                   <q-btn color="negative" icon="delete" @click="deleteDocument(document)" label="Delete" />
                 </div>
@@ -77,7 +77,7 @@
             </q-item>
           </q-list>
 
-          <div class="row justify-center q-mt-md">
+          <div class="row justify-center q-mt-md ">
             <q-pagination
               v-model="currentPage"
               :max="totalPages"
@@ -98,7 +98,7 @@
           <iframe :src="`http://127.0.0.1:8000/api/v1/docs/${currentDocument?.id}/preview`" style="width: 70%; height: 600px;"  />
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="Close" color="primary" v-close-popup />
+          <q-btn flat label="Close" color="secondary" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -138,11 +138,11 @@
                 { label: 'Everyone', value: false },
                 { label: 'Admin Only', value: true }
               ]"
-              color="primary"
+              color="secondary"
             />
             <q-card-actions align="right">
-              <q-btn flat label="Cancel" color="primary" v-close-popup />
-              <q-btn flat label="Save Changes" type="submit" color="primary" />
+              <q-btn flat label="Cancel" color="secondary" v-close-popup />
+              <q-btn flat label="Save Changes" type="submit" color="secondary" />
             </q-card-actions>
           </q-form>
         </q-card-section>

@@ -3,6 +3,9 @@ import { useAuthStore } from "@/plugins/stores/auth";
 import { apiClient } from "@/plugins/api";
 
 const routes = [
+  {
+    path: "/home", component: () => import("@/pages/HomePage.vue"),
+  },
   { path: "/login", component: () => import("@/pages/auth/LoginPage.vue"), meta: { requiresAuth: false } },
   {
     path: "/register",

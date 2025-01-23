@@ -7,11 +7,7 @@
     </q-header>
 
     <q-page-container>
-
-      <q-page class="bg-light q-pa-md min-h-screen">
-        <q-container class="form-container">
-          <q-row justify="center">
-            <q-col :cols="12" :md="8" :lg="6" :xl="5" :xxl="4">
+      <q-page padding class="max-width-70 q-pa-md">
               <q-card flat bordered class="q-pa-md">
                 <!-- Form Section -->
                 <q-form v-if="authStore.isAdmin"
@@ -141,9 +137,6 @@
                   />
                 </q-banner>
               </q-card>
-            </q-col>
-          </q-row>
-        </q-container>
       </q-page>
     </q-page-container>
   </q-layout>
@@ -268,34 +261,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Align text to the left for field-container */
-.form-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 64px); /* Adjust for header height */
-}
-
-q-row {
-width: 70%;
-}
-
-
-.q-col {
-  max-width: 70%; /* Set your max width */
-  margin: 0 auto;
-}
-
-/* Custom styles for form fields */
-.q-input,
-.q-select,
-.q-radio {
-  width: 100%;
-}
-
-.q-banner {
-  background-color: var(--q-banner-bg-color, #f7f7f7);
-  padding: 16px;
-  border-radius: 8px;
+.max-width-70 {
+  max-width: 70%;
+  margin: 0 auto; /* Optional: centers the list */
 }
 </style>

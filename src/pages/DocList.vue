@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
-    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-secondary'">
+    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
       <q-toolbar>
         <nav-bar />
       </q-toolbar>
@@ -50,7 +50,7 @@
                   <q-chip
                     v-for="category, index in document.categories"
                     :key="index"
-                    color="grey-9"
+                    :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
                     dense
                   >
                     {{ category }}
@@ -123,7 +123,7 @@
                 v-if="editFormData.categories"
                 removable
                 dense
-                color="grey-9"
+                :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
                 @remove="scope.removeAtIndex(scope.index)"
                 :tabindex="scope.tabindex"
               >

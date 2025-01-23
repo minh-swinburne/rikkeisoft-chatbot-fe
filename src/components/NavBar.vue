@@ -18,21 +18,19 @@
 
     <q-space />
 
-    <q-btn v-if="authStore.user" flat dense>
-      <q-btn-dropdown flat dense>
-        <template #label>
-          Welcome, {{ authStore.user?.firstname }}
-        </template>
-        <q-list>
-          <q-item clickable v-ripple @click="navigateTo('/profile')">
-            <q-item-section>Profile</q-item-section>
-          </q-item>
-          <q-item clickable v-ripple @click="logout">
-            <q-item-section>Logout</q-item-section>
-          </q-item>
-        </q-list>
-      </q-btn-dropdown>
-    </q-btn>
+    <q-btn-dropdown v-if="authStore.user" flat dense>
+      <template #label>
+        Welcome, {{ authStore.user?.firstname }}
+      </template>
+      <q-list>
+        <q-item clickable v-ripple @click="navigateTo('/profile')">
+          <q-item-section>Profile</q-item-section>
+        </q-item>
+        <q-item clickable v-ripple @click="logout">
+          <q-item-section>Logout</q-item-section>
+        </q-item>
+      </q-list>
+    </q-btn-dropdown>
     <q-btn v-else color="secondary" to="/login" label="Login" />
 
     <q-btn flat round :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'" @click="toggleDarkMode" />

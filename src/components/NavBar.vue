@@ -18,8 +18,20 @@
 
     <q-space />
 
-    <q-btn v-if="authStore.user" flat>
-      Welcome, {{ authStore.user?.firstname }}
+    <q-btn v-if="authStore.user" flat dense>
+      <q-btn-dropdown flat dense>
+        <template #label>
+          Welcome, {{ authStore.user?.firstname }}
+        </template>
+        <q-list>
+          <q-item clickable v-ripple @click="navigateTo('/profile')">
+            <q-item-section>Profile</q-item-section>
+          </q-item>
+          <q-item clickable v-ripple @click="logout">
+            <q-item-section>Logout</q-item-section>
+          </q-item>
+        </q-list>
+      </q-btn-dropdown>
     </q-btn>
     <q-btn v-else color="secondary" to="/login" label="Login" />
 
@@ -31,7 +43,7 @@
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/plugins/stores/auth';
 
 const $route = useRoute();
 const router = useRouter();
@@ -43,7 +55,6 @@ const tab = ref($route.path);
 const navItems = [
   { name: 'Chat', path: '/chat' },
   { name: 'Documents', path: '/docs' },
-  { name: 'Profile', path: '/profile' },
   { name: 'Upload', path: '/upload', requiresAdmin: true },
   { name: 'Config', path: '/config', requiresAdmin: true },
 ];
@@ -56,6 +67,11 @@ const filteredNavItems = computed(() => {
 
 function navigateTo(path) {
   router.push(path);
+}
+
+function logout() {
+  authStore.logout();
+  router.push('/login');
 }
 
 function toggleDarkMode() {

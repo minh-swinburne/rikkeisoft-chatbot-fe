@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "@/App.vue";
-import router from "@/router";
+import router from "@/plugins/router";
 import vue3GoogleLogin from "vue3-google-login";
 
 // Import Quasar CSS and additional styles

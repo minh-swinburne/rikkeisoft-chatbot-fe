@@ -50,34 +50,24 @@
                   ]"
                 />
               </div>
-              <!-- <div class="col-auto">
-                <q-btn label="Send Code" color="primary" @click="sendVerificationCode" :disable="codeSent" />
-              </div> -->
             </div>
-            <!-- <div v-if="codeSent" class="row q-col-gutter-sm items-center">
-              <div class="col">
-                <q-input
-                  v-model="verificationCode"
-                  label="Verification Code"
-                  filled
-                  required
-                  :rules="[val => val && val.length > 0 || 'Verification code is required']"
-                />
-              </div>
-              <div class="col-auto">
-                <q-btn label="Verify" color="primary" @click="verifyCode" />
-              </div>
-            </div> -->
             <div class="row q-col-gutter-sm">
               <div class="col-6">
                 <q-input
                   v-model="password"
                   label="Password"
-                  type="password"
+                  :type="isPwd ? 'password' : 'text'"
                   filled
                   required
-                  :rules="[val => val && val.length > 0 || 'Password is required']"
-                />
+                  :rules="[val => val && val.length > 0 || 'Password is required']">
+                  <template v-slot:append>
+                    <q-icon
+                      :name="isPwd ? 'visibility_off' : 'visibility'"
+                      class="cursor-pointer"
+                      @click="isPwd = !isPwd"
+                    />
+                  </template>
+                </q-input>
               </div>
               <div class="col-6">
                 <q-input
@@ -141,12 +131,12 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { useQuasar } from 'quasar';
-import { useAuthStore } from "@/stores/auth";
-import { loginRequest, msalInstance } from "@/config/msalConfig";
+import { useAuthStore } from "@/plugins/stores/auth";
+import { loginRequest, msalInstance } from "@/plugins/config/msalConfig";
 import { googleTokenLogin } from "vue3-google-login";
 
+import APIClient from '@/api.js'
 const $router = useRouter();
 
 const $q = useQuasar();
@@ -157,40 +147,10 @@ const lastname = ref("");
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
-// const verificationCode = ref("");
-// const codeSent = ref(false);
+const isPwd = ref(true);
 
 const authStore = useAuthStore();
 
-// async function sendVerificationCode() {
-//   try {
-//     // Implement your logic to send verification code
-//     // For example:
-//     // await axios.post("http://127.0.0.1:8000/api/v1/auth/send-verification", { email: email.value });
-//     codeSent.value = true;
-//     alert("Verification code sent to your email!");
-//   } catch (error) {
-//     console.error("Failed to send verification code", error);
-//     alert("Failed to send verification code. Please try again.");
-//   }
-// }
-
-// async function verifyCode() {
-//   try {
-//     // Implement your logic to verify the code
-//     // For example:
-//     // const response = await axios.post("http://127.0.0.1:8000/api/v1/auth/verify-code", { email: email.value, code: verificationCode.value });
-//     // if (response.data.verified) {
-//     //   alert("Email verified successfully!");
-//     // } else {
-//     //   alert("Invalid verification code. Please try again.");
-//     // }
-//     alert("Code verification logic to be implemented");
-//   } catch (error) {
-//     console.error("Failed to verify code", error);
-//     alert("An error occurred while verifying the code. Please try again.");
-//   }
-// }
 
 async function register() {
   if (password.value !== confirmPassword.value) {
@@ -199,19 +159,14 @@ async function register() {
   }
 
   try {
-    const response = await axios.post(
-      "http://127.0.0.1:8000/api/v1/auth/register",
-      {
-        username: username.value,
-        firstname: firstname.value,
-        lastname: lastname.value,
-        email: email.value,
-        password: password.value
-      },
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const userDetails = {
+      username: username.value,
+      firstname: firstname.value,
+      lastname: lastname.value,
+      email: email.value,
+      password: password.value
+    }
+    const response = await APIClient.registerUser(userDetails);
 
     if (response.status === 201) {
       alert("Registration successful!");
@@ -230,11 +185,7 @@ async function handleGoogleLogin() {
   try {
     const googleUser = await googleTokenLogin();
 
-    const response = await axios.post(
-      "http://127.0.0.1:8000/api/v1/auth/google",
-      { access_token: googleUser.access_token },
-      { headers: { "Content-Type": "application/json" } }
-    );
+    const response = await APIClient.authenticateGoogle(googleUser.access_token);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);
@@ -251,19 +202,7 @@ async function handleMicrosoftLogin() {
     await msalInstance.initialize();
     const loginResponse = await msalInstance.loginPopup(loginRequest);
 
-    const response = await axios.post(
-      "http://127.0.0.1:8000/api/v1/auth/microsoft",
-      {
-        access_token: loginResponse.accessToken,
-        id_token: loginResponse.idToken,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${loginResponse.accessToken}`,
-        },
-      }
-    );
+    const response = await APIClient.authenticateMicrosoft(loginResponse);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);

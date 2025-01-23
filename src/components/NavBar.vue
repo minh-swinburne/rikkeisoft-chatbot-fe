@@ -50,6 +50,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const $q = useQuasar();
 
+const isDark = ref(false)
 const tab = ref($route.path);
 
 const navItems = [
@@ -75,6 +76,8 @@ function logout() {
 }
 
 function toggleDarkMode() {
-  $q.dark.toggle();
+  isDark.value = !isDark.value
+  $q.dark.set(isDark.value)
+  localStorage.setItem('darkMode', isDark.value)
 }
 </script>

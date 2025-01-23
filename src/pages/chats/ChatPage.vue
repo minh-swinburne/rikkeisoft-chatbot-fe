@@ -89,6 +89,8 @@ const $q = useQuasar();
 const $router = useRouter();
 const layoutStore = useLayoutStore();
 
+const isDark = ref(false)
+
 const leftDrawerOpen = computed({
   get: () => layoutStore.leftDrawerOpen,
   set: (value) => layoutStore.setLeftDrawerOpen(value)
@@ -183,6 +185,11 @@ function toggleLeftDrawer() {
 
 onMounted(() => {
   fetchChats();
-  $q.dark.set(true); // Set dark mode as default
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode !== null) {
+    isDark.value = savedDarkMode === 'true'
+    $q.dark.set(isDark.value)
+    console.log($q.dark)
+  }
 });
 </script>

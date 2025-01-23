@@ -163,6 +163,8 @@ const $router = useRouter();
 const authStore = useAuthStore();
 // const formRef = useTemplateRef("uploadForm"); // Reference to the form element
 
+const isDark = ref(false)
+
 const uploadForm = ref(null); // Reference to the form element
 const activeTab = ref("file"); // Default tab is "File Upload"
 const file = ref(null);
@@ -257,7 +259,11 @@ function submit() {
 }
 
 onMounted(() => {
-  $q.dark.set(true);
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode !== null) {
+    isDark.value = savedDarkMode === 'true'
+    $q.dark.set(isDark.value)
+  }
 });
 </script>
 

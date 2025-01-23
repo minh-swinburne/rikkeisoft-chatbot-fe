@@ -3,6 +3,9 @@ import { createRouter, createWebHistory } from "vue-router";
 import APIClient from '@/api.js'
 
 const routes = [
+  {
+    path: "/home", component: () => import("@/pages/HomePage.vue")
+  },
   { path: "/login", component: () => import("@/pages/LoginPage.vue"), meta: { requiresAuth: false } },
   {
     path: "/register",

@@ -7,9 +7,14 @@ import '@quasar/extras/material-icons/material-icons.css';
 import { Dialog, Notify } from 'quasar';
 
 export default {
-  config: {},
   plugins: {
     Dialog, // Register Dialog plugin
     Notify, // Register Notify plugin
+  },
+  config: {
+    notify: {
+      position: 'top-right',
+      timeout: 2500,
+    }
   },
 };

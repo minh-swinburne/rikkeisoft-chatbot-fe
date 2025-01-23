@@ -1,8 +1,8 @@
 <template>
   <q-toolbar>
-    <q-toolbar-title>
-      RikkeiGPT
-    </q-toolbar-title>
+    <app-logo size="30px" />
+
+    <q-toolbar-title>RikkeiGPT</q-toolbar-title>
 
     <q-space />
 
@@ -12,25 +12,38 @@
         :key="item.path"
         :name="item.path"
         :label="item.name"
-        @click="navigateTo(item.path)"
+        @click="$router.push(item.path)"
       />
     </q-tabs>
 
     <q-space />
 
-    <q-btn flat round :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'" @click="toggleDarkMode" />
+    <q-btn
+      flat
+      round
+      :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
+      @click="toggleDarkMode"
+    />
 
-    <q-btn-dropdown v-if="authStore.user" flat dense>
-      <template #label>
-        Welcome, {{ authStore.user?.firstname }}
-      </template>
+    <q-btn-dropdown v-if="authStore.user" flat no-caps>
+      <template #label> Welcome, {{ authStore.user?.firstname }} </template>
       <q-list>
-        <q-item clickable v-ripple @click="navigateTo('/profile')">
+        <q-item clickable v-ripple @click="$router.push('/profile')">
+          <q-item-section avatar>
+            <q-icon name="person" />
+          </q-item-section>
+
           <q-item-section>Profile</q-item-section>
         </q-item>
         <q-separator />
         <q-item clickable v-ripple @click="logout">
-          <q-item-section>Logout</q-item-section>
+          <q-item-section avatar>
+            <q-icon :color="$q.dark.isActive ? '' : 'negative'" name="logout" />
+          </q-item-section>
+
+          <q-item-section :class="{ 'text-negative': !$q.dark.isActive }"
+            >Logout</q-item-section
+          >
         </q-item>
       </q-list>
     </q-btn-dropdown>
@@ -39,24 +52,25 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useQuasar } from 'quasar';
-import { useAuthStore } from '@/plugins/stores/auth';
+import { useAuthStore } from "@/plugins/stores/auth";
+import { useQuasar } from "quasar";
+import { computed, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import AppLogo from "./AppLogo.vue";
 
-const $route = useRoute();
-const router = useRouter();
-const authStore = useAuthStore();
 const $q = useQuasar();
+const $route = useRoute();
+const $router = useRouter();
+const authStore = useAuthStore();
 
-const isDark = ref(false)
+const isDark = ref(localStorage.getItem("darkMode") === "true");
 const tab = ref($route.path);
 
 const navItems = [
-  { name: 'Chat', path: '/chat' },
-  { name: 'Documents', path: '/docs' },
-  { name: 'Upload', path: '/upload', requiresAdmin: true },
-  { name: 'Config', path: '/config', requiresAdmin: true },
+  { name: "Chat", path: "/chat" },
+  { name: "Documents", path: "/docs" },
+  { name: "Upload", path: "/upload", requiresAdmin: true },
+  { name: "Config", path: "/config", requiresAdmin: true },
 ];
 
 const filteredNavItems = computed(() => {
@@ -65,18 +79,14 @@ const filteredNavItems = computed(() => {
     : navItems.filter((item) => !item.requiresAdmin);
 });
 
-function navigateTo(path) {
-  router.push(path);
-}
-
 function logout() {
   authStore.logout();
-  router.push('/login');
+  $router.push("/login");
 }
 
 function toggleDarkMode() {
-  isDark.value = !isDark.value
-  $q.dark.set(isDark.value)
-  localStorage.setItem('darkMode', isDark.value)
+  isDark.value = !isDark.value;
+  $q.dark.set(isDark.value);
+  localStorage.setItem("darkMode", isDark.value);
 }
 </script>

@@ -49,6 +49,7 @@
 
           <div class="q-mt-md">
             <q-btn
+              :loading="loading"
               no-caps
               outline
               @click="handleGoogleLogin"
@@ -63,6 +64,7 @@
           </div>
           <div class="q-mt-md">
             <q-btn
+              :loading="loading"
               no-caps
               outline
               @click="handleMicrosoftLogin"
@@ -95,7 +97,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useQuasar } from 'quasar';
+import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { googleTokenLogin } from "vue3-google-login";
 import { apiClient } from "@/plugins/api";
@@ -114,6 +116,7 @@ const loading = ref(false);
 async function handleNativeLogin() {
   try {
     loading.value = true;
+
     const params = new URLSearchParams();
     params.append("username", username.value);
     params.append("password", password.value);
@@ -121,25 +124,40 @@ async function handleNativeLogin() {
     const response = await apiClient.auth.authenticateNative(params);
     const { access_token, refresh_token } = response.data;
 
-    loading.value = false;
     authStore.login(access_token, refresh_token);
+    loading.value = false;
 
+    $q.notify({
+      color: "positive",
+      icon: "check_circle",
+      message: "Login successful!",
+    });
     $router.push("/chat");
   } catch (error) {
+    loading.value = false;
     console.error("Login failed", error);
   }
 }
 
 async function handleGoogleLogin() {
   try {
+    loading.value = true;
+
     const googleUser = await googleTokenLogin();
     const response = await apiClient.auth.authenticateGoogle(googleUser.access_token);
-
     const { access_token, refresh_token } = response.data;
-    authStore.login(access_token, refresh_token);
 
+    authStore.login(access_token, refresh_token);
+    loading.value = false;
+
+    $q.notify({
+      color: "positive",
+      icon: "check_circle",
+      message: response.status === 200 ? "Login successful!" : "Registration successful!",
+    });
     $router.push("/chat");
   } catch (error) {
+    loading.value = false;
     console.error("Google login failed", error);
     authStore.logout();
   }
@@ -147,15 +165,24 @@ async function handleGoogleLogin() {
 
 async function handleMicrosoftLogin() {
   try {
+    loading.value = true;
     await msalInstance.initialize();
+
     const loginResponse = await msalInstance.loginPopup(loginRequest);
     const response = await apiClient.auth.authenticateMicrosoft(loginResponse.accessToken, loginResponse.idToken);
-
     const { access_token, refresh_token } = response.data;
-    authStore.login(access_token, refresh_token);
 
+    authStore.login(access_token, refresh_token);
+    loading.value = false;
+
+    $q.notify({
+      color: "positive",
+      icon: "check_circle",
+      message: response.status === 200 ? "Login successful!" : "Registration successful!",
+    });
     $router.push("/chat");
   } catch (error) {
+    loading.value = false;
     authStore.logout();
     console.error("Microsoft login failed:", error);
   }

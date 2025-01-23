@@ -20,10 +20,17 @@ export default {
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: Roboto, Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* text-align: center; */
   /* color: #2c3e50; */
+}
+
+.text-dark-red {
+  color: #4d1f1f !important;
+}
+.bg-dark-red {
+  background-color: #4d1f1f !important;
 }
 </style>

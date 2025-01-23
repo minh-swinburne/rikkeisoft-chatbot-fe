@@ -37,7 +37,7 @@
           :key="chat.id"
           :active-class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-4'"
           :style="{ borderRadius: '5px' }"
-          class="q-ma-sm"
+          class="q-ma-sm q-pa-sm"
           clickable
           v-ripple
           @click="$router.push(`/chat/${chat.id}`)"
@@ -76,13 +76,13 @@
 </template>
 
 <script setup>
-import NavBar from '@/components/NavBar.vue';
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { camelize } from '@/utils';
 import { apiClient } from "@/plugins/api";
 import { useLayoutStore } from '@/plugins/stores/layout';
+import NavBar from '@/components/NavBar.vue';
 
 
 const $q = useQuasar();

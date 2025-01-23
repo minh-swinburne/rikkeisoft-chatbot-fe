@@ -9,14 +9,15 @@
     <q-page-container>
       <q-page padding class="max-width-70 q-pa-md">
         <q-card flat bordered class="q-pa-md">
-          <q-tabs
-            v-model="activeTab"
-            dense
-            class="q-mb-md"
-          >
-           <q-tab v-for="(tab, key) in tabs" :key="key" :name="key" :label="tab" />
+          <q-tabs v-model="activeTab" dense class="q-mb-md">
+            <q-tab
+              v-for="(tab, key) in tabs"
+              :key="key"
+              :name="key"
+              :label="tab"
+            />
           </q-tabs>
-          <q-separator/>
+          <q-separator />
           <q-tab-panels v-model="activeTab">
             <q-tab-panel v-for="(tab, key) in tabs" :key="key" :name="key">
               <q-form @submit="handleSubmit(key)">
@@ -32,7 +33,7 @@
                 </div>
                 <q-input
                   v-model="config.instructions"
-                  filled
+                  outlined
                   type="textarea"
                   label="Instructions"
                   :readonly="!isEditing"
@@ -43,26 +44,26 @@
                 <q-input
                   v-if="config.messageTemplate"
                   v-model="config.messageTemplate"
-                  filled
+                  outlined
                   type="textarea"
                   label="Message Template"
                   :readonly="!isEditing"
                   rows="4"
                   class="q-mt-md"
-                  />
+                />
 
                 <q-select
                   v-model="config.model"
                   :options="config.modelOptions"
                   label="Model"
-                  filled
+                  outlined
                   :disable="!isEditing"
                   class="q-mt-md"
-                  />
+                />
 
                 <q-input
                   v-model.number="config.maxTokens"
-                  filled
+                  outlined
                   type="number"
                   label="Max Tokens"
                   :readonly="!isEditing"
@@ -73,7 +74,7 @@
 
                 <q-input
                   v-model.number="config.temperature"
-                  filled
+                  outlined
                   type="number"
                   label="Temperature"
                   :readonly="!isEditing"
@@ -92,27 +93,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import { useQuasar } from 'quasar';
+import NavBar from "@/components/NavBar.vue";
 import { apiClient } from "@/plugins/api";
-import NavBar from '@/components/NavBar.vue';
+import { useQuasar } from "quasar";
+import { onMounted, ref, watch } from "vue";
 
 const $q = useQuasar();
 const isDark = ref(false);
 
 const tabs = {
-  answer_generation: 'Answer Generation',
-  question_suggestion: 'Question Suggestion',
-  name_generation: 'Chat Name Generation',
+  answer_generation: "Answer Generation",
+  question_suggestion: "Question Suggestion",
+  name_generation: "Chat Name Generation",
 };
 
-const activeTab = ref('answer_generation');
+const activeTab = ref("answer_generation");
 const isEditing = ref(false);
 const config = ref({
-  instructions: '',
+  instructions: "",
   messageTemplate: null,
   modelOptions: [],
-  model: '',
+  model: "",
   maxTokens: 1,
   temperature: 0.5,
 });
@@ -120,38 +121,38 @@ const config = ref({
 const loadConfig = async (tab) => {
   try {
     config.value = {
-      instructions: '',
+      instructions: "",
       messageTemplate: null,
       modelOptions: [],
-      model: '',
+      model: "",
       maxTokens: 1,
       temperature: 0.5,
     };
     const response = await apiClient.config.getConfig(tab);
     config.value = {
       instructions: response.data.system_prompt,
-      messageTemplate: response.data.message_template?.join('\n') || null,
+      messageTemplate: response.data.message_template?.join("\n") || null,
       modelOptions: response.data.model_options,
       model: response.data.params.model,
       maxTokens: response.data.params.max_tokens,
       temperature: response.data.params.temperature,
     };
-    console.log('Config loaded:', response.data);
+    console.log("Config loaded:", response.data);
   } catch (error) {
-    console.error('Error fetching config:', error);
+    console.error("Error fetching config:", error);
     $q.notify({
-      color: 'negative',
-      message: 'Failed to load configuration.',
-      icon: 'report_problem'
+      color: "negative",
+      message: "Failed to load configuration.",
+      icon: "report_problem",
     });
   }
 };
 
 onMounted(() => {
   loadConfig(activeTab.value);
-  const savedDarkMode = localStorage.getItem('darkMode');
+  const savedDarkMode = localStorage.getItem("darkMode");
   if (savedDarkMode !== null) {
-    isDark.value = savedDarkMode === 'true';
+    isDark.value = savedDarkMode === "true";
     $q.dark.set(isDark.value);
   }
 });
@@ -170,18 +171,18 @@ const toggleEdit = () => {
 const handleSubmit = async (tab) => {
   try {
     const response = await apiClient.config.updateConfig(tab, config);
-    console.log('Updated config:', response.data);
+    console.log("Updated config:", response.data);
     $q.notify({
-      color: 'positive',
+      color: "positive",
       message: `${tabs[tab]} configuration updated successfully.`,
-      icon: 'check_circle'
+      icon: "check_circle",
     });
   } catch (error) {
-    console.error('Error updating config:', error.response || error);
+    console.error("Error updating config:", error.response || error);
     $q.notify({
-      color: 'negative',
-      message: 'Failed to update configuration.',
-      icon: 'report_problem'
+      color: "negative",
+      message: "Failed to update configuration.",
+      icon: "report_problem",
     });
   }
 };
@@ -191,7 +192,6 @@ const handleSubmit = async (tab) => {
 .instruction-textarea textarea {
   min-height: 200px;
 }
-
 
 .max-width-70 {
   max-width: 70%;
@@ -205,4 +205,3 @@ const handleSubmit = async (tab) => {
   }
 }
 </style>
-

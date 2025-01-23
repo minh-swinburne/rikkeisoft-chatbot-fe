@@ -16,8 +16,10 @@
               autofocus
               required
               :class="{'q-mb-md': !!isInvalidUsername}"
-              :error="!!isInvalidUsername"
-              :error-message="isInvalidUsername"
+              :rules="[
+                val => val && val.length > 0 || 'Username is required',
+                val => val && /^[a-zA-Z][a-zA-Z0-9_]{3,20}$/.test(val) || 'Username must start with a letter and contain only alphanumeric characters or underscores'
+              ]"
             />
             <div class="row q-col-gutter-sm">
               <div class="col-6">
@@ -50,8 +52,10 @@
                   outlined
                   required
                   :class="{'q-mb-md': !!isInvalidEmail}"
-                  :error="!!isInvalidEmail"
-                  :error-message="isInvalidEmail"
+                  :rules="[
+                    val => val && val.length > 0 || 'Email is required',
+                    val => val && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(val) || 'Invalid email address'
+                  ]"
                 />
               </div>
             </div>
@@ -92,15 +96,22 @@
               </div>
             </div>
             <div class="q-mt-md login-btn">
-              <q-btn type="submit" label="Register" color="primary" class="full-width" />
+              <q-btn
+                :loading="loading"
+                type="submit"
+                label="Register"
+                color="primary"
+                class="full-width"
+              />
             </div>
           </q-form>
 
           <q-btn
+            :loading="loading"
             class="q-mt-md login-btn"
-            @click="handleGoogleLogin"
             no-caps
             flat
+            @click="handleGoogleLogin"
           >
             <template v-slot:default>
               <div class="row items-center no-wrap">
@@ -110,10 +121,11 @@
             </template>
           </q-btn>
           <q-btn
+            :loading="loading"
             class="q-mt-md login-btn"
-            @click="handleMicrosoftLogin"
             no-caps
             flat
+            @click="handleMicrosoftLogin"
           >
             <template v-slot:default>
               <div class="row items-center no-wrap">
@@ -147,8 +159,8 @@ import { useAuthStore } from "@/plugins/stores/auth";
 import { loginRequest, msalInstance } from "@/plugins/config/msalConfig";
 import { apiClient } from "@/plugins/api";
 
-const $router = useRouter();
 const $q = useQuasar();
+const $router = useRouter();
 const authStore = useAuthStore();
 
 const username = ref("");
@@ -158,6 +170,7 @@ const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 const isPwd = ref(true);
+const loading = ref(false);
 
 const isInvalidUsername = computed(() => {
   if (username.value.length === 0) return "Username is required";
@@ -170,12 +183,9 @@ const isInvalidEmail = computed(() => {
 
 
 async function register() {
-  if (password.value !== confirmPassword.value) {
-    alert("Passwords do not match!");
-    return;
-  }
-
   try {
+    loading.value = true;
+
     const userDetails = {
       username: username.value,
       firstname: firstname.value,
@@ -183,51 +193,91 @@ async function register() {
       email: email.value,
       password: password.value
     }
-    const response = await apiClient.auth.registerUser(userDetails);
 
-    if (response.status === 201) {
-      alert("Registration successful!");
-      $router.push("/login");
-    } else {
-      alert("Failed to register. Please try again.");
-    }
+    const response = await apiClient.auth.registerUser(userDetails);
+    const { access_token, refresh_token } = response.data;
+
+    authStore.login(access_token, refresh_token);
+    loading.value = false;
+
+    $q.notify({
+      color: "positive",
+      icon: "check_circle",
+      message: "Registration successful!",
+    });
+    $router.push("/chat");
   } catch (error) {
+    loading.value = false;
     console.error("Registration failed", error);
-    alert("An error occurred while registering. Please try again.");
+
+    $q.notify({
+      color: "negative",
+      icon: "report_problem",
+      message: "Registration failed",
+    });
   }
 }
 
 
 async function handleGoogleLogin() {
   try {
+    loading.value = true;
+
     const googleUser = await googleTokenLogin();
-
     const response = await apiClient.auth.authenticateGoogle(googleUser.access_token);
-
     const { access_token, refresh_token } = response.data;
-    authStore.login(access_token, refresh_token);
 
+    authStore.login(access_token, refresh_token);
+    loading.value = false;
+
+    $q.notify({
+      color: "positive",
+      icon: "check_circle",
+      message: response.status === 200 ? "Login successful!" : "Registration successful!",
+    });
     $router.push("/chat");
   } catch (error) {
+    loading.value = false;
     console.error("Google login failed", error);
     authStore.logout();
+
+    $q.notify({
+      color: "negative",
+      icon: "report_problem",
+      message: "Registration failed",
+    });
   }
 }
 
 async function handleMicrosoftLogin() {
   try {
+    loading.value = true;
     await msalInstance.initialize();
+
     const loginResponse = await msalInstance.loginPopup(loginRequest);
-
-    const response = await apiClient.auth.authenticateMicrosoft(loginResponse);
-
+    const response = await apiClient.auth.authenticateMicrosoft(loginResponse.accessToken, loginResponse.idToken);
     const { access_token, refresh_token } = response.data;
-    authStore.login(access_token, refresh_token);
 
+    console.log("Microsoft login response:", response);
+    authStore.login(access_token, refresh_token);
+    loading.value = false;
+
+    $q.notify({
+      color: "positive",
+      icon: "check_circle",
+      message: response.status === 200 ? "Login successful!" : "Registration successful!",
+    });
     $router.push("/chat");
   } catch (error) {
+    loading.value = false;
     authStore.logout();
     console.error("Microsoft login failed:", error);
+
+    $q.notify({
+      color: "negative",
+      icon: "report_problem",
+      message: "Registration failed",
+    });
   }
 }
 

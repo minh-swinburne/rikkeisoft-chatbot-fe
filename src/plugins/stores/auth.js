@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { jwtDecode } from "jwt-decode";
 import { googleLogout } from "vue3-google-login";
-import { msalInstance } from "@/plugins/config/msalConfig";
+// import { msalInstance } from "@/plugins/config/msalConfig";
 import { apiClient } from "@/plugins/api";
 
 export const useAuthStore = defineStore("auth", {
@@ -29,17 +29,13 @@ export const useAuthStore = defineStore("auth", {
     },
 
     logout() {
-      if (this.user?.provider === "google") {
-        googleLogout(); // Logout from Google
-      } else if (this.user?.provider === "microsoft") {
-        msalInstance.logoutPopup(); // Logout from Microsoft
-      }
-
       this.user = null; // Clear user information upon logout
       this.accessToken = null;
       this.refreshToken = null;
 
+      googleLogout(); // Logout from Google
       apiClient.client.clearToken();
+
       // Clear the JWT token from localStorage
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");

@@ -7,45 +7,47 @@
     </q-header>
 
     <q-page-container>
-      <q-page padding>
-        <div class="document-list q-pa-md">
-          <div class="row q-col-gutter-md q-mb-md items-center">
-            <div class="col-grow">
-              <q-input v-model="searchQuery" label="Search" dense>
-                <template v-slot:append>
-                  <q-icon name="search" />
-                </template>
-              </q-input>
-            </div>
-            <div class="col-auto">
-              <q-btn-dropdown color="secondary" label="Filter" icon="filter_list">
-                <q-card>
-                  <q-card-section>
-                    <div class="text-h6">Filter by Categories</div>
-                    <q-select
-                      v-model="selectedCategories"
-                      :options="availableCategories"
-                      multiple
-                      dense
-                      use-chips
-                      class="q-mt-sm"
-                    />
-                  </q-card-section>
-                  <q-card-actions align="right">
-                    <q-btn flat label="Clear" color="secondary" @click="clearFilters" />
-                    <q-btn flat label="Apply" color="secondary" v-close-popup />
-                  </q-card-actions>
-                </q-card>
-              </q-btn-dropdown>
+      <q-page padding class="row items-center justify-center">
+        <div class="row document-list q-pa-md justify-center" style="max-width: 800px">
+          <div class="col-grow q-mb-md items-center">
+            <div class="row q-col-gutter-lg">
+              <div class="col-grow">
+                <q-input v-model="searchQuery" label="Search" dense>
+                  <template v-slot:append>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-auto">
+                <q-btn-dropdown color="primary" label="Filter" icon="filter_list">
+                  <q-card>
+                    <q-card-section>
+                      <div class="text-h6">Filter by Categories</div>
+                      <q-select
+                        v-model="selectedCategories"
+                        :options="availableCategories"
+                        multiple
+                        dense
+                        use-chips
+                        class="q-mt-sm"
+                      />
+                    </q-card-section>
+                    <q-card-actions align="right">
+                      <q-btn flat label="Clear" @click="clearFilters" />
+                      <q-btn flat label="Apply" v-close-popup />
+                    </q-card-actions>
+                  </q-card>
+                </q-btn-dropdown>
+              </div>
             </div>
           </div>
 
-          <q-list bordered separator class="max-width-70">
-            <q-item v-for="document in paginatedDocuments" :key="document.id" class="q-my-sm">
-              <q-item-section>
+          <q-list bordered separator class="col-grow">
+            <q-item v-for="document in paginatedDocuments" :key="document.id" class="q-my-sm" style="flex-wrap: wrap">
+              <q-item-section class="col-grow q-mt-sm">
                 <q-item-label class="text-h6">{{ document.title }}</q-item-label>
-                <q-item-label caption>{{ document.description }}</q-item-label>
-                <q-item-label caption>
+                <q-item-label caption lines="2">{{ document.description }}</q-item-label>
+                <q-item-label>
                   <strong>Categories:</strong>
                   <q-chip
                     v-for="category, index in document.categories"
@@ -53,21 +55,33 @@
                     :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
                     dense
                   >
-                    {{ category }}
+                    {{ category.name }}
                   </q-chip>
                 </q-item-label>
-                <q-item-label caption>
+                <q-item-label>
                   <strong>Created:</strong> {{ formatDate(document.created_date) }}
                 </q-item-label>
-                <q-item-label caption>
-                  <strong>Creator:</strong> {{ document.creator }}
+                <q-item-label>
+                  <strong>Creator:</strong>
+                  <q-chip
+                    :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+                    clickable
+                    v-ripple
+                    @click="$router.push(`/profile/${document.creator.id}`)"
+                  >
+                    <q-avatar>
+                      <img :src="document.creator.avatar_url || 'https://cdn.quasar.dev/logo-v2/svg/logo-dark.svg'" />
+                    </q-avatar>
+                    {{ document.creator.full_name }}
+                  </q-chip>
                 </q-item-label>
-                <q-item-label caption>
+                <q-item-label>
                   <strong>Access:</strong> {{ document.restricted ? 'Admin Only' : 'Everyone' }}
                 </q-item-label>
               </q-item-section>
-              <q-item-section side>
-                <div class="row q-gutter-sm">
+
+              <q-item-section class="col-grow q-mt-md">
+                <div class="row q-gutter-sm justify-end">
                   <q-btn color="secondary" icon="visibility" @click="previewDocument(document)" label="Preview" />
                   <q-btn color="warning" icon="edit" @click="editDocument(document)" label="Edit" />
                   <q-btn color="positive" icon="download" @click="downloadDocument(document)" label="Download" />
@@ -77,7 +91,7 @@
             </q-item>
           </q-list>
 
-          <div class="row justify-center q-mt-md ">
+          <div class="justify-center q-mt-md ">
             <q-pagination
               v-model="currentPage"
               :max="totalPages"
@@ -153,12 +167,15 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { apiClient } from "@/plugins/api";
 import NavBar from "@/components/NavBar.vue";
 
 
 const $q = useQuasar();
+const $router = useRouter();
+
 const documents = ref([]);
 const showViewer = ref(false);
 const currentDocument = ref(null);
@@ -191,9 +208,6 @@ const fetchDocuments = async () => {
   try {
     const response = await apiClient.docs.listDocs();
     documents.value = response.data;
-    documents.value.forEach(document => {
-      document.categories = JSON.parse(document.categories);
-    });
   } catch (error) {
     console.error('Error fetching documents:', error);
     $q.notify({
@@ -221,10 +235,8 @@ const formatDate = (dateString) => {
 
 const filteredDocuments = computed(() => {
   return documents.value.filter(doc => {
-    const matchesSearch = doc.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                          doc.description.toLowerCase().includes(searchQuery.value.toLowerCase());
-    const matchesCategories = selectedCategories.value.length === 0 ||
-                              doc.categories.some(cat => selectedCategories.value.includes(cat));
+    const matchesSearch = doc.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || doc.description.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchesCategories = selectedCategories.value.length === 0 || doc.categories.some(cat => selectedCategories.value.includes(cat));
     return matchesSearch && matchesCategories;
   });
 });

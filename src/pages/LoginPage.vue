@@ -10,18 +10,21 @@
           <q-form @submit.prevent="handleNativeLogin">
             <q-input
               v-model="username"
-              label="Username"
+              label="Username / Email"
               filled
               autofocus
               required
-              :rules="[val => val && val.length > 0 || 'Username is required']"
+              :class="{'q-mb-md': username.length == 0}"
+              :rules="[val => val && val.length > 0 || 'Username or Email is required']"
             />
             <q-input
             v-model="password"
+            autocomplete="current-password"
             label="Password"
-            :type="isPwd ? 'password' : 'text'"
             filled
             required
+            :type="isPwd ? 'password' : 'text'"
+            :class="{'q-mb-md': password.length == 0}"
             :rules="[val => val && val.length > 0 || 'Password is required']">
               <template v-slot:append>
                 <q-icon
@@ -39,24 +42,27 @@
           <q-btn
             class="q-mt-md login-btn"
             @click="handleGoogleLogin"
+            no-caps
             flat
           >
             <template v-slot:default>
-              <div class="row items-center no-wrap">
+              <div class="row no-wrap">
                 <q-icon name="img:https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" size="18px" class="q-mr-sm" />
-                <div>Login with Google</div>
+                <div>Continue with Google</div>
               </div>
             </template>
           </q-btn>
           <q-btn
             class="q-mt-md login-btn"
             @click="handleMicrosoftLogin"
+            no-caps
             flat
           >
             <template v-slot:default>
-              <div class="row items-center no-wrap">
+              <div class="row no-wrap">
                 <q-icon name="img:https://learn.microsoft.com/en-us/azure/active-directory/develop/media/howto-add-branding-in-azure-ad-apps/ms-symbollockup_mssymbol_19.png" size="18px" class="q-mr-sm" />
-                <div>Login with Microsoft</div>
+                <div>Continue with Microsoft</div>
+                <q-space />
               </div>
             </template>
           </q-btn>
@@ -78,13 +84,13 @@
 </template>
 
 <script setup>
-import APIClient from '@/api.js';
 import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/plugins/stores/auth";
-import { googleTokenLogin } from "vue3-google-login";
-import { loginRequest, msalInstance } from "@/plugins/config/msalConfig";
 import { useQuasar } from 'quasar';
+import { useRouter } from "vue-router";
+import { googleTokenLogin } from "vue3-google-login";
+import { apiClient } from "@/plugins/api";
+import { useAuthStore } from "@/plugins/stores/auth";
+import { loginRequest, msalInstance } from "@/plugins/config/msalConfig";
 
 const $q = useQuasar();
 const $router = useRouter();
@@ -100,7 +106,7 @@ async function handleNativeLogin() {
     params.append("username", username.value);
     params.append("password", password.value);
 
-    const response = await APIClient.authenticateNative(params);
+    const response = await apiClient.auth.authenticateNative(params);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);
@@ -114,7 +120,7 @@ async function handleNativeLogin() {
 async function handleGoogleLogin() {
   try {
     const googleUser = await googleTokenLogin();
-    const response = await APIClient.authenticateGoogle(googleUser.access_token);
+    const response = await apiClient.auth.authenticateGoogle(googleUser.access_token);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);
@@ -130,7 +136,7 @@ async function handleMicrosoftLogin() {
   try {
     await msalInstance.initialize();
     const loginResponse = await msalInstance.loginPopup(loginRequest);
-    const response = await APIClient.authenticateMicrosoft(loginResponse);
+    const response = await apiClient.auth.authenticateMicrosoft(loginResponse.accessToken, loginResponse.idToken);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);
@@ -184,7 +190,7 @@ onMounted(() => {
   margin-bottom: 10px;
 }
 
-p{
+p {
   margin: 0px;
 }
 </style>

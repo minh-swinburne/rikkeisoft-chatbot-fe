@@ -22,9 +22,9 @@
                     <q-tab name="file" label="File Upload" />
                     <q-tab name="link" label="Web Link Upload" />
                   </q-tabs>
-  
+
                   <q-separator />
-  
+
                   <!-- File / Weblink Input Section -->
                   <q-file
                     v-if="activeTab === 'file'"
@@ -42,9 +42,9 @@
                     <template v-slot:append>
                       <q-icon name="attach_file" />
                     </template>
-  
+
                   </q-file>
-  
+
                   <q-input
                     v-else
                     v-model="link"
@@ -56,7 +56,7 @@
                     required
                     :rules="[val => !!val || 'Field is required']"
                   />
-  
+
                   <!-- Shared Fields Section -->
                   <q-input
                     v-model="documentTitle"
@@ -67,7 +67,7 @@
                     required
                     :rules="[val => !!val || 'Field is required']"
                   />
-  
+
                   <q-input
                     v-model="description"
                     name="description"
@@ -77,7 +77,7 @@
                     filled
                     required
                   />
-  
+
                   <q-select
                     v-model="selectedCategories"
                     :options="categories"
@@ -90,11 +90,11 @@
                     required
                     :rules="[val => !!val || 'Field is required']"
                   />
-  
+
                   <q-input v-model="createdDate" name="createdDate" label="Day Created" type="date" class="q-mb-md" filled />
-  
+
                   <q-input v-model="creator" name="creator" label="Creator (Email)" class="q-mb-md" filled required :rules="[val => !!val || 'Field is required']"/>
-  
+
                   <!-- Access Control Section -->
                   <q-radio
                     v-model="restricted"
@@ -112,11 +112,11 @@
                     class="q-mb-md"
                     inline
                   />
-  
+
                   <!-- Submit Button -->
                   <q-btn label="Upload" color="primary" type="submit" class="full-width" />
                 </q-form>
-  
+
                 <!-- Access Denied Message -->
                 <q-banner v-else class="q-pa-md">
                   <q-item-label class="text-center text-danger" style="font-weight: 600">
@@ -125,12 +125,12 @@
                   <q-item-label class="text-center text-grey-7">
                     You need to be logged in as an admin to upload documents.
                   </q-item-label>
-  
+
                   <!-- Login Button using RouterLink -->
                   <RouterLink :to="{ path: '/login', query: { redirect: $route.fullPath } }">
                     <q-btn label="Login" color="secondary" class="full-width" />
                   </RouterLink>
-  
+
                   <!-- Logout Button (if the user is already logged in) -->
                   <q-btn
                     v-if="authStore.user"
@@ -150,12 +150,12 @@
 </template>
 
 <script setup>
-import NavBar from "@/components/NavBar.vue";
 import { ref, onMounted } from "vue";
-import { useAuthStore } from "@/plugins/stores/auth";
-import { useRouter, RouterLink } from "vue-router";
 import { useQuasar } from "quasar";
-import APIClient from '@/api.js'
+import { useRouter, RouterLink } from "vue-router";
+import NavBar from "@/components/NavBar.vue";
+import { useAuthStore } from "@/plugins/stores/auth";
+import { apiClient } from "@/plugins/api";
 
 
 const $q = useQuasar();
@@ -221,14 +221,13 @@ function submit() {
       formData.append("createdDate", createdDate.value || new Date().toISOString().slice(0, 10)); // Use today as default
       formData.append("creator", creator.value);
       formData.append("restricted", restricted.value === "all" ? "false" : "true");
-      formData.append("uploader", authStore.user.email);
 
       // Debug FormData entries
       for (let [key, value] of formData.entries()) {
         console.log(`${key}:`, value);
       }
       // Submit form data via Axios
-      APIClient.uploadDocs(formData)
+      apiClient.docs.uploadDoc(formData)
         .then((response) => {
           console.log("Upload success:", response.data);
           $q.notify({

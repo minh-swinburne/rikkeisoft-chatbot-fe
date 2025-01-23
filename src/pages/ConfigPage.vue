@@ -105,8 +105,9 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { apiClient } from "@/plugins/api";
 import NavBar from "@/components/NavBar.vue";
-import APIClient from '@/api.js'
+
 
 const tabs = {
   answer_generation: "Answer Generation",
@@ -128,7 +129,7 @@ const config = ref({
 // Fetch the configuration for a specific tab
 const loadConfig = async (tab) => {
   try {
-    const response = await APIClient.getConfig(tab)
+    const response = await apiClient.config.getConfig(tab)
     config.value = {
       instructions: response.data.system_prompt,
       messageTemplate: response.data.message_template?.join("\n") || null,
@@ -167,7 +168,7 @@ const toggleEdit = () => {
 // Submit form data to backend
 const handleSubmit = async (tab) => {
   try {
-    const response = await APIClient.updateConfig(tab, config);
+    const response = await apiClient.config.updateConfig(tab, config);
 
     console.log("Updated config:", response.data);
     alert(`${tab} configuration updated successfully.`);

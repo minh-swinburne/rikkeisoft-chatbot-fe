@@ -2,8 +2,7 @@ import { defineStore } from "pinia";
 import { jwtDecode } from "jwt-decode";
 import { googleLogout } from "vue3-google-login";
 import { msalInstance } from "@/plugins/config/msalConfig";
-import APIClient from '@/api.js'
-import axios from "axios";
+import { apiClient } from "@/plugins/api";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -24,10 +23,9 @@ export const useAuthStore = defineStore("auth", {
     login(accessToken, refreshToken) {
       localStorage.setItem("access_token", accessToken); // Store the JWT token in localStorage
       localStorage.setItem("refresh_token", refreshToken); // Store the refresh token in
-      // Set the Authorization header for all requests
       this.hydrateUser();
 
-      axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+      apiClient.client.setToken(accessToken);
     },
 
     logout() {
@@ -40,6 +38,8 @@ export const useAuthStore = defineStore("auth", {
       this.user = null; // Clear user information upon logout
       this.accessToken = null;
       this.refreshToken = null;
+
+      apiClient.client.clearToken();
       // Clear the JWT token from localStorage
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
@@ -48,7 +48,7 @@ export const useAuthStore = defineStore("auth", {
     async refreshAccess() {
       // Attempt to refresh the token
       try {
-        const response = await APIClient.refreshToken();
+        const response = await apiClient.auth.refreshToken();
         const { access_token, refresh_token } = response.data;
         this.login(access_token, refresh_token); // Log in with the new tokens
       } catch (error) {

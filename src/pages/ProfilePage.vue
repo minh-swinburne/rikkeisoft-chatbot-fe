@@ -91,11 +91,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
-import APIClient from '@/api.js'
+import { apiClient } from "@/plugins/api";
 import NavBar from "@/components/NavBar.vue";
 
 const $q = useQuasar()
-
 const isDark = ref(false)
 
 const email = ref('')
@@ -126,8 +125,8 @@ const onSubmit = async () => {
       formData.append('avatar', avatarFile.value)
     }
 
-    const response = await APIClient.updateProfile(formData)
-    
+    const response = await apiClient.users.updateUser(formData)
+
     if (response.status === 200) {
       $q.notify({
         color: 'positive',
@@ -150,7 +149,7 @@ const onSubmit = async () => {
 // Load user data when component mounts
 onMounted(async () => {
   try {
-    const userData = await APIClient.getUserProfile()
+    const userData = await apiClient.users.getCurrentUser()
     email.value = userData.email
     firstname.value = userData.firstname
     lastname.value = userData.lastname

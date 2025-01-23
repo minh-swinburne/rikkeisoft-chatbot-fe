@@ -76,19 +76,17 @@
 </template>
 
 <script setup>
-import APIClient from '@/api.js';
 import NavBar from '@/components/NavBar.vue';
-import { camelize } from '@/utils';
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/plugins/stores/auth';
+import { camelize } from '@/utils';
+import { apiClient } from "@/plugins/api";
 import { useLayoutStore } from '@/plugins/stores/layout';
 
 
 const $q = useQuasar();
 const $router = useRouter();
-const authStore = useAuthStore();
 const layoutStore = useLayoutStore();
 
 const isDark = ref(false)
@@ -122,7 +120,7 @@ async function renameChat(chat) {
   }).onOk(async (newName) => {
     if (newName && newName !== chat.name) {
       try {
-        await APIClient.renameChat(chat.id, newName, authStore.user.sub);
+        await apiClient.chats.renameChat(chat.id, newName);
         await fetchChats();
       } catch (error) {
         $q.notify({
@@ -144,7 +142,7 @@ async function deleteChat(chat) {
       cancel: 'No',
     }).onOk(async () => {
       try {
-        await APIClient.deleteChat(chat.id);
+        await apiClient.chats.deleteChat(chat.id);
         await fetchChats();
 
         // Check if the current chat's ID is the same as the deleted chat's ID
@@ -168,11 +166,9 @@ async function deleteChat(chat) {
   }
 }
 
-
-
 async function fetchChats() {
   try {
-    const response = await APIClient.getChats(authStore.user.sub);
+    const response = await apiClient.chats.listChats();
     chats.value = camelize(response.data);
   } catch (error) {
     $q.notify({

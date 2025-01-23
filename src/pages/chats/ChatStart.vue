@@ -30,7 +30,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from '@/plugins/stores/auth';
-import APIClient from '@/api.js';
+import { apiClient } from "@/plugins/api";
 
 const $q = useQuasar();
 const $router = useRouter();
@@ -55,11 +55,11 @@ async function createNewChat() {
   if (!userInput.value.trim()) return;
 
   try {
-    const response = await APIClient.createChat('New Chat', authStore.user.sub);
+    const response = await apiClient.chats.createChat('New Chat', authStore.user.sub);
     const chatId = response.data.id;
     $emit("send");
     // await fetchChats();
-    
+
     // Redirect to the new chat with the initial message as a query parameter
     $router.push(`/chat/${chatId}?initialMessage=${encodeURIComponent(userInput.value)}`);
   } catch (error) {

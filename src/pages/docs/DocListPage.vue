@@ -154,8 +154,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
+import { apiClient } from "@/plugins/api";
 import NavBar from "@/components/NavBar.vue";
-import APIClient from "@/api.js";
+
 
 const $q = useQuasar();
 const documents = ref([]);
@@ -188,7 +189,7 @@ const itemsPerPage = 10;
 
 const fetchDocuments = async () => {
   try {
-    const response = await APIClient.getDocs();
+    const response = await apiClient.docs.listDocs();
     documents.value = response.data;
     documents.value.forEach(document => {
       document.categories = JSON.parse(document.categories);
@@ -266,8 +267,8 @@ const submitEditForm = async () => {
     formData.append('categories', JSON.stringify(editFormData.value.categories));
     formData.append('restricted', editFormData.value.restricted);
 
-    await APIClient.editDocs(editFormData.value.id,formData);
-    
+    await apiClient.docs.editDoc(editFormData.value.id,formData);
+
     fetchDocuments()
     $q.notify({
       color: 'positive',
@@ -286,7 +287,7 @@ const submitEditForm = async () => {
 
 const downloadDocument = async (doc) => {
   try {
-    const response = await APIClient.downloadDoc(doc.id)
+    const response = await apiClient.docs.downloadDoc(doc.id)
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
@@ -318,7 +319,7 @@ const deleteDocument = async (document) => {
       persistent: true
     });
 
-    await APIClient.deleteDoc(document.id);
+    await apiClient.docs.deleteDoc(document.id);
     documents.value = documents.value.filter(doc => doc.id !== document.id);
     $q.notify({
       color: 'positive',
@@ -344,4 +345,3 @@ const deleteDocument = async (document) => {
     margin: 0 auto; /* Optional: centers the list */
   }
 </style>
-

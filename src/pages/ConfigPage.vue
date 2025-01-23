@@ -94,8 +94,8 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
+import { apiClient } from "@/plugins/api";
 import NavBar from '@/components/NavBar.vue';
-import APIClient from '@/api.js';
 
 const $q = useQuasar();
 const isDark = ref(false);
@@ -127,7 +127,7 @@ const loadConfig = async (tab) => {
       maxTokens: 1,
       temperature: 0.5,
     };
-    const response = await APIClient.getConfig(tab);
+    const response = await apiClient.config.getConfig(tab);
     config.value = {
       instructions: response.data.system_prompt,
       messageTemplate: response.data.message_template?.join('\n') || null,
@@ -169,7 +169,7 @@ const toggleEdit = () => {
 
 const handleSubmit = async (tab) => {
   try {
-    const response = await APIClient.updateConfig(tab, config);
+    const response = await apiClient.config.updateConfig(tab, config);
     console.log('Updated config:', response.data);
     $q.notify({
       color: 'positive',

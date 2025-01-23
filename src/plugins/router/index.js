@@ -1,12 +1,12 @@
-import { useAuthStore } from "@/plugins/stores/auth";
 import { createRouter, createWebHistory } from "vue-router";
-import APIClient from '@/api.js'
+import { useAuthStore } from "@/plugins/stores/auth";
+import { apiClient } from "@/plugins/api";
 
 const routes = [
-  { path: "/login", component: () => import("@/pages/LoginPage.vue"), meta: { requiresAuth: false } },
+  { path: "/login", component: () => import("@/pages/auth/LoginPage.vue"), meta: { requiresAuth: false } },
   {
     path: "/register",
-    component: () => import("@/pages/RegisterPage.vue"),
+    component: () => import("@/pages/auth/RegisterPage.vue"),
   },
   {
     path: "/chat",
@@ -25,12 +25,12 @@ const routes = [
   },
   {
     path: "/upload",
-    component: () => import("@/pages/UploadPage.vue"),
+    component: () => import("@/pages/docs/DocUploadPage.vue"),
     meta: { requiresAuth: true },
   },
   {
     path: "/docs",
-    component: () => import("@/pages/DocList.vue"),
+    component: () => import("@/pages/docs/DocListPage.vue"),
     meta: { requiresAuth: true },
   },
   {
@@ -62,7 +62,7 @@ async function checkTokenValidity() {
   }
 
   try {
-    const response = await APIClient.validateToken();
+    const response = await apiClient.auth.validateToken();
     return response.data.valid;
   } catch (error) {
     console.error("Token validation failed:", error.response?.data || error);
@@ -76,10 +76,7 @@ router.beforeEach(async (to, from, next) => {
   const isValidToken = await checkTokenValidity();
 
   if (isValidToken && !authStore.isAuthenticated) {
-    authStore.login(
-      localStorage.getItem("access_token"),
-      localStorage.getItem("refresh_token")
-    );
+    authStore.hydrateUser();
     next();
   } else if (requiresAuth && !isValidToken) {
     next("/login");

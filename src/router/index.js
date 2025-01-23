@@ -60,7 +60,7 @@ async function checkTokenValidity() {
     const response = await axios.get(
       "http://localhost:8000/api/v1/auth/validate",
       {
-        withCredentials: true, 
+        withCredentials: true,
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -75,13 +75,17 @@ async function checkTokenValidity() {
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
-  authStore.hydrateUser();
 
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
   const isValidToken = await checkTokenValidity();
+  console.log("isValidToken: ", isValidToken);
 
-  if (requiresAuth && !isValidToken) {
+  if (isValidToken && !authStore.isAuthenticated) {
+    authStore.login(localStorage.getItem("access_token"), localStorage.getItem("refresh_token"));
+    next();
+  }
+  else if (requiresAuth && !isValidToken) {
     next("/login");
   } else {
     next();

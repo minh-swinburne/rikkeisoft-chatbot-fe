@@ -25,18 +25,25 @@
         <q-item
           v-for="chat in sortedChats"
           :key="chat.id"
-          :to="`/chat/${chat.id}`"
           :active-class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-4'"
           :style="{ borderRadius: '5px' }"
           class="q-ma-sm"
           clickable
-          v-ripple
+          @click="$router.push(`/chat/${chat.id}`)"
         >
           <q-item-section>
             <q-item-label lines="1">{{ chat.name }}</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-btn-dropdown flat dense rounded no-icon-animation size="sm" dropdown-icon="more_horiz">
+            <q-btn-dropdown
+              flat
+              dense
+              rounded
+              no-icon-animation
+              size="sm"
+              dropdown-icon="more_horiz"
+              @click.stop="console.log('clicked')"
+            >
               <q-list>
                 <q-item clickable v-close-popup @click="renameChat(chat)">
                   <q-item-section>Rename</q-item-section>
@@ -115,7 +122,7 @@ async function createNewChat() {
 
 
 async function renameChat(chat) {
-  const newName = await $q.dialog({
+  $q.dialog({
     title: 'Rename Chat',
     message: 'Enter new chat name:',
     prompt: {
@@ -124,23 +131,27 @@ async function renameChat(chat) {
     },
     cancel: true,
     persistent: true,
-  });
-
-  if (newName && newName !== chat.name) {
-    try {
-      await axios.put(`http://127.0.0.1:8000/api/v1/chats/${chat.id}/rename`, {
-        name: newName,
-        user_id: authStore.user.sub,
-      });
-      await fetchChats();
-    } catch (error) {
-      $q.notify({
-        color: 'negative',
-        message: 'Error renaming chat',
-        icon: 'error',
-      });
+  }).onOk(async (newName) => {
+    if (newName && newName !== chat.name) {
+      try {
+        console.log("Renaming chat", chat.id, newName);
+        await axios.put(`http://127.0.0.1:8000/api/v1/chats/${chat.id}`, {
+          name: newName,
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        await fetchChats();
+      } catch (error) {
+        $q.notify({
+          color: 'negative',
+          message: 'Error renaming chat',
+          icon: 'error',
+        });
+      }
     }
-  }
+  });
 }
 
 async function deleteChat(chat) {
@@ -152,7 +163,7 @@ async function deleteChat(chat) {
       cancel: 'No',
     });
 
-    await axios.delete(`http://127.0.0.1:8000/api/v1/chats/${chat.id}/delete`);
+    await axios.delete(`http://127.0.0.1:8000/api/v1/chats/${chat.id}`);
     await fetchChats();
   } catch (error) {
     if (error) {
@@ -167,9 +178,7 @@ async function deleteChat(chat) {
 
 async function fetchChats() {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/v1/chats', {
-      params: { user_id: authStore.user.sub },
-    });
+    const response = await axios.get('http://127.0.0.1:8000/api/v1/chats/');
     chats.value = camelize(response.data);
   } catch (error) {
     $q.notify({

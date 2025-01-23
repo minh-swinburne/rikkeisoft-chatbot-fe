@@ -11,7 +11,7 @@
             <q-input
               v-model="username"
               label="Username"
-              filled
+              outlined
               autofocus
               required
               :rules="[val => val && val.length > 0 || 'Username is required']"
@@ -20,7 +20,7 @@
               v-model="password"
               label="Password"
               type="password"
-              filled
+              outlined
               required
               :rules="[val => val && val.length > 0 || 'Password is required']"
             />

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 class APIClient {
   constructor(baseURL) {
@@ -8,20 +8,20 @@ class APIClient {
 
   // Authenticate (native, Google, Microsoft)
   authenticateNative(params) {
-    return this.client.post('auth/native', params, {
+    return this.client.post("auth/native", params, {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       withCredentials: true,
     });
   }
 
   authenticateGoogle(accessToken) {
-    return this.client.post('auth/google', { access_token: accessToken }, {
+    return this.client.post("auth/google", { access_token: accessToken }, {
       headers: { "Content-Type": "application/json" },
     });
   }
 
   authenticateMicrosoft(loginResponse) {
-    return this.client.post('auth/microsoft', {
+    return this.client.post("auth/microsoft", {
       access_token: loginResponse.accessToken,
       id_token: loginResponse.idToken,
     }, {
@@ -34,14 +34,14 @@ class APIClient {
 
   // Register user
   registerUser(userDetails) {
-    return this.client.post('auth/register', userDetails, {
+    return this.client.post("auth/register", userDetails, {
       headers: { "Content-Type": "application/json" },
     });
   }
 
   // Validate and refresh token
   validateToken() {
-    return this.client.get('auth/validate', {
+    return this.client.get("auth/validate", {
       withCredentials: true,
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -50,17 +50,17 @@ class APIClient {
   }
 
   refreshToken() {
-    return this.client.post('auth/refresh', null, {
+    return this.client.post("auth/refresh", null, {
       withCredentials: true,
       headers: {
         Authorization: `Bearer ${this.refreshToken}`,
       },
     });
   }
- 
+
   // Chat & Message
   getChats(userId) {
-    return this.client.get('chats', {
+    return this.client.get("chats", {
       params: { user_id: userId },
     });
   }
@@ -92,10 +92,10 @@ class APIClient {
       body: JSON.stringify({ query }),
     });
   }
-  
+
   // Get docs
   getDocs() {
-    return this.client.get('docs');
+    return this.client.get("docs");
   }
 
   // Upload docs
@@ -110,13 +110,13 @@ class APIClient {
   // Edit docs
   editDocs(id, formData) {
     return this.client.put(`docs/${id}/edit`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: { "Content-Type": "multipart/form-data" },
     });
   }
 
   // Download docs
   downloadDoc(id) {
-    return this.client.get(`docs/${id}/download`, { responseType: 'blob' });
+    return this.client.get(`docs/${id}/download`, { responseType: "blob" });
   }
 
   // Delete docs
@@ -142,4 +142,4 @@ class APIClient {
 
 }
 
-export default new APIClient('http://127.0.0.1:8000/api/v1/'); // Adjust baseURL as needed
+export default new APIClient("http://127.0.0.1:8000/api/v1/"); // Adjust baseURL as needed

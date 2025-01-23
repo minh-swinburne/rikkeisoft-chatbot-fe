@@ -38,6 +38,11 @@ const routes = [
     component: () => import("@/pages/ConfigPage.vue"),
     meta: { requiresAuth: false },
   },
+  {
+    path: "/profile",
+    component: () => import("@/pages/ProfilePage.vue"),
+    meta: { requiresAuth: true },
+  },
   { path: "/", redirect: "/login" }, // Default route
 ];
 

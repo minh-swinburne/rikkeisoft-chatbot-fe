@@ -170,6 +170,8 @@ const editFormData = ref({
   restricted: false,
 });
 
+const isDark = ref(false)
+
 const availableCategories = ref([
   'Guidance',
   'Policies',
@@ -203,7 +205,11 @@ const fetchDocuments = async () => {
 
 onMounted(() => {
   fetchDocuments();
-  $q.dark.set(true);
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode !== null) {
+    isDark.value = savedDarkMode === 'true'
+    $q.dark.set(isDark.value)
+  }
 });
 
 const formatDate = (dateString) => {

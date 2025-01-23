@@ -10,29 +10,33 @@
           <q-form @submit.prevent="register">
             <q-input
               v-model="username"
+              autocomplete="username"
               label="Username"
-              filled
+              outlined
               autofocus
               required
-              :rules="[val => val && val.length > 0 || 'Username is required']"
+              :class="{'q-mb-md': !!isInvalidUsername}"
+              :error="!!isInvalidUsername"
+              :error-message="isInvalidUsername"
             />
             <div class="row q-col-gutter-sm">
               <div class="col-6">
                 <q-input
                   v-model="firstname"
+                  autocomplete="given-name"
                   label="First Name"
-                  filled
+                  outlined
                   required
+                  :class="{'q-mb-md': firstname.length == 0}"
                   :rules="[val => val && val.length > 0 || 'First name is required']"
                 />
               </div>
               <div class="col-6">
                 <q-input
                   v-model="lastname"
-                  label="Last Name"
-                  filled
-                  required
-                  :rules="[val => val && val.length > 0 || 'Last name is required']"
+                  autocomplete="family-name"
+                  label="Last Name (Optional)"
+                  outlined
                 />
               </div>
             </div>
@@ -40,14 +44,14 @@
               <div class="col">
                 <q-input
                   v-model="email"
+                  autocomplete="email"
                   label="Email"
                   type="email"
-                  filled
+                  outlined
                   required
-                  :rules="[
-                    val => val && val.length > 0 || 'Email is required',
-                    val => val && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(val) || 'Invalid email format'
-                  ]"
+                  :class="{'q-mb-md': !!isInvalidEmail}"
+                  :error="!!isInvalidEmail"
+                  :error-message="isInvalidEmail"
                 />
               </div>
             </div>
@@ -55,10 +59,12 @@
               <div class="col-6">
                 <q-input
                   v-model="password"
+                  autocomplete="new-password"
                   label="Password"
-                  :type="isPwd ? 'password' : 'text'"
-                  filled
+                  outlined
                   required
+                  :type="isPwd ? 'password' : 'text'"
+                  :class="{'q-mb-md': password.length == 0}"
                   :rules="[val => val && val.length > 0 || 'Password is required']">
                   <template v-slot:append>
                     <q-icon
@@ -72,10 +78,12 @@
               <div class="col-6">
                 <q-input
                   v-model="confirmPassword"
+                  autocomplete="new-password"
                   label="Confirm Password"
                   type="password"
-                  filled
+                  outlined
                   required
+                  :class="{'q-mb-md': confirmPassword.length == 0 || password !== confirmPassword}"
                   :rules="[
                     val => val && val.length > 0 || 'Confirm password is required',
                     val => val === password || 'Passwords do not match'
@@ -91,24 +99,26 @@
           <q-btn
             class="q-mt-md login-btn"
             @click="handleGoogleLogin"
+            no-caps
             flat
           >
             <template v-slot:default>
               <div class="row items-center no-wrap">
                 <q-icon name="img:https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" size="18px" class="q-mr-sm" />
-                <div>Login with Google</div>
+                <div>Continue with Google</div>
               </div>
             </template>
           </q-btn>
           <q-btn
             class="q-mt-md login-btn"
             @click="handleMicrosoftLogin"
+            no-caps
             flat
           >
             <template v-slot:default>
               <div class="row items-center no-wrap">
                 <q-icon name="img:https://learn.microsoft.com/en-us/azure/active-directory/develop/media/howto-add-branding-in-azure-ad-apps/ms-symbollockup_mssymbol_19.png" size="18px" class="q-mr-sm" />
-                <div>Login with Microsoft</div>
+                <div>Continue with Microsoft</div>
               </div>
             </template>
           </q-btn>
@@ -129,17 +139,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { googleTokenLogin } from "vue3-google-login";
 import { useRouter } from "vue-router";
-import { useQuasar } from 'quasar';
+import { useQuasar } from "quasar";
 import { useAuthStore } from "@/plugins/stores/auth";
 import { loginRequest, msalInstance } from "@/plugins/config/msalConfig";
-import { googleTokenLogin } from "vue3-google-login";
+import { apiClient } from "@/plugins/api";
 
-import APIClient from '@/api.js'
 const $router = useRouter();
-
 const $q = useQuasar();
+const authStore = useAuthStore();
 
 const username = ref("");
 const firstname = ref("");
@@ -149,7 +159,14 @@ const password = ref("");
 const confirmPassword = ref("");
 const isPwd = ref(true);
 
-const authStore = useAuthStore();
+const isInvalidUsername = computed(() => {
+  if (username.value.length === 0) return "Username is required";
+  return /^[a-zA-Z][a-zA-Z0-9_]{3,20}$/.test(username.value) ? false : "Username must start with a letter and contain only alphanumeric characters or underscores";
+});
+const isInvalidEmail = computed(() => {
+  if (email.value.length === 0) return "Email is required";
+  return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email.value) ? false : "Invalid email address";
+});
 
 
 async function register() {
@@ -166,7 +183,7 @@ async function register() {
       email: email.value,
       password: password.value
     }
-    const response = await APIClient.registerUser(userDetails);
+    const response = await apiClient.auth.registerUser(userDetails);
 
     if (response.status === 201) {
       alert("Registration successful!");
@@ -185,7 +202,7 @@ async function handleGoogleLogin() {
   try {
     const googleUser = await googleTokenLogin();
 
-    const response = await APIClient.authenticateGoogle(googleUser.access_token);
+    const response = await apiClient.auth.authenticateGoogle(googleUser.access_token);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);
@@ -202,7 +219,7 @@ async function handleMicrosoftLogin() {
     await msalInstance.initialize();
     const loginResponse = await msalInstance.loginPopup(loginRequest);
 
-    const response = await APIClient.authenticateMicrosoft(loginResponse);
+    const response = await apiClient.auth.authenticateMicrosoft(loginResponse);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);
@@ -245,14 +262,10 @@ onMounted(() => {
   justify-content: center;
 }
 
-
 .login-btn {
   background-color: #ffffff;
   color: #5e5e5e;
   border: 1px solid #8c8c8c;
   margin-bottom: 10px;
 }
-
-
 </style>
-

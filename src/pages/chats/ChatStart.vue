@@ -1,9 +1,9 @@
 <template>
   <q-page class="flex flex-center" :class="{ 'bg-grey-10': $q.dark.isActive }">
-    <div class="text-center">
+    <div class="text-center" style="width: 100%;">
       <h1 class="text-h3 q-mb-md" :class="{ 'text-white': $q.dark.isActive }">Welcome to Chatbot</h1>
       <p class="text-subtitle1" :class="{ 'text-grey-5': $q.dark.isActive }">Enter a message to start a new chat</p>
-      <q-form @submit="createNewChat" class="q-pa-md" style="width: 100%; min-width: 800px;" >
+      <q-form @submit="createNewChat" class="q-pa-md" style="width: 60%; margin: auto;" >
         <q-input
           v-model="userInput"
           outlined
@@ -30,7 +30,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from '@/plugins/stores/auth';
-import APIClient from '@/api.js';
+import { apiClient } from "@/plugins/api";
 
 const $q = useQuasar();
 const $router = useRouter();
@@ -55,11 +55,11 @@ async function createNewChat() {
   if (!userInput.value.trim()) return;
 
   try {
-    const response = await APIClient.createChat('New Chat', authStore.user.sub);
+    const response = await apiClient.chats.createChat('New Chat', authStore.user.sub);
     const chatId = response.data.id;
     $emit("send");
     // await fetchChats();
-    
+
     // Redirect to the new chat with the initial message as a query parameter
     $router.push(`/chat/${chatId}?initialMessage=${encodeURIComponent(userInput.value)}`);
   } catch (error) {

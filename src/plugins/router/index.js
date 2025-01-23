@@ -1,15 +1,12 @@
-import { useAuthStore } from "@/plugins/stores/auth";
 import { createRouter, createWebHistory } from "vue-router";
-import APIClient from '@/api.js'
+import { useAuthStore } from "@/plugins/stores/auth";
+import { apiClient } from "@/plugins/api";
 
 const routes = [
-  {
-    path: "/home", component: () => import("@/pages/HomePage.vue")
-  },
-  { path: "/login", component: () => import("@/pages/LoginPage.vue"), meta: { requiresAuth: false } },
+  { path: "/login", component: () => import("@/pages/auth/LoginPage.vue"), meta: { requiresAuth: false } },
   {
     path: "/register",
-    component: () => import("@/pages/RegisterPage.vue"),
+    component: () => import("@/pages/auth/RegisterPage.vue"),
   },
   {
     path: "/chat",
@@ -28,18 +25,23 @@ const routes = [
   },
   {
     path: "/upload",
-    component: () => import("@/pages/UploadPage.vue"),
+    component: () => import("@/pages/docs/DocUploadPage.vue"),
     meta: { requiresAuth: true },
   },
   {
     path: "/docs",
-    component: () => import("@/pages/DocList.vue"),
+    component: () => import("@/pages/docs/DocListPage.vue"),
     meta: { requiresAuth: true },
   },
   {
     path: "/config",
     component: () => import("@/pages/ConfigPage.vue"),
     meta: { requiresAuth: false },
+  },
+  {
+    path: "/profile",
+    component: () => import("@/pages/ProfilePage.vue"),
+    meta: { requiresAuth: true },
   },
   { path: "/", redirect: "/login" }, // Default route
 ];
@@ -60,7 +62,10 @@ async function checkTokenValidity() {
   }
 
   try {
-    const response = await APIClient.validateToken();
+    if (!apiClient.client.getToken()) {
+      apiClient.client.setToken(localStorage.getItem("access_token"));
+    }
+    const response = await apiClient.auth.validateToken();
     return response.data.valid;
   } catch (error) {
     console.error("Token validation failed:", error.response?.data || error);
@@ -70,13 +75,13 @@ async function checkTokenValidity() {
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
-  authStore.hydrateUser();
-
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-
   const isValidToken = await checkTokenValidity();
 
-  if (requiresAuth && !isValidToken) {
+  if (isValidToken && !authStore.isAuthenticated) {
+    authStore.hydrateUser();
+    next();
+  } else if (requiresAuth && !isValidToken) {
     next("/login");
   } else {
     next();

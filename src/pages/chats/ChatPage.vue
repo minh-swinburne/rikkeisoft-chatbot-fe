@@ -46,7 +46,15 @@
             <q-item-label lines="1">{{ chat.name }}</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-btn-dropdown flat dense rounded no-icon-animation size="sm" dropdown-icon="more_horiz" @click.stop>
+            <q-btn-dropdown
+              dropdown-icon="more_horiz"
+              size="sm"
+              flat
+              dense
+              rounded
+              no-icon-animation
+              @click.stop
+            >
               <q-list>
                 <q-item clickable v-close-popup @click="renameChat(chat)">
                   <q-item-section>Rename</q-item-section>
@@ -59,12 +67,6 @@
           </q-item-section>
         </q-item>
       </q-list>
-      <q-space />
-      <q-item>
-        <q-btn color="negative" class="full-width" @click="logout">
-          Logout
-        </q-btn>
-      </q-item>
     </q-drawer>
 
     <q-page-container>
@@ -74,20 +76,20 @@
 </template>
 
 <script setup>
+import NavBar from '@/components/NavBar.vue';
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/plugins/stores/auth';
-import { useLayoutStore } from '@/plugins/stores/layout';
-import NavBar from '@/components/NavBar.vue';
 import { camelize } from '@/utils';
+import { apiClient } from "@/plugins/api";
+import { useLayoutStore } from '@/plugins/stores/layout';
 
-import APIClient from '@/api.js'
 
 const $q = useQuasar();
 const $router = useRouter();
-const authStore = useAuthStore();
 const layoutStore = useLayoutStore();
+
+const isDark = ref(false)
 
 const leftDrawerOpen = computed({
   get: () => layoutStore.leftDrawerOpen,
@@ -106,7 +108,7 @@ async function createNewChat() {
 
 
 async function renameChat(chat) {
-  const newName = await $q.dialog({
+  $q.dialog({
     title: 'Rename Chat',
     message: 'Enter new chat name:',
     prompt: {
@@ -115,32 +117,32 @@ async function renameChat(chat) {
     },
     cancel: true,
     persistent: true,
-  });
-
-  if (newName && newName !== chat.name) {
-    try {
-      await APIClient.renameChat(chat.id, newName, authStore.user.sub);
-      await fetchChats();
-    } catch (error) {
-      $q.notify({
-        color: 'negative',
-        message: 'Error renaming chat',
-        icon: 'error',
-      });
+  }).onOk(async (newName) => {
+    if (newName && newName !== chat.name) {
+      try {
+        await apiClient.chats.renameChat(chat.id, newName);
+        await fetchChats();
+      } catch (error) {
+        $q.notify({
+          color: 'negative',
+          message: 'Error renaming chat',
+          icon: 'error',
+        });
+      }
     }
-  }
+  });
 }
 
 async function deleteChat(chat) {
   try {
-    await $q.dialog({
+    $q.dialog({
       title: 'Confirm Deletion',
       message: 'Are you sure you want to delete this chat?',
       ok: 'Yes',
       cancel: 'No',
     }).onOk(async () => {
       try {
-        await APIClient.deleteChat(chat.id);
+        await apiClient.chats.deleteChat(chat.id);
         await fetchChats();
 
         // Check if the current chat's ID is the same as the deleted chat's ID
@@ -155,7 +157,6 @@ async function deleteChat(chat) {
         });
       }
     });
-
   } catch (error) {
     $q.notify({
       color: 'negative',
@@ -165,11 +166,9 @@ async function deleteChat(chat) {
   }
 }
 
-
-
 async function fetchChats() {
   try {
-    const response = await APIClient.getChats(authStore.user.sub);
+    const response = await apiClient.chats.listChats();
     chats.value = camelize(response.data);
   } catch (error) {
     $q.notify({
@@ -180,17 +179,17 @@ async function fetchChats() {
   }
 }
 
-function logout() {
-  authStore.logout();
-  $router.push('/login');
-}
-
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
 onMounted(() => {
   fetchChats();
-  $q.dark.set(true); // Set dark mode as default
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode !== null) {
+    isDark.value = savedDarkMode === 'true'
+    $q.dark.set(isDark.value)
+    console.log($q.dark)
+  }
 });
 </script>

@@ -78,14 +78,13 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { marked } from 'marked';
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
-import { camelize } from '@/utils';
+import { useRoute, useRouter } from 'vue-router';
 import { useLayoutStore } from '@/plugins/stores/layout';
-import { nextTick } from 'vue';
-import APIClient from '@/api.js'
+import { apiClient } from "@/plugins/api";
+import { camelize } from '@/utils';
 
 const $route = useRoute();
 const $router = useRouter();
@@ -138,10 +137,10 @@ async function sendMessage(initialMessage = null) {
   });
 
   try {
-    const config = await APIClient.getConfig('answer_generation');
+    const config = await apiClient.config.getConfig('answer_generation');
     const streaming = config.data.params.stream;
 
-    const response = await ( APIClient.sendMessage($route.params.chatId, query));
+    const response = await ( apiClient.chats.sendMessage($route.params.chatId, query));
     if (streaming) {
       console.log("Streaming response...");
 
@@ -189,7 +188,7 @@ async function sendMessage(initialMessage = null) {
 async function fetchMessages() {
   try {
     console.log("Fetching messages...")
-    const response = await APIClient.getMessage($route.params.chatId);
+    const response = await apiClient.chats.listMessages($route.params.chatId);
     messages.value = camelize(response.data);
     scrollToBottom();
   } catch (error) {
@@ -203,7 +202,7 @@ async function fetchMessages() {
 
 async function fetchSuggestions() {
   try {
-    const response = await APIClient.getSuggestion($route.params.chatId);
+    const response = await apiClient.chats.getSuggestion($route.params.chatId);
     suggestions.value = response.data.suggestions;
   } catch (error) {
     console.error('Error fetching suggestions:', error);
@@ -224,7 +223,6 @@ function reloadChat() {
 }
 
 onMounted(() => {
-  // reloadChat();
 
   window.addEventListener('chat-changed', (event) => {
     if (event.detail === $route.params.chatId) {
@@ -239,6 +237,9 @@ onMounted(() => {
     sendMessage(decodeURIComponent(initialMessage));
     // Remove the initialMessage from the query parameters
     $router.replace({ query: {} });
+  }
+  else {
+    reloadChat();
   }
 });
 

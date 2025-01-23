@@ -18,7 +18,7 @@
               </q-input>
             </div>
             <div class="col-auto">
-              <q-btn-dropdown color="primary" label="Filter" icon="filter_list">
+              <q-btn-dropdown color="secondary" label="Filter" icon="filter_list">
                 <q-card>
                   <q-card-section>
                     <div class="text-h6">Filter by Categories</div>
@@ -32,15 +32,15 @@
                     />
                   </q-card-section>
                   <q-card-actions align="right">
-                    <q-btn flat label="Clear" color="primary" @click="clearFilters" />
-                    <q-btn flat label="Apply" color="primary" v-close-popup />
+                    <q-btn flat label="Clear" color="secondary" @click="clearFilters" />
+                    <q-btn flat label="Apply" color="secondary" v-close-popup />
                   </q-card-actions>
                 </q-card>
               </q-btn-dropdown>
             </div>
           </div>
 
-          <q-list bordered separator>
+          <q-list bordered separator class="max-width-70">
             <q-item v-for="document in paginatedDocuments" :key="document.id" class="q-my-sm">
               <q-item-section>
                 <q-item-label class="text-h6">{{ document.title }}</q-item-label>
@@ -50,7 +50,7 @@
                   <q-chip
                     v-for="category, index in document.categories"
                     :key="index"
-                    color="grey-9"
+                    :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
                     dense
                   >
                     {{ category }}
@@ -68,8 +68,8 @@
               </q-item-section>
               <q-item-section side>
                 <div class="row q-gutter-sm">
-                  <q-btn color="primary" icon="visibility" @click="previewDocument(document)" label="Preview" />
-                  <q-btn color="secondary" icon="edit" @click="editDocument(document)" label="Edit" />
+                  <q-btn color="secondary" icon="visibility" @click="previewDocument(document)" label="Preview" />
+                  <q-btn color="warning" icon="edit" @click="editDocument(document)" label="Edit" />
                   <q-btn color="positive" icon="download" @click="downloadDocument(document)" label="Download" />
                   <q-btn color="negative" icon="delete" @click="deleteDocument(document)" label="Delete" />
                 </div>
@@ -77,7 +77,7 @@
             </q-item>
           </q-list>
 
-          <div class="row justify-center q-mt-md">
+          <div class="row justify-center q-mt-md ">
             <q-pagination
               v-model="currentPage"
               :max="totalPages"
@@ -98,7 +98,7 @@
           <iframe :src="`http://127.0.0.1:8000/api/v1/docs/${currentDocument?.id}/preview`" style="width: 70%; height: 600px;"  />
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="Close" color="primary" v-close-popup />
+          <q-btn flat label="Close" color="secondary" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -123,7 +123,7 @@
                 v-if="editFormData.categories"
                 removable
                 dense
-                color="grey-9"
+                :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
                 @remove="scope.removeAtIndex(scope.index)"
                 :tabindex="scope.tabindex"
               >
@@ -138,11 +138,11 @@
                 { label: 'Everyone', value: false },
                 { label: 'Admin Only', value: true }
               ]"
-              color="primary"
+              color="secondary"
             />
             <q-card-actions align="right">
-              <q-btn flat label="Cancel" color="primary" v-close-popup />
-              <q-btn flat label="Save Changes" type="submit" color="primary" />
+              <q-btn flat label="Cancel" color="secondary" v-close-popup />
+              <q-btn flat label="Save Changes" type="submit" color="secondary" />
             </q-card-actions>
           </q-form>
         </q-card-section>
@@ -154,8 +154,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
+import { apiClient } from "@/plugins/api";
 import NavBar from "@/components/NavBar.vue";
-import APIClient from "@/api.js";
+
 
 const $q = useQuasar();
 const documents = ref([]);
@@ -169,6 +170,8 @@ const editFormData = ref({
   categories: [],
   restricted: false,
 });
+
+const isDark = ref(false)
 
 const availableCategories = ref([
   'Guidance',
@@ -186,7 +189,7 @@ const itemsPerPage = 10;
 
 const fetchDocuments = async () => {
   try {
-    const response = await APIClient.getDocs();
+    const response = await apiClient.docs.listDocs();
     documents.value = response.data;
     documents.value.forEach(document => {
       document.categories = JSON.parse(document.categories);
@@ -203,7 +206,11 @@ const fetchDocuments = async () => {
 
 onMounted(() => {
   fetchDocuments();
-  $q.dark.set(true);
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode !== null) {
+    isDark.value = savedDarkMode === 'true'
+    $q.dark.set(isDark.value)
+  }
 });
 
 const formatDate = (dateString) => {
@@ -260,8 +267,8 @@ const submitEditForm = async () => {
     formData.append('categories', JSON.stringify(editFormData.value.categories));
     formData.append('restricted', editFormData.value.restricted);
 
-    await APIClient.editDocs(editFormData.value.id,formData);
-    
+    await apiClient.docs.editDoc(editFormData.value.id,formData);
+
     fetchDocuments()
     $q.notify({
       color: 'positive',
@@ -280,7 +287,7 @@ const submitEditForm = async () => {
 
 const downloadDocument = async (doc) => {
   try {
-    const response = await APIClient.downloadDoc(doc.id)
+    const response = await apiClient.docs.downloadDoc(doc.id)
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
@@ -312,7 +319,7 @@ const deleteDocument = async (document) => {
       persistent: true
     });
 
-    await APIClient.deleteDoc(document.id);
+    await apiClient.docs.deleteDoc(document.id);
     documents.value = documents.value.filter(doc => doc.id !== document.id);
     $q.notify({
       color: 'positive',
@@ -331,3 +338,10 @@ const deleteDocument = async (document) => {
   }
 };
 </script>
+
+<style>
+  .max-width-70 {
+    max-width: 70%;
+    margin: 0 auto; /* Optional: centers the list */
+  }
+</style>

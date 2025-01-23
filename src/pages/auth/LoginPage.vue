@@ -10,19 +10,23 @@
           <q-form @submit.prevent="handleNativeLogin">
             <q-input
               v-model="username"
-              label="Username"
-              filled
+              label="Username / Email"
+              outlined
               autofocus
               required
-              :rules="[val => val && val.length > 0 || 'Username is required']"
+              :class="{'q-mb-md': username.length == 0}"
+              :rules="[val => val && val.length > 0 || 'Username or Email is required']"
             />
             <q-input
-            v-model="password"
-            label="Password"
-            :type="isPwd ? 'password' : 'text'"
-            filled
-            required
-            :rules="[val => val && val.length > 0 || 'Password is required']">
+              v-model="password"
+              autocomplete="current-password"
+              label="Password"
+              outlined
+              required
+              :type="isPwd ? 'password' : 'text'"
+              :class="{'q-mb-md': password.length == 0}"
+              :rules="[val => val && val.length > 0 || 'Password is required']"
+            >
               <template v-slot:append>
                 <q-icon
                   :name="isPwd ? 'visibility_off' : 'visibility'"
@@ -31,43 +35,55 @@
                 />
               </template>
             </q-input>
-            <div class="q-mt-md login-btn">
-              <q-btn type="submit" label="Login" color="primary" class="full-width" />
+            <div class="q-mt-md">
+              <q-btn
+                :loading="loading"
+                type="submit"
+                label="Login"
+                color="primary"
+                class="full-width"
+                unelevated
+              />
             </div>
           </q-form>
 
-          <q-btn
-            class="q-mt-md login-btn"
-            @click="handleGoogleLogin"
-            flat
-          >
-            <template v-slot:default>
-              <div class="row items-center no-wrap">
-                <q-icon name="img:https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" size="18px" class="q-mr-sm" />
-                <div>Login with Google</div>
-              </div>
-            </template>
-          </q-btn>
-          <q-btn
-            class="q-mt-md login-btn"
-            @click="handleMicrosoftLogin"
-            flat
-          >
-            <template v-slot:default>
-              <div class="row items-center no-wrap">
-                <q-icon name="img:https://learn.microsoft.com/en-us/azure/active-directory/develop/media/howto-add-branding-in-azure-ad-apps/ms-symbollockup_mssymbol_19.png" size="18px" class="q-mr-sm" />
-                <div>Login with Microsoft</div>
-              </div>
-            </template>
-          </q-btn>
+          <div class="q-mt-md">
+            <q-btn
+              no-caps
+              outline
+              @click="handleGoogleLogin"
+            >
+              <template v-slot:default>
+                <div class="row no-wrap">
+                  <q-icon name="img:https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" size="18px" class="q-mr-sm" />
+                  <div>Continue with Google</div>
+                </div>
+              </template>
+            </q-btn>
+          </div>
+          <div class="q-mt-md">
+            <q-btn
+              no-caps
+              outline
+              @click="handleMicrosoftLogin"
+            >
+              <template v-slot:default>
+                <div class="row no-wrap">
+                  <q-icon name="img:https://learn.microsoft.com/en-us/azure/active-directory/develop/media/howto-add-branding-in-azure-ad-apps/ms-symbollockup_mssymbol_19.png" size="18px" class="q-mr-sm" />
+                  <div>Continue with Microsoft</div>
+                  <q-space />
+                </div>
+              </template>
+            </q-btn>
+          </div>
 
           <div class="row items-center justify-center q-mt-md">
             <p>Don't have an account?</p>
             <q-btn
               to="/register"
-              flat
               color="primary"
               label="Register"
+              flat
             />
           </div>
         </q-card-section>
@@ -79,31 +95,33 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/plugins/stores/auth";
-import { googleTokenLogin } from "vue3-google-login";
-import { loginRequest, msalInstance } from "@/plugins/config/msalConfig";
 import { useQuasar } from 'quasar';
-import APIClient from '@/api.js';
+import { useRouter } from "vue-router";
+import { googleTokenLogin } from "vue3-google-login";
+import { apiClient } from "@/plugins/api";
+import { useAuthStore } from "@/plugins/stores/auth";
+import { loginRequest, msalInstance } from "@/plugins/config/msalConfig";
 
 const $q = useQuasar();
-
 const $router = useRouter();
 const authStore = useAuthStore();
 
 const username = ref("");
 const password = ref("");
 const isPwd = ref(true);
+const loading = ref(false);
 
 async function handleNativeLogin() {
   try {
+    loading.value = true;
     const params = new URLSearchParams();
     params.append("username", username.value);
     params.append("password", password.value);
 
-    const response = await APIClient.authenticateNative(params);
-
+    const response = await apiClient.auth.authenticateNative(params);
     const { access_token, refresh_token } = response.data;
+
+    loading.value = false;
     authStore.login(access_token, refresh_token);
 
     $router.push("/chat");
@@ -115,8 +133,7 @@ async function handleNativeLogin() {
 async function handleGoogleLogin() {
   try {
     const googleUser = await googleTokenLogin();
-
-    const response = await APIClient.authenticateGoogle(googleUser.access_token);
+    const response = await apiClient.auth.authenticateGoogle(googleUser.access_token);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);
@@ -132,8 +149,7 @@ async function handleMicrosoftLogin() {
   try {
     await msalInstance.initialize();
     const loginResponse = await msalInstance.loginPopup(loginRequest);
-
-    const response = await APIClient.authenticateMicrosoft(loginResponse);
+    const response = await apiClient.auth.authenticateMicrosoft(loginResponse.accessToken, loginResponse.idToken);
 
     const { access_token, refresh_token } = response.data;
     authStore.login(access_token, refresh_token);
@@ -180,14 +196,7 @@ onMounted(() => {
   justify-content: center;
 }
 
-.login-btn {
-  background-color: #ffffff;
-  color: #5e5e5e;
-  border: 1px solid #8c8c8c;
-  margin-bottom: 10px;
-}
-
-p{
+p {
   margin: 0px;
 }
 </style>

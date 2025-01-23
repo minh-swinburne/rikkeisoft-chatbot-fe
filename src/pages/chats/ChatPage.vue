@@ -46,7 +46,15 @@
             <q-item-label lines="1">{{ chat.name }}</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-btn-dropdown flat dense rounded no-icon-animation size="sm" dropdown-icon="more_horiz" @click.stop>
+            <q-btn-dropdown
+              dropdown-icon="more_horiz"
+              size="sm"
+              flat
+              dense
+              rounded
+              no-icon-animation
+              @click.stop
+            >
               <q-list>
                 <q-item clickable v-close-popup @click="renameChat(chat)">
                   <q-item-section>Rename</q-item-section>
@@ -68,15 +76,15 @@
 </template>
 
 <script setup>
+import APIClient from '@/api.js';
+import NavBar from '@/components/NavBar.vue';
+import { camelize } from '@/utils';
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/plugins/stores/auth';
 import { useLayoutStore } from '@/plugins/stores/layout';
-import NavBar from '@/components/NavBar.vue';
-import { camelize } from '@/utils';
 
-import APIClient from '@/api.js'
 
 const $q = useQuasar();
 const $router = useRouter();
@@ -102,7 +110,7 @@ async function createNewChat() {
 
 
 async function renameChat(chat) {
-  const newName = await $q.dialog({
+  $q.dialog({
     title: 'Rename Chat',
     message: 'Enter new chat name:',
     prompt: {
@@ -111,25 +119,25 @@ async function renameChat(chat) {
     },
     cancel: true,
     persistent: true,
-  });
-
-  if (newName && newName !== chat.name) {
-    try {
-      await APIClient.renameChat(chat.id, newName, authStore.user.sub);
-      await fetchChats();
-    } catch (error) {
-      $q.notify({
-        color: 'negative',
-        message: 'Error renaming chat',
-        icon: 'error',
-      });
+  }).onOk(async (newName) => {
+    if (newName && newName !== chat.name) {
+      try {
+        await APIClient.renameChat(chat.id, newName, authStore.user.sub);
+        await fetchChats();
+      } catch (error) {
+        $q.notify({
+          color: 'negative',
+          message: 'Error renaming chat',
+          icon: 'error',
+        });
+      }
     }
-  }
+  });
 }
 
 async function deleteChat(chat) {
   try {
-    await $q.dialog({
+    $q.dialog({
       title: 'Confirm Deletion',
       message: 'Are you sure you want to delete this chat?',
       ok: 'Yes',
@@ -151,7 +159,6 @@ async function deleteChat(chat) {
         });
       }
     });
-
   } catch (error) {
     $q.notify({
       color: 'negative',

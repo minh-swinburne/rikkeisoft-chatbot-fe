@@ -72,13 +72,16 @@ async function checkTokenValidity() {
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
-  authStore.hydrateUser();
-
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-
   const isValidToken = await checkTokenValidity();
 
-  if (requiresAuth && !isValidToken) {
+  if (isValidToken && !authStore.isAuthenticated) {
+    authStore.login(
+      localStorage.getItem("access_token"),
+      localStorage.getItem("refresh_token")
+    );
+    next();
+  } else if (requiresAuth && !isValidToken) {
     next("/login");
   } else {
     next();

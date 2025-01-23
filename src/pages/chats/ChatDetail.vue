@@ -224,7 +224,7 @@ function reloadChat() {
 }
 
 onMounted(() => {
-  
+
   window.addEventListener('chat-changed', (event) => {
     if (event.detail === $route.params.chatId) {
       console.log("hehehe")

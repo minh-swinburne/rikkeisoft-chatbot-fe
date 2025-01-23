@@ -78,16 +78,15 @@
 </template>
 
 <script setup>
+import APIClient from '@/api.js';
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/plugins/stores/auth";
 import { googleTokenLogin } from "vue3-google-login";
 import { loginRequest, msalInstance } from "@/plugins/config/msalConfig";
 import { useQuasar } from 'quasar';
-import APIClient from '@/api.js';
 
 const $q = useQuasar();
-
 const $router = useRouter();
 const authStore = useAuthStore();
 
@@ -115,7 +114,6 @@ async function handleNativeLogin() {
 async function handleGoogleLogin() {
   try {
     const googleUser = await googleTokenLogin();
-
     const response = await APIClient.authenticateGoogle(googleUser.access_token);
 
     const { access_token, refresh_token } = response.data;
@@ -132,7 +130,6 @@ async function handleMicrosoftLogin() {
   try {
     await msalInstance.initialize();
     const loginResponse = await msalInstance.loginPopup(loginRequest);
-
     const response = await APIClient.authenticateMicrosoft(loginResponse);
 
     const { access_token, refresh_token } = response.data;

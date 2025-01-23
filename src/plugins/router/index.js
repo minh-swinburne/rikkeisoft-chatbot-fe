@@ -3,10 +3,10 @@ import { useAuthStore } from "@/plugins/stores/auth";
 import { apiClient } from "@/plugins/api";
 
 const routes = [
-  { path: "/login", component: () => import("@/pages/LoginPage.vue"), meta: { requiresAuth: false } },
+  { path: "/login", component: () => import("@/pages/auth/LoginPage.vue"), meta: { requiresAuth: false } },
   {
     path: "/register",
-    component: () => import("@/pages/RegisterPage.vue"),
+    component: () => import("@/pages/auth/RegisterPage.vue"),
   },
   {
     path: "/chat",
@@ -25,12 +25,12 @@ const routes = [
   },
   {
     path: "/upload",
-    component: () => import("@/pages/UploadPage.vue"),
+    component: () => import("@/pages/docs/DocUploadPage.vue"),
     meta: { requiresAuth: true },
   },
   {
     path: "/docs",
-    component: () => import("@/pages/DocList.vue"),
+    component: () => import("@/pages/docs/DocListPage.vue"),
     meta: { requiresAuth: true },
   },
   {

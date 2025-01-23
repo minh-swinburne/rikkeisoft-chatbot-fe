@@ -4,6 +4,8 @@ export const usersAPI = (client) => {
   return {
     listUsers: () => client.get(`${prefix}`),
 
+    getCurrentUser: () => client.get(`${prefix}/me`),
+
     getUser: (id) => client.get(`${prefix}/${id}`),
 
     createUser: (userDetails) =>

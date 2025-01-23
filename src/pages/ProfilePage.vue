@@ -5,81 +5,83 @@
         <nav-bar/>
       </q-toolbar>
     </q-header>
+
     <q-page-container>
-      <q-page class="flex flex-center">
-        <q-card class="my-card q-pa-md" style="width: 70%">
-          <q-card-section>
-            <div class="text-h6">Profile Settings</div>
-          </q-card-section>
+      <q-page padding class="max-width-70 q-pa-md">
+        <q-card flat bordered class="q-pa-md">
+          <div class="text-h6">Profile Settings</div>
+          <q-form @submit="onSubmit" class="q-gutter-md">
+            <div class="row justify-center q-mb-md">
+              <q-avatar size="100px">
+                <q-img :src="avatarUrl" />
+                <q-file v-model="avatarFile" accept="image/*" style="display: none">
+                  <template v-slot:append>
+                    <q-icon name="attach_file" />
+                  </template>
+                </q-file>
+              </q-avatar>
+            </div>
+            <div class="row justify-center q-mb-md">
+              <q-btn flat @click="$refs.avatarInput.click()">Change Avatar</q-btn>
+            </div>
 
-          <q-card-section>
-            <q-form @submit="onSubmit" class="q-gutter-md">
-              <div class="row justify-center q-mb-md">
-                <q-avatar size="100px">
-                  <q-img :src="avatarUrl" />
-                  <q-file v-model="avatarFile" accept="image/*" style="display: none">
-                    <template v-slot:append>
-                      <q-icon name="attach_file" />
-                    </template>
-                  </q-file>
-                </q-avatar>
-              </div>
-              <div class="row justify-center q-mb-md">
-                <q-btn flat @click="$refs.avatarInput.click()">Change Avatar</q-btn>
-              </div>
+            <q-input
+              filled
+              v-model="email"
+              label="Email"
+              type="email"
+              :rules="[val => !!val || 'Email is required', isValidEmail]"
+              class="q-mb-md"
+            />
 
-              <q-input
-                filled
-                v-model="email"
-                label="Email"
-                type="email"
-                :rules="[val => !!val || 'Email is required', isValidEmail]"
-              />
+            <q-input
+              filled
+              v-model="firstname"
+              label="First Name"
+              :rules="[val => !!val || 'First name is required']"
+              class="q-mb-md"
+            />
 
-              <q-input
-                filled
-                v-model="firstname"
-                label="First Name"
-                :rules="[val => !!val || 'First name is required']"
-              />
+            <q-input
+              filled
+              v-model="lastname"
+              label="Last Name"
+              :rules="[val => !!val || 'Last name is required']"
+              class="q-mb-md"
+            />
 
-              <q-input
-                filled
-                v-model="lastname"
-                label="Last Name"
-                :rules="[val => !!val || 'Last name is required']"
-              />
+            <q-input
+              filled
+              v-model="username"
+              label="Username"
+              :rules="[val => !!val || 'Username is required']"
+              class="q-mb-md"
+            />
 
-              <q-input
-                filled
-                v-model="username"
-                label="Username"
-                :rules="[val => !!val || 'Username is required']"
-              />
+            <q-input
+              filled
+              v-model="password"
+              label="New Password"
+              type="password"
+              :rules="[val => !val || val.length >= 8 || 'Password must be at least 8 characters']"
+              class="q-mb-md"
+            />
 
-              <q-input
-                filled
-                v-model="password"
-                label="New Password"
-                type="password"
-                :rules="[val => !val || val.length >= 8 || 'Password must be at least 8 characters']"
-              />
+            <q-input
+              filled
+              v-model="confirmPassword"
+              label="Confirm New Password"
+              type="password"
+              :rules="[
+                val => !password || val === password || 'Passwords do not match'
+              ]"
+              class="q-mb-md"
+            />
 
-              <q-input
-                filled
-                v-model="confirmPassword"
-                label="Confirm New Password"
-                type="password"
-                :rules="[
-                  val => !password || val === password || 'Passwords do not match'
-                ]"
-              />
-
-              <div>
-                <q-btn label="Save Changes" type="submit" color="primary" />
-              </div>
-            </q-form>
-          </q-card-section>
+            <div>
+              <q-btn label="Save Changes" type="submit" color="primary" />
+            </div>
+          </q-form>
         </q-card>
       </q-page>
     </q-page-container>
@@ -164,3 +166,10 @@ onMounted(async () => {
   }
 })
 </script>
+
+<style scoped>
+.max-width-70 {
+  max-width: 70%;
+  margin: 0 auto; /* Optional: centers the list */
+}
+</style>

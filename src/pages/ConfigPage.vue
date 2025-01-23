@@ -7,91 +7,85 @@
     </q-header>
 
     <q-page-container>
-      <q-page padding class="max-width-70">
-        <div class="q-pa-md">
-          <q-card flat bordered>
-            <q-tabs
-              v-model="activeTab"
-              dense
-              class="text-grey"
-              active-color="primary"
-              indicator-color="primary"
-              align="justify"
-              narrow-indicator
-            >
-              <q-tab v-for="(tab, key) in tabs" :key="key" :name="key" :label="tab" />
-            </q-tabs>
-
-            <q-separator />
-
-            <q-tab-panels v-model="activeTab">
-              <q-tab-panel v-for="(tab, key) in tabs" :key="key" :name="key">
-                <h5 class="q-mt-none">{{ tab }}</h5>
-                <q-form @submit="handleSubmit(key)">
-                  <q-input
-                    v-model="config.instructions"
-                    filled
-                    type="textarea"
-                    label="Instructions"
-                    :readonly="!isEditing"
-                    rows="12"
-                    class="instruction-textarea"
-                  />
-
-                  <q-input
-                    v-if="config.messageTemplate"
-                    v-model="config.messageTemplate"
-                    filled
-                    type="textarea"
-                    label="Message Template"
-                    :readonly="!isEditing"
-                    rows="4"
-                    class="q-mt-md"
-                  />
-
-                  <q-select
-                    v-model="config.model"
-                    :options="config.modelOptions"
-                    label="Model"
-                    filled
-                    :disable="!isEditing"
-                    class="q-mt-md"
-                  />
-
-                  <q-input
-                    v-model.number="config.maxTokens"
-                    filled
-                    type="number"
-                    label="Max Tokens"
-                    :readonly="!isEditing"
-                    :min="1"
-                    :max="8192"
-                    class="q-mt-md"
-                  />
-
-                  <q-input
-                    v-model.number="config.temperature"
-                    filled
-                    type="number"
-                    label="Temperature"
-                    :readonly="!isEditing"
-                    :step="0.1"
-                    :min="0"
-                    :max="1"
-                    class="q-mt-md"
-                  />
-
+      <q-page padding class="max-width-70 q-pa-md">
+        <q-card flat bordered class="q-pa-md">
+          <q-tabs
+            v-model="activeTab"
+            dense
+            class="q-mb-md"
+          >
+           <q-tab v-for="(tab, key) in tabs" :key="key" :name="key" :label="tab" />
+          </q-tabs>
+          <q-separator/>
+          <q-tab-panels v-model="activeTab">
+            <q-tab-panel v-for="(tab, key) in tabs" :key="key" :name="key">
+              <q-form @submit="handleSubmit(key)">
+                <div class="row items-center justify-between q-mb-md">
+                  <h5 class="q-my-none">{{ tab }}</h5>
                   <q-btn
                     :label="isEditing ? 'Apply' : 'Edit'"
                     color="primary"
                     @click="toggleEdit"
-                    class="q-mt-lg"
+                    :icon="isEditing ? 'check' : 'edit'"
+                    :class="{ 'q-ml-sm': $q.screen.gt.xs }"
                   />
-                </q-form>
-              </q-tab-panel>
-            </q-tab-panels>
-          </q-card>
-        </div>
+                </div>
+                <q-input
+                  v-model="config.instructions"
+                  filled
+                  type="textarea"
+                  label="Instructions"
+                  :readonly="!isEditing"
+                  rows="12"
+                  class="instruction-textarea"
+                />
+
+                <q-input
+                  v-if="config.messageTemplate"
+                  v-model="config.messageTemplate"
+                  filled
+                  type="textarea"
+                  label="Message Template"
+                  :readonly="!isEditing"
+                  rows="4"
+                  class="q-mt-md"
+                  />
+
+                <q-select
+                  v-model="config.model"
+                  :options="config.modelOptions"
+                  label="Model"
+                  filled
+                  :disable="!isEditing"
+                  class="q-mt-md"
+                  />
+
+                <q-input
+                  v-model.number="config.maxTokens"
+                  filled
+                  type="number"
+                  label="Max Tokens"
+                  :readonly="!isEditing"
+                  :min="1"
+                  :max="8192"
+                  class="q-mt-md"
+                />
+
+                <q-input
+                  v-model.number="config.temperature"
+                  filled
+                  type="number"
+                  label="Temperature"
+                  :readonly="!isEditing"
+                  :step="0.1"
+                  :min="0"
+                  :max="1"
+                  class="q-mt-md"
+                />
+              </q-form>
+            </q-tab-panel>
+          </q-tab-panels>
+        </q-card>
       </q-page>
     </q-page-container>
   </q-layout>
@@ -204,4 +198,11 @@ const handleSubmit = async (tab) => {
   margin: 0 auto; /* Optional: centers the list */
 }
 
+@media (max-width: 599px) {
+  .q-page-container .q-btn {
+    width: 100%;
+    margin-top: 16px;
+  }
+}
 </style>
+

@@ -88,7 +88,7 @@
         </q-card>
       </q-fab>
 
-      <q-form @submit="sendMessage()" class="q-pa-md" style="width: 100%">
+      <q-form class="q-pa-md" style="width: 100%">
         <q-input
           v-model="userInput"
           outlined
@@ -104,7 +104,7 @@
           :dark="$q.dark.isActive"
         >
           <template v-slot:append>
-            <q-btn round flat icon="send" type="submit" />
+            <q-btn round flat icon="send" @click="sendMessage()" />
           </template>
         </q-input>
       </q-form>
@@ -184,6 +184,7 @@ function parseTime(time) {
 }
 
 async function sendMessage(initialMessage = null) {
+  console.log("Sending message...");
   const query = initialMessage || userInput.value.trim();
   if (!query) return;
 

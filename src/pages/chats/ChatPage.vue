@@ -139,6 +139,7 @@ async function generateName(chatId) {
 
       const reader = nameResponse.body.getReader();
       const decoder = new TextDecoder("utf-8");
+      const delay = 100;
 
       let newName = "";
       let done = false;
@@ -147,8 +148,14 @@ async function generateName(chatId) {
         const { value, done: streamDone } = await reader.read();
         if (streamDone) break;
 
-        newName += decoder.decode(value, { stream: true });
-        chats.value[index].name = newName;
+        let char = decoder.decode(value, { stream: true });
+
+        if (!["\"", "''"].includes(char)) {
+          newName += char;
+          chats.value[index].name = newName;
+
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
       }
 
       console.log("Streaming completed.");

@@ -83,8 +83,8 @@
               <q-item-section class="col-grow q-mt-md">
                 <div class="row q-gutter-sm justify-end">
                   <q-btn color="secondary" icon="visibility" @click="previewDocument(document)" label="Preview" />
-                  <q-btn color="warning" icon="edit" @click="editDocument(document)" label="Edit" />
                   <q-btn color="positive" icon="download" @click="downloadDocument(document)" label="Download" />
+                  <q-btn color="warning" icon="edit" @click="editDocument(document)" label="Edit" />
                   <q-btn color="negative" icon="delete" @click="deleteDocument(document)" label="Delete" />
                 </div>
               </q-item-section>
@@ -103,17 +103,17 @@
       </q-page>
     </q-page-container>
 
-    <q-dialog v-model="showViewer" full-width>
-      <q-card>
-        <q-card-section>
-          <div class="text-h6 text-center">{{ currentDocument?.title }}</div>
+    <q-dialog v-model="showViewer">
+      <q-card style="width: 90vw; max-width: 900px;">
+        <q-card-section class="row items-center q-pb-none q-mb-md">
+          <div class="text-h6">{{ currentDocument.title }} - Preview</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
-        <q-card-section class="q-pa-none" align="center">
-          <iframe :src="`http://127.0.0.1:8000/api/v1/docs/${currentDocument?.id}/preview`" style="width: 70%; height: 600px;"  />
+
+        <q-card-section class="q-pa-none q-mb-lg" align="center">
+          <iframe :src="previewUrl" style="width: 90%; height: 500px;"  />
         </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="Close" color="secondary" v-close-popup />
-        </q-card-actions>
       </q-card>
     </q-dialog>
 
@@ -179,6 +179,8 @@ const $router = useRouter();
 const documents = ref([]);
 const showViewer = ref(false);
 const currentDocument = ref(null);
+const previewUrl = ref("");
+
 const showEditForm = ref(false);
 const editFormData = ref({
   id: '',
@@ -254,9 +256,22 @@ const clearFilters = () => {
   selectedCategories.value = [];
 };
 
-const previewDocument = (document) => {
-  currentDocument.value = document;
-  showViewer.value = true;
+const previewDocument = async (document) => {
+  try {
+    const response = await apiClient.docs.previewDoc(document.id);
+    console.log('Preview response:', response);
+    previewUrl.value = response.data;
+    console.log('Preview URL:', previewUrl.value);
+    currentDocument.value = document;
+    showViewer.value = true;
+  } catch (error) {
+    console.error('Error previewing document:', error);
+    $q.notify({
+      color: 'negative',
+      message: 'Failed to preview document',
+      icon: 'report_problem'
+    });
+  }
 };
 
 const editDocument = (document) => {
@@ -324,19 +339,29 @@ const downloadDocument = async (doc) => {
 
 const deleteDocument = async (document) => {
   try {
-    await $q.dialog({
+    $q.dialog({
       title: 'Confirm Deletion',
       message: `Are you sure you want to delete "${document.title}"?`,
       cancel: true,
       persistent: true
-    });
+    }).onOk(async () => {
+      try {
+        await apiClient.docs.deleteDoc(document.id);
+        documents.value = documents.value.filter(doc => doc.id !== document.id);
 
-    await apiClient.docs.deleteDoc(document.id);
-    documents.value = documents.value.filter(doc => doc.id !== document.id);
-    $q.notify({
-      color: 'positive',
-      message: 'Document deleted successfully',
-      icon: 'check'
+        $q.notify({
+          color: 'positive',
+          message: 'Document deleted successfully',
+          icon: 'check'
+        });
+      } catch (error) {
+        console.error('Error deleting document:', error);
+        $q.notify({
+          color: 'negative',
+          message: 'Failed to delete document',
+          icon: 'report_problem'
+        });
+      }
     });
   } catch (error) {
     if (error) {

@@ -14,11 +14,11 @@ export const docsAPI = (client) => {
         headers: { "Content-Type": "multipart/form-data" },
       }),
 
-    downloadDoc: (id) =>
-      client.get(`docs/${id}/download`, { responseType: "blob" }),
+    // downloadDoc: (id) =>
+    //   client.get(`${prefix}/${id}/download`, { responseType: "blob" }),
 
-    previewDoc: (id) => client.get(`docs/${id}/preview`),
+    previewDoc: (id) => client.get(`${prefix}/${id}/preview`),
 
-    deleteDoc: (id) => client.delete(`docs/${id}`),
+    deleteDoc: (id) => client.delete(`${prefix}/${id}`),
   };
 };

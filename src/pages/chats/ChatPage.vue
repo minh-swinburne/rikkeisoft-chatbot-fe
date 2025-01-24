@@ -33,7 +33,7 @@
           />
         </q-item-label>
         <q-item
-          v-for="chat in sortedChats"
+          v-for="chat in chats"
           :key="chat.id"
           :active-class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-4'"
           :style="{ borderRadius: '5px' }"
@@ -70,50 +70,119 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view @send="fetchChats" />
+      <router-view @send="fetchChats" @rename="generateName" />
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
-import { camelize } from '@/utils';
+import NavBar from "@/components/NavBar.vue";
 import { apiClient } from "@/plugins/api";
-import { useLayoutStore } from '@/plugins/stores/layout';
-import NavBar from '@/components/NavBar.vue';
-
+import { useLayoutStore } from "@/plugins/stores/layout";
+import { camelize } from "@/utils";
+import { useQuasar } from "quasar";
+import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
 const $q = useQuasar();
 const $router = useRouter();
 const layoutStore = useLayoutStore();
 
-const isDark = ref(localStorage.getItem("darkMode") === "true");
+const chats = ref([]);
+const isDark = ref(false);
 
 const leftDrawerOpen = computed({
   get: () => layoutStore.leftDrawerOpen,
-  set: (value) => layoutStore.setLeftDrawerOpen(value)
+  set: (value) => layoutStore.setLeftDrawerOpen(value),
 });
 
-const chats = ref([]);
-
-const sortedChats = computed(() =>
-  [...chats.value].sort((a, b) => new Date(b.lastAccess) - new Date(a.lastAccess))
-);
-
-async function createNewChat() {
-  $router.push('/chat');
+function toggleLeftDrawer() {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
+function sortChats() {
+  console.log("Sorting chats...");
+  chats.value.sort((a, b) => new Date(b.lastAccess) - new Date(a.lastAccess));
+  // console.log(chats.value);
+}
+
+async function createNewChat() {
+  $router.push("/chat");
+}
+
+async function fetchChats() {
+  try {
+    const response = await apiClient.chats.listChats();
+    chats.value = camelize(response.data);
+    sortChats();
+  } catch (error) {
+    $q.notify({
+      color: "negative",
+      message: "Error fetching chats",
+      icon: "error",
+    });
+  }
+}
+
+async function generateName(chatId) {
+  const index = chats.value.findIndex((chat) => chat.id === chatId);
+  console.log("Generating new chat name...");
+  console.log(chats.value[index]);
+
+  try {
+    const confResponse = await apiClient.config.checkStream("name_generation");
+    const streaming = confResponse.data;
+    const nameResponse = await apiClient.chats.getNewName(chatId);
+
+    if (streaming) {
+      console.log("Streaming new name...");
+
+      const reader = nameResponse.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      const delay = 100;
+
+      let newName = "";
+      let done = false;
+
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        if (streamDone) break;
+
+        let char = decoder.decode(value, { stream: true });
+
+        if (!["\"", "''"].includes(char)) {
+          newName += char;
+          chats.value[index].name = newName;
+
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+
+      console.log("Streaming completed.");
+      console.log(newName);
+    } else {
+      console.log("Non-streaming response received.");
+      // console.log(chats.value[0] === chats.value[index]);
+      const responseData = await nameResponse.json();
+      chats.value[index].name = responseData.name;
+    }
+  } catch (error) {
+    console.error("Error generating new chat name:", error);
+    $q.notify({
+      color: "negative",
+      message: "An error occurred while generating new chat name.",
+      icon: "error",
+    });
+  }
+}
 
 async function renameChat(chat) {
   $q.dialog({
-    title: 'Rename Chat',
-    message: 'Enter new chat name:',
+    title: "Rename Chat",
+    message: "Enter new chat name:",
     prompt: {
       model: chat.name,
-      type: 'text',
+      type: "text",
     },
     cancel: true,
     persistent: true,
@@ -122,11 +191,17 @@ async function renameChat(chat) {
       try {
         await apiClient.chats.renameChat(chat.id, newName);
         await fetchChats();
+
+        $q.notify({
+          color: "positive",
+          message: "Chat renamed successfully",
+          icon: "check_circle",
+        });
       } catch (error) {
         $q.notify({
-          color: 'negative',
-          message: 'Error renaming chat',
-          icon: 'error',
+          color: "negative",
+          message: "Error renaming chat",
+          icon: "error",
         });
       }
     }
@@ -136,10 +211,10 @@ async function renameChat(chat) {
 async function deleteChat(chat) {
   try {
     $q.dialog({
-      title: 'Confirm Deletion',
-      message: 'Are you sure you want to delete this chat?',
-      ok: 'Yes',
-      cancel: 'No',
+      title: "Confirm Deletion",
+      message: "Are you sure you want to delete this chat?",
+      ok: "Yes",
+      cancel: "No",
     }).onOk(async () => {
       try {
         await apiClient.chats.deleteChat(chat.id);
@@ -149,47 +224,36 @@ async function deleteChat(chat) {
         if ($router.currentRoute.value.params.chatId === chat.id) {
           await $router.push(`/chat`);
         }
+
+        $q.notify({
+          color: "positive",
+          message: "Chat deleted successfully",
+          icon: "check_circle",
+        });
       } catch (deleteError) {
         $q.notify({
-          color: 'negative',
-          message: 'Error deleting chat',
-          icon: 'error',
+          color: "negative",
+          message: "Error deleting chat",
+          icon: "error",
         });
       }
     });
   } catch (error) {
     $q.notify({
-      color: 'negative',
-      message: 'Error with the deletion confirmation dialog',
-      icon: 'error',
+      color: "negative",
+      message: "Error with the deletion confirmation dialog",
+      icon: "error",
     });
   }
-}
-
-async function fetchChats() {
-  try {
-    const response = await apiClient.chats.listChats();
-    chats.value = camelize(response.data);
-  } catch (error) {
-    $q.notify({
-      color: 'negative',
-      message: 'Error fetching chats',
-      icon: 'error',
-    });
-  }
-}
-
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
 onMounted(() => {
   fetchChats();
-  const savedDarkMode = localStorage.getItem('darkMode')
+  const savedDarkMode = localStorage.getItem("darkMode");
   if (savedDarkMode !== null) {
-    isDark.value = savedDarkMode === 'true'
-    $q.dark.set(isDark.value)
-    console.log($q.dark)
+    isDark.value = savedDarkMode === "true";
+    $q.dark.set(isDark.value);
+    console.log($q.dark);
   }
 });
 </script>

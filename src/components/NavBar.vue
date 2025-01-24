@@ -7,13 +7,27 @@
     <q-space />
 
     <q-tabs v-model="tab" inline-label>
-      <q-tab
+      <component
         v-for="item in filteredNavItems"
+        :is="item.children ? 'q-btn-dropdown' : 'q-tab'"
         :key="item.path"
         :name="item.path"
         :label="item.name"
-        @click="$router.push(item.path)"
-      />
+        flat
+        @click="handleTabChange(item)"
+      >
+        <q-list v-if="item.children" bordered link>
+          <q-item
+            v-for="child in item.children"
+            :key="child.path"
+            clickable
+            v-ripple
+            @click="handleTabChange(child)"
+          >
+            <q-item-section>{{ child.name }}</q-item-section>
+          </q-item>
+        </q-list>
+      </component>
     </q-tabs>
 
     <q-space />
@@ -68,8 +82,15 @@ const tab = ref($route.path);
 
 const navItems = [
   { name: "Chat", path: "/chat" },
-  { name: "Documents", path: "/docs" },
-  { name: "Upload", path: "/upload", requiresAdmin: true },
+  {
+    name: "Documents",
+    path: "/docs",
+    requiresAdmin: true,
+    children: [
+      { name: "All Documents", path: "/list" },
+      { name: "Upload", path: "/upload" },
+    ],
+  },
   { name: "Config", path: "/config", requiresAdmin: true },
 ];
 
@@ -85,10 +106,14 @@ function logout() {
 }
 
 function toggleDarkMode() {
-  $q.dark.toggle(); 
-  isDark.value = $q.dark.isActive; 
-  localStorage.setItem("darkMode", isDark.value); 
-  console.log($q.dark.isActive);
+  isDark.value = !isDark.value;
+  $q.dark.set(isDark.value);
+  localStorage.setItem("darkMode", isDark.value);
 }
 
+function handleTabChange(tab) {
+  if (!tab.children) {
+    $router.push(tab.path);
+  }
+}
 </script>

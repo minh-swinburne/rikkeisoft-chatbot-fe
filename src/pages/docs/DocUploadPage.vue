@@ -28,7 +28,7 @@
               v-if="activeTab === 'file'"
               v-model="file"
               name="file"
-              label="Choose File"
+              label="Choose File *"
               accept=".pdf, .doc, .docx, .xls, .xlsx"
               class="q-mb-md"
               outlined
@@ -45,7 +45,7 @@
               v-else
               v-model="link"
               name="link"
-              label="Enter Weblink"
+              label="Enter Weblink *"
               placeholder="https://example.com"
               class="q-mb-md"
               outlined
@@ -55,9 +55,9 @@
 
             <!-- Shared Fields Section -->
             <q-input
-              v-model="documentTitle"
+              v-model="title"
               name="title"
-              label="Document Title"
+              label="Document Title *"
               class="q-mb-md"
               outlined
               required
@@ -71,21 +71,22 @@
               type="textarea"
               class="q-mb-md"
               outlined
-              required
             />
 
             <q-select
               v-model="selectedCategories"
               :options="categories"
               name="categories"
-              label="Categories"
+              label="Categories *"
               class="q-mb-md"
               type="checkbox"
               multiple
               outlined
               required
-              :rules="[(val) => !!val || 'Field is required']"
+              :rules="[(val) => val.length > 0 || 'Field is required']"
             />
+
+            <!-- {{ selectedCategories }} -->
 
             <q-input
               v-model="createdDate"
@@ -99,7 +100,7 @@
             <q-input
               v-model="creator"
               name="creator"
-              label="Creator (Email)"
+              label="Creator (Email) *"
               class="q-mb-md"
               outlined
               required
@@ -107,7 +108,7 @@
             />
 
             <!-- Access Control Section -->
-            <q-item-label class="text-h6">Access Control</q-item-label>
+            <q-item-label class="text-h6">Access Control *</q-item-label>
             <q-option-group
               v-model="restricted"
               :options="accessOptions"
@@ -118,6 +119,7 @@
 
             <!-- Submit Button -->
             <q-btn
+              :loading="uploading"
               label="Upload"
               color="primary"
               type="submit"
@@ -181,17 +183,18 @@ const link = ref(""); // For "Weblink Upload"
 const createdDate = ref(""); // Default date is today
 const creator = ref(authStore.user?.email);
 const restricted = ref("admin"); // Default access is "Everyone"
-const documentTitle = ref(""); // For "Document Title"
+const title = ref(""); // For "Document Title"
 const description = ref(""); // For "Description"
+const uploading = ref(false); // For loading spinner
 
 const accessOptions = ref([
   {
-    label: "Everyone",
-    value: "all",
-  },
-  {
     label: "Admin Only",
     value: "admin",
+  },
+  {
+    label: "Everyone",
+    value: "all",
   },
 ]);
 const categories = ref([
@@ -221,6 +224,7 @@ function handleFileUpload(event) {
 }
 
 function submit() {
+  uploading.value = true;
   uploadForm.value.validate().then((success) => {
     if (success) {
       console.log("Form submitted successfully!");
@@ -235,9 +239,8 @@ function submit() {
         formData.append("link", link.value);
       }
 
-      formData.append("title", documentTitle.value);
+      formData.append("title", title.value);
       formData.append("description", description.value || ""); // Optional
-      formData.append("categories", selectedCategories.value.join(","));
       formData.append(
         "createdDate",
         createdDate.value || new Date().toISOString().slice(0, 10)
@@ -247,6 +250,10 @@ function submit() {
         "restricted",
         restricted.value === "all" ? "false" : "true"
       );
+
+      selectedCategories.value.forEach((category) => {
+        formData.append("categories", category);
+      });
 
       // Debug FormData entries
       for (let [key, value] of formData.entries()) {
@@ -278,6 +285,7 @@ function submit() {
         message: "Please fill in all required fields.",
       });
     }
+    uploading.value = false;
   });
 
   console.log($q.notify);

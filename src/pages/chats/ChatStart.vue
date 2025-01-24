@@ -3,7 +3,7 @@
     <div class="text-center" style="width: 100%;">
       <h1 class="text-h3 q-mb-md" :class="{ 'text-white': $q.dark.isActive }">Welcome to RikkeiGPT</h1>
       <p class="text-subtitle1" :class="{ 'text-grey-5': $q.dark.isActive }">Enter a message to start a new chat</p>
-      <q-form @submit="createNewChat" class="q-pa-md" style="width: 60%; margin: auto;" >
+      <q-form class="q-pa-md" style="width: 60%; margin: auto;" >
         <q-input
           v-model="userInput"
           outlined
@@ -17,7 +17,7 @@
           :dark="$q.dark.isActive"
         >
           <template v-slot:append>
-            <q-btn round flat icon="send" type="submit" />
+            <q-btn round flat icon="send" @click="createNewChat()" />
           </template>
         </q-input>
       </q-form>

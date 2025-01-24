@@ -2,14 +2,7 @@
 <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
     <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
     <q-toolbar>
-        <q-btn
-        :icon="$q.dark.isActive ? 'menu' : 'menu'"
-        aria-label="Menu"
-        flat
-        dense
-        round
-        @click="toggleLeftDrawer"
-        />
+        <nav-bar />
     </q-toolbar>
     </q-header>
 
@@ -111,11 +104,16 @@
         </div>
 
         <!-- Testimonials Section -->
-        <div id="Testimonials" class="testimonials-section q-pa-lg bg-grey-2 text-center">
-            <h2 class="text-h5 q-mb-md">Developers</h2>
+        <div 
+            id="Testimonials" 
+            class="testimonials-section q-pa-lg text-center"
+            :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-grey-2 text-dark'"
+        >
+            <h2 class="text-h5 q-mb-xl">Developers</h2>
                 <q-carousel
                     v-model="testimonialIndex"
                     navigation
+                    :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-grey-2 text-dark'"
                     control-color="primary"
                     height="300px"
                 >
@@ -123,36 +121,30 @@
                 <q-carousel-slide name="slide-1">
                 <q-img
                     src="../assets/background_2.jpg"
-                    class="q-mb-sm"
                     style="border-radius: 50%; width: 100px; height: 100px; margin: auto;"
-                    alt="John Doe"
+                    alt="Nguyen Thi Thanh Minh"
                 />
-                <p>"ChatBot World has revolutionized how I get answers to my questions. Truly amazing!"</p>
-                <p class="text-caption">- John Doe</p>
+                <h6>Nguyen Thi Thanh Minh</h6>
                 </q-carousel-slide>
 
                 <!-- Slide 2 -->
                 <q-carousel-slide name="slide-2">
                 <q-img
                     src="../assets/background_3.jpg"
-                    class="q-mb-sm"
                     style="border-radius: 50%; width: 100px; height: 100px; margin: auto;"
-                    alt="Jane Smith"
+                    alt="Duong Viet Minh Hoang"
                 />
-                <p>"Incredibly intuitive and helpful. I love the 24/7 support."</p>
-                <p class="text-caption">- Jane Smith</p>
+                <h6>Duong Viet Minh Hoang</h6>
                 </q-carousel-slide>
 
                 <!-- Slide 3 -->
                 <q-carousel-slide name="slide-3">
                 <q-img
                     src="../assets/background_4.jpg"
-                    class="q-mb-sm"
                     style="border-radius: 50%; width: 100px; height: 100px; margin: auto;"
-                    alt="Emma Brown"
+                    alt="Nguyen Si Thanh Trung"
                 />
-                <p>"A perfect blend of intelligence and user-friendliness."</p>
-                <p class="text-caption">- Emma Brown</p>
+                <h6>Nguyen Si Thanh Trung</h6>
                 </q-carousel-slide>
             </q-carousel>
         </div>
@@ -162,8 +154,8 @@
             <div class="row items-center justify-around q-col-gutter-md">
             <!-- Company Info -->
             <div class="col-12 col-sm-4 text-center">
-                <h6 class="text-h6">Rikkeisoft</h6>
-                <p class="text-caption">Innovative solutions for a smarter future.</p>
+                <h4 class="text-h4">Rikkeisoft<p class="text-caption">Where the dream begins</p></h4>
+
             </div>
 
             <!-- Contact Links -->
@@ -221,7 +213,7 @@
             </div>
             </div>
             <div class="text-center text-caption q-mt-xs">
-            © 2025 Your Company Name. All rights reserved.
+            © 2025 Rikkeisoft. All rights reserved.
             </div>
         </q-footer>
 
@@ -229,53 +221,62 @@
     </q-layout>
 </template>
 
-<script>
+<script setup>
+import NavBar from "@/components/NavBar.vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import { useQuasar } from "quasar";
 
-export default {
-name: "HeroSection",
-data() {
-    return {
-        texts: ["Hello World!","Welcome to ChatBot!"], // Sentences to type
-        typedText: "", // Current text being typed
-        showCursor: true, // Blinking cursor state
-        currentCharIndex: 0, // Current character in the text
-        currentTextIndex: 0, // Tracks which sentence is being typed
-        testimonialIndex: 'slide-1'
-    };
-},
-methods: {
-    typeText() {
-    const currentText = this.texts[this.currentTextIndex];
-    if (this.currentCharIndex < currentText.length) {
-        this.typedText += currentText[this.currentCharIndex];
-        this.currentCharIndex++;
-        setTimeout(this.typeText, 100);
-    } else {
-        setTimeout(this.switchText, 2000); // Pause before switching
-    }
-    },
-    switchText() {
-    this.currentCharIndex = 0;
-    this.currentTextIndex = (this.currentTextIndex + 1) % this.texts.length;
-    this.typedText = "";
-    this.typeText();
-    },
-    startCursorBlink() {
-    this.cursorInterval = setInterval(() => {
-        this.showCursor = !this.showCursor;
-    }, 500);
-    },
-},
-mounted() {
-    this.startCursorBlink();
-    this.typeText();
-},
-beforeUnmount() {
-    clearInterval(this.cursorInterval);
-},
+const $q = useQuasar();
+const isDark = ref(localStorage.getItem("darkMode") === "true");
+
+const texts = ref(["Hello World!", "Welcome to ChatBot!"]); // Sentences to type
+const typedText = ref(""); // Current text being typed
+const showCursor = ref(true); // Blinking cursor state
+const currentCharIndex = ref(0); // Current character in the text
+const currentTextIndex = ref(0); // Tracks which sentence is being typed
+let cursorInterval = null; // Interval for cursor blinking
+const testimonialIndex = ref("slide-1"); // Default to the first slide
+
+
+const typeText = () => {
+  const currentText = texts.value[currentTextIndex.value];
+  if (currentCharIndex.value < currentText.length) {
+    typedText.value += currentText[currentCharIndex.value];
+    currentCharIndex.value++;
+    setTimeout(typeText, 100);
+  } else {
+    setTimeout(switchText, 2000); // Pause before switching
+  }
 };
-</script>
 
+const switchText = () => {
+  currentCharIndex.value = 0;
+  currentTextIndex.value = (currentTextIndex.value + 1) % texts.value.length;
+  typedText.value = "";
+  typeText();
+};
+
+const startCursorBlink = () => {
+  cursorInterval = setInterval(() => {
+    showCursor.value = !showCursor.value;
+  }, 500);
+};
+
+onMounted(() => {
+  startCursorBlink();
+  typeText();
+  const savedDarkMode = localStorage.getItem("darkMode");
+  if (savedDarkMode !== null) {
+    isDark.value = savedDarkMode === 'true'
+    $q.dark.set(isDark.value)
+    console.log($q.dark)
+  }
+});
+
+onBeforeUnmount(() => {
+  clearInterval(cursorInterval);
+});
+</script>
 
 <style>
 .hero-section {

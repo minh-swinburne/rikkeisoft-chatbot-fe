@@ -85,8 +85,10 @@ function logout() {
 }
 
 function toggleDarkMode() {
-  isDark.value = !isDark.value;
-  $q.dark.set(isDark.value);
-  localStorage.setItem("darkMode", isDark.value);
+  $q.dark.toggle(); 
+  isDark.value = $q.dark.isActive; 
+  localStorage.setItem("darkMode", isDark.value); 
+  console.log($q.dark.isActive);
 }
+
 </script>

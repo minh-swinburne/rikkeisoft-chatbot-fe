@@ -46,7 +46,7 @@ const routes = [
     component: () => import("@/pages/ProfilePage.vue"),
     meta: { requiresAuth: true },
   },
-  { path: "/", redirect: "/login" }, // Default route
+  { path: "/", redirect: "/home" }, // Default route
 ];
 
 const router = createRouter({

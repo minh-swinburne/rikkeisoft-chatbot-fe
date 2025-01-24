@@ -89,7 +89,7 @@ const $q = useQuasar();
 const $router = useRouter();
 const layoutStore = useLayoutStore();
 
-const isDark = ref(false)
+const isDark = ref(localStorage.getItem("darkMode") === "true");
 
 const leftDrawerOpen = computed({
   get: () => layoutStore.leftDrawerOpen,

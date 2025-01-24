@@ -13,8 +13,8 @@ export default {
   },
   config: {
     notify: {
-      position: 'top-right',
-      timeout: 2500,
+      position: 'bottom-right',
+      timeout: 2000,
     }
   },
 };

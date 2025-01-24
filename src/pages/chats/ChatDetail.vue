@@ -29,10 +29,10 @@
           :bg-color="
             message.role === 'assistant'
               ? $q.dark.isActive
-                ? 'dark-red'
-                : 'red-2'
+                ? 'grey-9'
+                : 'grey-2'
               : $q.dark.isActive
-              ? 'grey-9'
+              ? 'dark'
               : 'grey-3'
           "
           :style="{
@@ -317,5 +317,11 @@ watch(
 
 .scroll-area-transition {
   transition: max-height 0.8s ease-in-out;
+}
+</style>
+
+<style lang="scss">
+.q-message-text a {
+  color: $link !important; /* Choose your desired link color */
 }
 </style>

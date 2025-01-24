@@ -107,7 +107,7 @@ import { useQuasar } from "quasar";
 import { onMounted, ref } from "vue";
 
 const $q = useQuasar();
-const isDark = ref(false);
+const isDark = ref(localStorage.getItem("darkMode") === "true");
 
 const email = ref("");
 const firstname = ref("");

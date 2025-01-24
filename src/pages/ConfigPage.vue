@@ -99,7 +99,7 @@ import { useQuasar } from "quasar";
 import { onMounted, ref, watch } from "vue";
 
 const $q = useQuasar();
-const isDark = ref(false);
+const isDark = ref(localStorage.getItem("darkMode") === "true");
 
 const tabs = {
   answer_generation: "Answer Generation",

@@ -172,7 +172,7 @@ const $router = useRouter();
 const authStore = useAuthStore();
 // const formRef = useTemplateRef("uploadForm"); // Reference to the form element
 
-const isDark = ref(false);
+const isDark = ref(localStorage.getItem("darkMode") === "true");
 
 const uploadForm = ref(null); // Reference to the form element
 const activeTab = ref("file"); // Default tab is "File Upload"

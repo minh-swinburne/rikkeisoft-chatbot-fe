@@ -188,7 +188,7 @@ const editFormData = ref({
   restricted: false,
 });
 
-const isDark = ref(false)
+const isDark = ref(localStorage.getItem("darkMode") === "true");
 
 const availableCategories = ref([
   'Guidance',

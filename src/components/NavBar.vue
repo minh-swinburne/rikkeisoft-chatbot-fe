@@ -16,11 +16,7 @@
         flat
         @click="handleTabChange(item)"
       >
-        <q-list
-          v-if="item.children"
-          bordered
-          link
-        >
+        <q-list v-if="item.children" bordered link>
           <q-item
             v-for="child in item.children"
             :key="child.path"

@@ -70,7 +70,7 @@
                     @click="$router.push(`/profile/${document.creator.id}`)"
                   >
                     <q-avatar>
-                      <img :src="document.creator.avatar_url || 'https://cdn.quasar.dev/logo-v2/svg/logo-dark.svg'" />
+                      <q-img :src="document.creator.avatar_url" srcset="https://cdn.quasar.dev/logo-v2/svg/logo-dark.svg" alt="Creator Avatar" />
                     </q-avatar>
                     {{ document.creator.full_name }}
                   </q-chip>

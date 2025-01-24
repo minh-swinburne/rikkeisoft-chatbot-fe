@@ -18,12 +18,17 @@ export const chatsAPI = (client) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          chatId: chatId,
+          chat_id: chatId,
           role: "user",
           content: query,
         }),
       }),
 
-    getSuggestion: (chatId) => client.post(`chats/${chatId}/suggestions`),
+    getSuggestions: (chatId) => client.get(`chats/${chatId}/suggestions`),
+
+    getNewName: (chatId) => client.fetch(`chats/${chatId}/name`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }),
   };
 };

@@ -37,10 +37,11 @@ export class Client {
   }
 
   fetch(url, options = {}) {
-    const token = this.getAuthorizationToken();
+    const token = this.getToken();
+    // console.log(token);
     const headers = {
-      Authorization: `Bearer ${token}`,
       ...options.headers,
+      Authorization: token,
     };
 
     return fetch(this.baseURL + url, { ...options, headers });

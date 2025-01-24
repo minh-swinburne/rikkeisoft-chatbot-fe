@@ -22,7 +22,9 @@
         <q-chat-message
           v-for="(message, index) in sortedMessages"
           :key="index"
-          :name="message.role === 'assistant' ? 'Bot' : authStore.user?.firstname"
+          :name="
+            message.role === 'assistant' ? 'Bot' : authStore.user?.firstname
+          "
           :text="[marked(message.content)]"
           :sent="message.role !== 'assistant'"
           :text-color="$q.dark.isActive ? 'white' : 'black'"
@@ -38,7 +40,7 @@
           :style="{
             maxWidth: '80%',
             alignSelf: message.role === 'assistant' ? 'flex-start' : 'flex-end',
-  boxShadow: 'none',
+            boxShadow: 'none',
             padding: '0 16px',
           }"
           :stamp="parseTime(message.time)"
@@ -111,20 +113,23 @@
 </template>
 
 <script setup>
-import { marked } from "marked";
-import { useQuasar, date } from "quasar";
-import { useRoute, useRouter } from "vue-router";
-import { computed, nextTick, onMounted, ref, watch } from "vue";
-import { useLayoutStore } from "@/plugins/stores/layout";
-import { useAuthStore } from "@/plugins/stores/auth";
 import { apiClient } from "@/plugins/api";
+import { useAuthStore } from "@/plugins/stores/auth";
+import { useLayoutStore } from "@/plugins/stores/layout";
 import { camelize } from "@/utils";
+import { marked } from "marked";
+import { date, useQuasar } from "quasar";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
+const $q = useQuasar();
 const $route = useRoute();
 const $router = useRouter();
-const $q = useQuasar();
 const authStore = useAuthStore();
 const layoutStore = useLayoutStore();
+
+// eslint-disable-next-line
+const emit = defineEmits(["send", "rename"]);
 
 const messages = ref([]);
 const suggestions = ref([]);
@@ -168,12 +173,12 @@ function parseTime(time) {
   // } else if (sameDate) {
   //   timeString = date.formatDate(time, "H") + "hours ago";
   // } else {
-    if (sameYear) {
-      timeString = date.formatDate(time, "MMM Do");
-    } else {
-      timeString = date.formatDate(time, "DD/MM/YYYY");
-    }
-    timeString += ", " + date.formatDate(time, "hh:mm A");
+  if (sameYear) {
+    timeString = date.formatDate(time, "MMM Do");
+  } else {
+    timeString = date.formatDate(time, "DD/MM/YYYY");
+  }
+  timeString += ", " + date.formatDate(time, "hh:mm A");
   // }
   return timeString;
 }
@@ -189,26 +194,34 @@ async function sendMessage(initialMessage = null) {
   messages.value.push({
     role: "user",
     content: query,
+    time: new Date().toISOString(),
   });
 
   try {
-    const config = await apiClient.config.getConfig("answer_generation");
-    const streaming = config.data.params.stream;
+    const confResponse = await apiClient.config.checkStream(
+      "answer_generation"
+    );
+    const streaming = confResponse.data;
 
-    const response = await apiClient.chats.sendMessage(
+    const chatResponse = await apiClient.chats.sendMessage(
       $route.params.chatId,
       query
     );
+
     if (streaming) {
       console.log("Streaming response...");
 
-      const reader = response.body.getReader();
+      const reader = chatResponse.body.getReader();
       const decoder = new TextDecoder("utf-8");
 
       let botResponse = "";
       let done = false;
 
-      messages.value.push({ role: "assistant", content: botResponse });
+      messages.value.push({
+        role: "assistant",
+        content: botResponse,
+        time: new Date().toISOString(),
+      });
 
       while (!done) {
         const { value, done: streamDone } = await reader.read();
@@ -226,14 +239,20 @@ async function sendMessage(initialMessage = null) {
     } else {
       console.log("Non-streaming response received.");
 
-      const responseData = await response.json();
+      const responseData = await chatResponse.json();
       const botResponse = responseData.content;
       messages.value.push({ role: responseData.role, content: botResponse });
       scrollToBottom();
     }
 
+    if (messages.value.length === 2) {
+      emit("rename", $route.params.chatId);
+    }
+    emit("send");
+
     fetchSuggestions();
   } catch (error) {
+    console.error("Error sending message:", error);
     $q.notify({
       color: "negative",
       message: "An error occurred while fetching the bot's response.",
@@ -259,7 +278,7 @@ async function fetchMessages() {
 
 async function fetchSuggestions() {
   try {
-    const response = await apiClient.chats.getSuggestion($route.params.chatId);
+    const response = await apiClient.chats.getSuggestions($route.params.chatId);
     suggestions.value = response.data.suggestions;
   } catch (error) {
     console.error("Error fetching suggestions:", error);

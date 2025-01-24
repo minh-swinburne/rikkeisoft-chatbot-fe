@@ -12,5 +12,7 @@ export const configAPI = (client) => {
         max_tokens: parseInt(config.value.maxTokens),
         temperature: parseFloat(config.value.temperature),
       }),
+
+    checkStream: (tab) => client.get(`${prefix}/${tab}/stream`),
   };
 };

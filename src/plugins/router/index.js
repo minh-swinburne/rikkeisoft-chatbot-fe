@@ -3,10 +3,16 @@ import { useAuthStore } from "@/plugins/stores/auth";
 import { apiClient } from "@/plugins/api";
 
 const routes = [
+  { path: "/", redirect: "/home" }, // Default route
   {
-    path: "/home", component: () => import("@/pages/HomePage.vue"),
+    path: "/home",
+    component: () => import("@/pages/HomePage.vue"),
   },
-  { path: "/login", component: () => import("@/pages/auth/LoginPage.vue"), meta: { requiresAuth: false } },
+  {
+    path: "/login",
+    component: () => import("@/pages/auth/LoginPage.vue"),
+    meta: { requiresAuth: false },
+  },
   {
     path: "/register",
     component: () => import("@/pages/auth/RegisterPage.vue"),
@@ -33,20 +39,39 @@ const routes = [
   },
   {
     path: "/docs",
-    component: () => import("@/pages/docs/DocListPage.vue"),
-    meta: { requiresAuth: true },
+    // component: () => import("@/pages/docs/DocListPage.vue"),
+    meta: { requiresAuth: true, requiresAdmin: true },
+    children: [
+      {
+        path: "/list",
+        component: () => import("@/pages/docs/DocListPage.vue"),
+      },
+      {
+        path: "/upload",
+        component: () => import("@/pages/docs/DocUploadPage.vue"),
+      },
+    ],
   },
   {
     path: "/config",
     component: () => import("@/pages/ConfigPage.vue"),
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false, requiresAdmin: true },
   },
   {
     path: "/profile",
     component: () => import("@/pages/ProfilePage.vue"),
     meta: { requiresAuth: true },
+    children: [
+      {
+        path: "/me",
+        // component: () => import("@/pages/profile/ProfileDetail.vue"),
+      },
+      {
+        path: "/:userId",
+        // component: () => import("@/pages/profile/ProfileDetail.vue"),
+      },
+    ]
   },
-  { path: "/", redirect: "/login" }, // Default route
 ];
 
 const router = createRouter({

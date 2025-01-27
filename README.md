@@ -1,26 +1,35 @@
-# Rikkeisoft - Documents Chatbot Assistant for Employees | Frontend
+# package.json
 
-Language: JavaScript
-Framework: Vue.js - Node.js
+This template should help get you started developing with Vue 3 in Vite.
 
-## Installation & Launch
-  1. Clone repo to your local machine.
-  2. Install necessary modules:
-    ```
-      npm install
-    ```
-  3. Run the app:
-    ```
-      npm run serve
-    ```
-  4. App should be running at <http://localhost:8080/>
+## Recommended IDE Setup
 
-Members:
-- Nguyen Thi Thanh Minh
-- Duong Viet Minh Hoang
-- Doan Quang Lam
-- Nguyen Sy Thanh Trung
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-Mentors:
-- Nam Tran (Crist)
-- Hieu Trinh (Nick)
+## Customize configuration
+
+See [Vite Configuration Reference](https://vite.dev/config/).
+
+## Project Setup
+
+```sh
+npm install
+```
+
+### Compile and Hot-Reload for Development
+
+```sh
+npm run dev
+```
+
+### Compile and Minify for Production
+
+```sh
+npm run build
+```
+
+### Lint with [ESLint](https://eslint.org/)
+
+```sh
+npm run lint
+```

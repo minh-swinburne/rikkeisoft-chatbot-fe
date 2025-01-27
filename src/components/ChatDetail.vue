@@ -359,5 +359,3 @@ watch(
   width: calc(100% - 130px);
 }
 </style>
-
-

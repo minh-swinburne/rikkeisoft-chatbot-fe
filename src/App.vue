@@ -15,42 +15,40 @@ export default {
 
 <style lang="scss">
 #app {
-  font-family: Roboto, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Roboto, Inter, Avenir, Helvetica, Arial, sans-serif;
+  background-color: $light;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* text-align: center; */
   /* color: #2c3e50; */
 }
 
-a {
-  color: $link-dark !important; /* Choose your desired link color */
+a, .link {
+  color: $primary;
+}
+.body--dark a, .body--dark .link {
+  color: $link;
 }
 
-.text-light-red {
-  color: #ffcccc !important;
-}
-.bg-light-red {
-  background-color: #ffcccc !important;
+input:is(:-webkit-autofill, :autofill) {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: black;
+  transition: background-color 5000s ease-in-out 0s;
+  box-shadow: inset 0 0 0 500px white !important;
+
+  &:hover,
+  &:focus,
+  &:active {
+    /* Inherit the same styles as base autofill */
+    // This has no effect, just to avoid the empty rule warning
+    background-color: transparent !important;
+  }
 }
 
-.text-dark-red {
-  color: #4d1f1f !important;
-}
-.bg-dark-red {
-  background-color: #4d1f1f !important;
-}
-
-.text-grey-15 {
-  color: #333333 !important;
-}
-.bg-grey-15 {
-  background-color: #333333 !important;
-}
-
-.text-grey-16 {
-  color: #262626 !important;
-}
-.bg-grey-16 {
-  background-color: #262626 !important;
+.body--dark {
+  input:is(:-webkit-autofill, :autofill) {
+    -webkit-text-fill-color: white;
+    box-shadow: inset 0 0 0 500px var(--q-dark) !important;
+  }
 }
 </style>

@@ -80,31 +80,20 @@
         </q-card>
       </q-fab>
 
-      <q-form class="q-pa-md" style="width: 100%">
-        <q-input
+      <q-form :class="{ 'bg-grey-16': $q.dark.isActive }" class="q-pa-md" style="width: 100%">
+        <chat-input
           v-model="userInput"
-          outlined
-          rounded
-          autogrow
-          type="textarea"
-          placeholder="Type your message (Markdown supported)..."
-          :rows="1"
-          :max-rows="1"
-          @keydown="handleKeydown"
-          class="q-mx-md"
           :style="{ width: 'calc(100% - 32px)' }"
-          :dark="$q.dark.isActive"
-        >
-          <template v-slot:append>
-            <q-btn round flat icon="send" @click="sendMessage()" />
-          </template>
-        </q-input>
+          class="q-mx-md"
+          @send="sendMessage(userInput)"
+        />
       </q-form>
     </q-page-sticky>
   </q-page>
 </template>
 
 <script setup>
+import ChatInput from '@/components/ChatInput.vue'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
 import { useLayoutStore } from '@/plugins/stores/layout'
@@ -138,17 +127,8 @@ const maxHeightScrollArea = computed(() => {
   return `calc(100vh - 50px - ${textInputHeight}px)`
 })
 
-function handleKeydown(event) {
-  if (event.key === 'Enter' && !event.shiftKey) {
-    // If Enter is pressed without Shift, send the message
-    event.preventDefault() // Prevent the default Enter behavior (form submission)
-    sendMessage()
-  }
-}
-
 function applySuggestion(suggestion) {
-  userInput.value = suggestion
-  sendMessage()
+  sendMessage(suggestion)
 }
 
 function parseTime(time) {
@@ -174,14 +154,11 @@ function parseTime(time) {
   return timeString
 }
 
-async function sendMessage(initialMessage = null) {
-  console.log('Sending message...')
-  const query = initialMessage || userInput.value.trim()
+async function sendMessage(query) {
   if (!query) return
+  console.log('Sending message:', query)
 
-  if (!initialMessage) {
-    userInput.value = ''
-  }
+  userInput.value = ''
 
   messages.value.push({
     role: 'user',
@@ -221,8 +198,7 @@ async function sendMessage(initialMessage = null) {
         scrollToBottom()
       }
 
-      console.log('Streaming completed.')
-      console.log(botResponse)
+      console.log('Streaming completed. Bot response:', botResponse)
     } else {
       console.log('Non-streaming response received.')
 
@@ -235,8 +211,8 @@ async function sendMessage(initialMessage = null) {
     if (messages.value.length === 2) {
       emit('rename', $route.params.chatId)
     }
-    emit('send')
 
+    emit('send')
     fetchSuggestions()
   } catch (error) {
     console.error('Error sending message:', error)
@@ -289,7 +265,7 @@ function reloadChat() {
 onMounted(() => {
   window.addEventListener('chat-changed', (event) => {
     if (event.detail === $route.params.chatId) {
-      console.log('hehehe')
+      console.log('hehehe chat changed')
       reloadChat()
     }
   })
@@ -328,11 +304,4 @@ watch(
 </style>
 
 <style lang="scss">
-.q-message-text a {
-  color: $link-dark !important; /* Choose your desired link color */
-}
-
-.q-message-text.text-dark-red a {
-  color: $link !important; /* Choose your desired link color */
-}
 </style>

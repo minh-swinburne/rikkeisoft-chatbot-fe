@@ -2,7 +2,7 @@
   <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
     <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
       <q-toolbar>
-        <AppNavBar />
+        <AppNavbar />
       </q-toolbar>
     </q-header>
 
@@ -153,12 +153,12 @@
 </template>
 
 <script setup>
-import AppNavBar from '@/components/AppNavBar.vue'
+import AppNavbar from '@/components/AppNavbar.vue'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
 import { useQuasar } from 'quasar'
 import { onMounted, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 const $q = useQuasar()
 const $router = useRouter()

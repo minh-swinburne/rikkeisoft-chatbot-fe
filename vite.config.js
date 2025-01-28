@@ -14,6 +14,7 @@ export default defineConfig({
         additionalData: '@import "@/styles/quasar.variables.scss";',
       },
     },
+    postcss: './postcss.config.js',
   },
   plugins: [
     vue({

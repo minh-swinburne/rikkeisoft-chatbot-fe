@@ -2,7 +2,7 @@
   <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
     <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
       <q-toolbar>
-        <AppNavBar />
+        <AppNavbar />
       </q-toolbar>
     </q-header>
 
@@ -221,9 +221,9 @@
 </template>
 
 <script setup>
-import AppNavBar from '@/components/AppNavBar.vue'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import AppNavbar from '@/components/AppNavbar.vue'
 import { useQuasar } from 'quasar'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 const $q = useQuasar()
 const isDark = ref(localStorage.getItem('darkMode') === 'true')

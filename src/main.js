@@ -1,5 +1,3 @@
-// import '@/assets/main.css'
-
 import { Quasar } from 'quasar'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

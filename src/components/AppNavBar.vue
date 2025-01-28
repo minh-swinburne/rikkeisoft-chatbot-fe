@@ -1,8 +1,9 @@
 <template>
   <q-toolbar>
-    <app-logo size="30px" />
-
-    <q-toolbar-title>RikkeiGPT</q-toolbar-title>
+    <router-link to="/" class="row items-center text-white" style="text-decoration: none;">
+      <app-logo size="30px" />
+      <q-toolbar-title>RikkeiGPT</q-toolbar-title>
+    </router-link>
 
     <q-space />
 

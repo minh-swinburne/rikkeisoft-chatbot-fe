@@ -10,7 +10,7 @@
           round
           @click="toggleLeftDrawer"
         />
-        <AppNavBar />
+        <AppNavbar />
       </q-toolbar>
     </q-header>
 
@@ -77,7 +77,7 @@
 </template>
 
 <script setup>
-import AppNavBar from '@/components/AppNavBar.vue'
+import AppNavbar from '@/components/AppNavbar.vue'
 import { apiClient } from '@/plugins/api'
 import { useLayoutStore } from '@/plugins/stores/layout'
 import { camelize } from '@/utils'

@@ -14,6 +14,7 @@
         :key="item.path"
         :name="item.path"
         :label="item.name"
+        stretch
         flat
         @click="handleTabChange(item)"
       >
@@ -118,3 +119,12 @@ function handleTabChange(tab) {
   }
 }
 </script>
+
+<style>
+.q-tabs :is(.q-tab, .q-btn) > :is(.q-focus-helper, .q-ripple) {
+  margin: 8px 4px;
+  width: calc(100% - 8px) !important;
+  height: calc(100% - 16px) !important;
+  border-radius: 5px !important;
+}
+</style>

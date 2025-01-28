@@ -1,11 +1,13 @@
 // It's highly recommended to change the default colors
 // to match your app's branding.// src/css/quasar.variables.scss
+// @import '~quasar-variables-styl';
 
 $primary   : #c10015;
 $secondary : #1976d2;
 $accent    : #9C27B0;
 
-$dark      : #303030;
+$light     : #f5f5f5;
+$dark      : #212121;
 $dark-page : #121212;
 
 $positive  : #21BA45;
@@ -13,6 +15,12 @@ $negative  : #C10015;
 $info      : #6ee7ff;
 $warning   : #e4ad16;
 
-$link      : #bb8cdd;
+$shadow    : #f443364d;
+$link      : #ef9a9a;
+$link-dark : #c10015;
 
-@import '~quasar-variables-styl'
+$light-red : #ffcccc;
+$dark-red  : #4d1f1f;
+
+$grey-15   : #333333;
+$grey-16   : #262626;

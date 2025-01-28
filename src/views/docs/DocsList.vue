@@ -1,0 +1,410 @@
+<template>
+  <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
+    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
+      <q-toolbar>
+        <AppNavbar />
+      </q-toolbar>
+    </q-header>
+
+    <q-page-container>
+      <q-page padding class="row items-center justify-center">
+        <div class="row document-list q-pa-md justify-center" style="max-width: 800px">
+          <div class="col-grow q-mb-md items-center">
+            <div class="row q-col-gutter-lg">
+              <div class="col-grow">
+                <q-input v-model="searchQuery" label="Search" dense>
+                  <template v-slot:append>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-auto">
+                <q-btn-dropdown color="primary" label="Filter" icon="filter_list">
+                  <q-card>
+                    <q-card-section>
+                      <div class="text-h6">Filter by Categories</div>
+                      <q-select
+                        v-model="selectedCategories"
+                        :options="availableCategories"
+                        multiple
+                        dense
+                        use-chips
+                        class="q-mt-sm"
+                      />
+                    </q-card-section>
+                    <q-card-actions align="right">
+                      <q-btn flat label="Clear" @click="clearFilters" />
+                      <q-btn flat label="Apply" v-close-popup />
+                    </q-card-actions>
+                  </q-card>
+                </q-btn-dropdown>
+              </div>
+            </div>
+          </div>
+
+          <q-list bordered separator class="col-grow">
+            <q-item
+              v-for="document in paginatedDocuments"
+              :key="document.id"
+              class="q-my-sm"
+              style="flex-wrap: wrap"
+            >
+              <q-item-section class="col-grow q-mt-sm">
+                <q-item-label class="text-h6">{{ document.title }}</q-item-label>
+                <q-item-label caption lines="2">{{ document.description }}</q-item-label>
+                <q-item-label>
+                  <strong>Categories:</strong>
+                  <q-chip
+                    v-for="(category, index) in document.categories"
+                    :key="index"
+                    :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+                    dense
+                  >
+                    {{ category.name }}
+                  </q-chip>
+                </q-item-label>
+                <q-item-label>
+                  <strong>Created:</strong> {{ formatDate(document.created_date) }}
+                </q-item-label>
+                <q-item-label>
+                  <strong>Creator:</strong>
+                  <q-chip
+                    :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+                    clickable
+                    v-ripple
+                    @click="$router.push(`/profile/${document.creator.id}`)"
+                  >
+                    <q-avatar>
+                      <q-img
+                        :src="document.creator.avatar_url"
+                        srcset="https://cdn.quasar.dev/logo-v2/svg/logo-dark.svg"
+                        alt="Creator Avatar"
+                      />
+                    </q-avatar>
+                    {{ document.creator.full_name }}
+                  </q-chip>
+                </q-item-label>
+                <q-item-label>
+                  <strong>Access:</strong> {{ document.restricted ? 'Admin Only' : 'Everyone' }}
+                </q-item-label>
+              </q-item-section>
+
+              <q-item-section class="col-grow q-mt-md">
+                <div class="row q-gutter-sm justify-end">
+                  <q-btn
+                    color="secondary"
+                    icon="visibility"
+                    @click="previewDocument(document)"
+                    label="Preview"
+                  />
+                  <q-btn
+                    color="positive"
+                    icon="download"
+                    @click="downloadDocument(document)"
+                    label="Download"
+                  />
+                  <q-btn color="warning" icon="edit" @click="editDocument(document)" label="Edit" />
+                  <q-btn
+                    color="negative"
+                    icon="delete"
+                    @click="deleteDocument(document)"
+                    label="Delete"
+                  />
+                </div>
+              </q-item-section>
+            </q-item>
+          </q-list>
+
+          <div class="justify-center q-mt-md">
+            <q-pagination v-model="currentPage" :max="totalPages" :max-pages="5" boundary-links />
+          </div>
+        </div>
+      </q-page>
+    </q-page-container>
+
+    <q-dialog v-model="showViewer">
+      <q-card style="width: 90vw; max-width: 900px">
+        <q-card-section class="row items-center q-pb-none q-mb-md">
+          <div class="text-h6">{{ currentDocument.title }} - Preview</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section class="q-pa-none q-mb-lg" align="center">
+          <iframe :src="previewUrl" style="width: 90%; height: 500px" />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="showEditForm">
+      <q-card style="width: 500px; max-width: 90vw">
+        <q-card-section>
+          <div class="text-h6">Edit Document</div>
+        </q-card-section>
+        <q-card-section>
+          <q-form @submit="submitEditForm">
+            <q-input v-model="editFormData.title" label="Title" required />
+            <q-input v-model="editFormData.description" type="textarea" label="Description" />
+            <q-select
+              v-model="editFormData.categories"
+              :options="availableCategories"
+              label="Categories"
+              multiple
+            >
+              <template v-slot:selected-item="scope">
+                <q-chip
+                  v-if="editFormData.categories"
+                  removable
+                  dense
+                  :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+                  @remove="scope.removeAtIndex(scope.index)"
+                  :tabindex="scope.tabindex"
+                >
+                  {{ scope.opt }}
+                </q-chip>
+              </template>
+            </q-select>
+
+            <q-option-group
+              v-model="editFormData.restricted"
+              :options="[
+                { label: 'Everyone', value: false },
+                { label: 'Admin Only', value: true },
+              ]"
+              color="secondary"
+            />
+            <q-card-actions align="right">
+              <q-btn flat label="Cancel" color="secondary" v-close-popup />
+              <q-btn flat label="Save Changes" type="submit" color="secondary" />
+            </q-card-actions>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+  </q-layout>
+</template>
+
+<script setup>
+import AppNavbar from '@/components/AppNavbar.vue'
+import { apiClient } from '@/plugins/api'
+import { useQuasar } from 'quasar'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const $q = useQuasar()
+const $router = useRouter()
+
+const documents = ref([])
+const showViewer = ref(false)
+const currentDocument = ref(null)
+const previewUrl = ref('')
+
+const showEditForm = ref(false)
+const editFormData = ref({
+  id: '',
+  title: '',
+  description: '',
+  categories: [],
+  restricted: false,
+})
+
+const isDark = ref(localStorage.getItem('darkMode') === 'true')
+
+const availableCategories = ref([
+  'Guidance',
+  'Policies',
+  'Reports',
+  'Procedures',
+  'Training Materials',
+  'Technical Documentation',
+])
+
+const searchQuery = ref('')
+const selectedCategories = ref([])
+const currentPage = ref(1)
+const itemsPerPage = 10
+
+const fetchDocuments = async () => {
+  try {
+    const response = await apiClient.docs.listDocs()
+    documents.value = response.data
+  } catch (error) {
+    console.error('Error fetching documents:', error)
+    $q.notify({
+      color: 'negative',
+      message: 'Failed to fetch documents',
+      icon: 'report_problem',
+    })
+  }
+}
+
+onMounted(() => {
+  fetchDocuments()
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode !== null) {
+    isDark.value = savedDarkMode === 'true'
+    $q.dark.set(isDark.value)
+  }
+})
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'Invalid Date'
+  const date = new Date(dateString)
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+const filteredDocuments = computed(() => {
+  return documents.value.filter((doc) => {
+    const matchesSearch =
+      doc.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      doc.description.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const matchesCategories =
+      selectedCategories.value.length === 0 ||
+      doc.categories.some((cat) => selectedCategories.value.includes(cat))
+    return matchesSearch && matchesCategories
+  })
+})
+
+const paginatedDocuments = computed(() => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage
+  return filteredDocuments.value.slice(startIndex, startIndex + itemsPerPage)
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredDocuments.value.length / itemsPerPage)
+})
+
+const clearFilters = () => {
+  selectedCategories.value = []
+}
+
+const previewDocument = async (document) => {
+  try {
+    const response = await apiClient.docs.previewDoc(document.id)
+    console.log('Preview response:', response)
+    previewUrl.value = response.data
+    console.log('Preview URL:', previewUrl.value)
+    currentDocument.value = document
+    showViewer.value = true
+  } catch (error) {
+    console.error('Error previewing document:', error)
+    $q.notify({
+      color: 'negative',
+      message: 'Failed to preview document',
+      icon: 'report_problem',
+    })
+  }
+}
+
+const editDocument = (document) => {
+  editFormData.value = {
+    id: document.id,
+    title: document.title || '',
+    description: document.description || '',
+    categories: Array.isArray(document.categories)
+      ? document.categories
+      : document.categories
+        ? [document.categories]
+        : [],
+    restricted: document.restricted || false,
+  }
+  showEditForm.value = true
+}
+
+const submitEditForm = async () => {
+  try {
+    const formData = new FormData()
+    formData.append('doc_id', editFormData.value.id)
+    formData.append('title', editFormData.value.title)
+    formData.append('description', editFormData.value.description)
+    formData.append('categories', JSON.stringify(editFormData.value.categories))
+    formData.append('restricted', editFormData.value.restricted)
+
+    await apiClient.docs.editDoc(editFormData.value.id, formData)
+
+    fetchDocuments()
+    $q.notify({
+      color: 'positive',
+      message: 'Document updated successfully',
+      icon: 'check',
+    })
+  } catch (error) {
+    console.error('Error updating document:', error)
+    $q.notify({
+      color: 'negative',
+      message: 'Failed to update document',
+      icon: 'report_problem',
+    })
+  }
+}
+
+const downloadDocument = async (doc) => {
+  try {
+    const response = await apiClient.docs.downloadDoc(doc.id)
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', doc.filename)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    $q.notify({
+      color: 'positive',
+      message: 'Document downloaded successfully',
+      icon: 'check',
+    })
+  } catch (error) {
+    console.error('Error downloading document:', error)
+    $q.notify({
+      color: 'negative',
+      message: 'Failed to download document',
+      icon: 'report_problem',
+    })
+  }
+}
+
+const deleteDocument = async (document) => {
+  try {
+    $q.dialog({
+      title: 'Confirm Deletion',
+      message: `Are you sure you want to delete "${document.title}"?`,
+      cancel: true,
+      persistent: true,
+    }).onOk(async () => {
+      try {
+        await apiClient.docs.deleteDoc(document.id)
+        documents.value = documents.value.filter((doc) => doc.id !== document.id)
+
+        $q.notify({
+          color: 'positive',
+          message: 'Document deleted successfully',
+          icon: 'check',
+        })
+      } catch (error) {
+        console.error('Error deleting document:', error)
+        $q.notify({
+          color: 'negative',
+          message: 'Failed to delete document',
+          icon: 'report_problem',
+        })
+      }
+    })
+  } catch (error) {
+    if (error) {
+      console.error('Error deleting document:', error)
+      $q.notify({
+        color: 'negative',
+        message: 'Failed to delete document',
+        icon: 'report_problem',
+      })
+    }
+  }
+}
+</script>
+
+<style>
+.max-width-70 {
+  max-width: 70%;
+  margin: 0 auto; /* Optional: centers the list */
+}
+</style>

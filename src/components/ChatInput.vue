@@ -24,7 +24,7 @@ import { useQuasar } from 'quasar'
 const $q = useQuasar()
 const inputRef = useTemplateRef('input')
 const message = defineModel()
-const emit = defineEmits(['send'])
+const emit = defineEmits(['send', 'update:model-value'])
 
 const maxRows = 5
 const maxHeight = ref(100)
@@ -36,6 +36,7 @@ function sendMessage() {
 function handleEnter(event) {
   if (!event.shiftKey) {
     // If Enter is pressed without Shift, send the message
+    // event.preventDefault()
     sendMessage()
   } else {
     // If Enter is pressed with Shift, insert a newline
@@ -47,6 +48,11 @@ onMounted(() => {
   // console.log(inputRef.value)
   // console.log(getComputedStyle(inputRef.value.$el.control).paddingBottom)
   const style = getComputedStyle(inputRef.value.$el.control)
-  maxHeight.value = maxRows * parseInt(style.lineHeight) + parseInt(style.paddingBottom) + parseInt(style.paddingTop)
+  maxHeight.value =
+    maxRows * parseInt(style.lineHeight) +
+    parseInt(style.paddingBottom) +
+    parseInt(style.paddingTop)
 })
+
+defineExpose({ maxHeight, focus: () => inputRef.value.focus() })
 </script>

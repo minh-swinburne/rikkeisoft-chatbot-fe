@@ -19,9 +19,20 @@ export default {
   background-color: $light;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scrollbar-color: $grey-7 transparent;
   /* text-align: center; */
   /* color: #2c3e50; */
 }
+
+// ::-webkit-scrollbar {
+//   background: transparent;
+// }
+// ::-webkit-scrollbar-thumb {
+//   width: 8px;
+//   border-radius: 4px;
+//   background-color: lightgrey;
+//   background-clip: padding-box;
+// }
 
 a, .link {
   color: $primary;

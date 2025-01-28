@@ -6,17 +6,14 @@
       :style="{
         maxWidth: leftDrawerOpen ? 'calc(100vw - 285px)' : '100vw',
         maxHeight: maxHeightScrollArea,
-        boxShadow: 'none',
         transition: 'max-width 0.1s ease',
       }"
     >
       <div
-        class="chat-messages shadow-up-3"
         :style="{
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: 'none',
         }"
       >
         <q-chat-message
@@ -44,6 +41,21 @@
           :stamp="parseTime(message.time)"
           text-html
         />
+
+        <q-chat-message
+          v-if="waiting"
+          :text-color="$q.dark.isActive ? 'white' : 'black'"
+          :bg-color="$q.dark.isActive ? 'dark-red' : 'light-red'"
+          :style="{
+            maxWidth: '80%',
+            alignSelf: 'flex-start',
+            boxShadow: 'none',
+            padding: '0 16px',
+          }"
+          name="Bot"
+        >
+          <q-spinner-dots size="2rem" />
+        </q-chat-message>
       </div>
     </q-scroll-area>
 
@@ -56,6 +68,10 @@
         justifyContent: 'end',
       }"
     >
+      <q-page-scroller reverse position="bottom" :scroll-offset="20" :offset="[0, 18]">
+        <q-btn fab icon="keyboard_arrow_down" color="primary" />
+      </q-page-scroller>
+
       <q-fab icon="lightbulb" color="primary" class="q-mx-md" direction="left">
         <q-card
           :style="{
@@ -82,9 +98,11 @@
 
       <q-form :class="{ 'bg-grey-16': $q.dark.isActive }" class="q-pa-md" style="width: 100%">
         <chat-input
+          ref="chatInput"
           v-model="userInput"
           :style="{ width: 'calc(100% - 32px)' }"
           class="q-mx-md"
+          @update:model-value="updateScrollArea"
           @send="sendMessage(userInput)"
         />
       </q-form>
@@ -100,7 +118,7 @@ import { useLayoutStore } from '@/plugins/stores/layout'
 import { camelize } from '@/utils'
 import { marked } from 'marked'
 import { date, useQuasar } from 'quasar'
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const $q = useQuasar()
@@ -108,24 +126,34 @@ const $route = useRoute()
 const $router = useRouter()
 const authStore = useAuthStore()
 const layoutStore = useLayoutStore()
+const chatInputRef = useTemplateRef('chatInput')
 
 const emit = defineEmits(['send', 'rename'])
 
 const messages = ref([])
 const suggestions = ref([])
 const userInput = ref('')
+const waiting = ref(false)
 const chatScrollArea = ref(null)
+const maxHeightScrollArea = ref('calc(100vh - 50px - 88px)')
 
-const leftDrawerOpen = computed(() => layoutStore.leftDrawerOpen)
+const leftDrawerOpen = computed(() => layoutStore.leftDrawerOpen && $q.screen.gt.sm)
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time)),
 )
 
-const maxHeightScrollArea = computed(() => {
-  const textInputHeight = 88 // Adjust according to your actual text input height
-  return `calc(100vh - 50px - ${textInputHeight}px)`
-})
+function updateScrollArea() {
+  // Add a small delay to allow the input to update its height
+  setTimeout(() => {
+    const padding = 32
+    const textInputHeight = chatInputRef.value
+      ? parseInt(getComputedStyle(chatInputRef.value.$el).height)
+      : 56
+
+    maxHeightScrollArea.value = `calc(100vh - 50px - ${textInputHeight + padding}px)`
+  }, 50)
+}
 
 function applySuggestion(suggestion) {
   sendMessage(suggestion)
@@ -158,18 +186,18 @@ async function sendMessage(query) {
   if (!query) return
   console.log('Sending message:', query)
 
-  userInput.value = ''
-
   messages.value.push({
     role: 'user',
     content: query,
     time: new Date().toISOString(),
   })
 
+  userInput.value = ''
+  waiting.value = true
+
   try {
     const confResponse = await apiClient.config.checkStream('answer_generation')
     const streaming = confResponse.data
-
     const chatResponse = await apiClient.chats.sendMessage($route.params.chatId, query)
 
     if (streaming) {
@@ -181,6 +209,7 @@ async function sendMessage(query) {
       let botResponse = ''
       let done = false
 
+      waiting.value = false
       messages.value.push({
         role: 'assistant',
         content: botResponse,
@@ -201,9 +230,10 @@ async function sendMessage(query) {
       console.log('Streaming completed. Bot response:', botResponse)
     } else {
       console.log('Non-streaming response received.')
-
       const responseData = await chatResponse.json()
       const botResponse = responseData.content
+
+      waiting.value = false
       messages.value.push({ role: responseData.role, content: botResponse })
       scrollToBottom()
     }
@@ -293,15 +323,9 @@ watch(
 </script>
 
 <style scoped>
-.chat-messages {
-  display: flex;
-  flex-direction: column;
-}
-
 .scroll-area-transition {
   transition: max-height 0.8s ease-in-out;
 }
 </style>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

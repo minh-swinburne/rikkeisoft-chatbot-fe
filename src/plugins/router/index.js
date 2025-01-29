@@ -1,59 +1,68 @@
-import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-  { path: '/', redirect: '/home' }, // Default route
+  { path: '/', name: 'root', redirect: '/home' }, // Default route
   {
     path: '/home',
+    name: 'home',
     component: () => import('@/views/HomeView.vue'),
   },
   {
     path: '/login',
+    name: 'login',
     component: () => import('@/views/auth/LoginView.vue'),
-    meta: { requiresAuth: false },
   },
   {
     path: '/register',
+    name: 'register',
     component: () => import('@/views/auth/RegisterView.vue'),
   },
   {
     path: '/chat',
+    name: 'chat',
     component: () => import('@/views/chat/ChatView.vue'),
     meta: { requiresAuth: true },
     children: [
       {
         path: '',
+        name: 'chat-start',
         component: () => import('@/views/chat/ChatStart.vue'),
       },
       {
         path: ':chatId',
+        name: 'chat-detail',
         component: () => import('@/views/chat/ChatDetail.vue'),
       },
     ],
   },
   {
     path: '/docs',
-    // component: () => import("@/views/docs/DocsView.vue"),
+    name: 'docs',
+    component: () => import('@/views/docs/DocsView.vue'),
     meta: { requiresAuth: true, requiresAdmin: true },
     children: [
       {
-        path: '/list',
+        path: 'list',
+        name: 'docs-list',
         component: () => import('@/views/docs/DocsList.vue'),
       },
       {
-        path: '/upload',
+        path: 'upload',
+        name: 'docs-upload',
         component: () => import('@/views/docs/DocsUpload.vue'),
       },
     ],
   },
   {
     path: '/config',
+    name: 'config',
     component: () => import('@/views/ConfigView.vue'),
     meta: { requiresAuth: false, requiresAdmin: true },
   },
   {
     path: '/profile',
+    name: 'profile',
     component: () => import('@/views/ProfileView.vue'),
     meta: { requiresAuth: true },
     children: [
@@ -74,30 +83,11 @@ const router = createRouter({
   routes,
 })
 
-async function checkTokenValidity() {
-  const hasToken = !!localStorage.getItem('access_token') && !!localStorage.getItem('refresh_token')
-
-  if (!hasToken) {
-    console.warn('No token found in cookies. User is not logged in.')
-    return false
-  }
-
-  try {
-    if (!apiClient.client.getToken()) {
-      apiClient.client.setToken(localStorage.getItem('access_token'))
-    }
-    const response = await apiClient.auth.validateToken()
-    return response.data.valid
-  } catch (error) {
-    console.error('Token validation failed:', error.response?.data || error)
-    return false
-  }
-}
-
 router.beforeEach(async (to, from, next) => {
+  console.log('Checking if user is authenticated...')
   const authStore = useAuthStore()
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
-  const isValidToken = await checkTokenValidity()
+  const isValidToken = await authStore.validateAccess()
 
   if (isValidToken && !authStore.isAuthenticated) {
     authStore.hydrateUser()

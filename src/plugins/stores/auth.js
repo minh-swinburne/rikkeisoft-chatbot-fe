@@ -41,6 +41,26 @@ export const useAuthStore = defineStore("auth", {
       localStorage.removeItem("refresh_token");
     },
 
+    async validateAccess() {
+      const hasToken = !!localStorage.getItem("access_token") && !!localStorage.getItem("refresh_token")
+
+    if (!hasToken) {
+      console.warn('No token found in cookies. User is not logged in.')
+      return false
+    }
+
+    try {
+      if (!apiClient.client.getToken()) {
+        apiClient.client.setToken(localStorage.getItem('access_token'))
+      }
+      const response = await apiClient.auth.validateToken()
+      return response.data.valid
+    } catch (error) {
+      console.error('Token validation failed:', error.response?.data || error)
+      return false
+    }
+    },
+
     async refreshAccess() {
       // Attempt to refresh the token
       try {

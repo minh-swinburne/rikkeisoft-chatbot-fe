@@ -3,14 +3,14 @@
     <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
       <q-toolbar>
         <q-btn
-          :icon="$q.dark.isActive ? 'menu' : 'menu'"
+          icon="menu"
           aria-label="Menu"
           flat
           dense
           round
           @click="toggleLeftDrawer"
         />
-        <AppNavbar />
+        <app-navbar />
       </q-toolbar>
     </q-header>
 
@@ -36,12 +36,12 @@
         <q-item
           v-for="chat in chats"
           :key="chat.id"
-          :active-class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-4'"
-          :style="{ borderRadius: '5px' }"
+          :to="{ name: 'chat-detail', params: { chatId: chat.id } }"
+          :active-class="$q.dark.isActive ? 'bg-grey-15' : 'bg-grey-4'"
+          :style="{ borderRadius: '5px', color: 'inherit' }"
           class="q-ma-sm q-pa-sm"
           clickable
           v-ripple
-          @click="$router.push(`/chat/${chat.id}`)"
         >
           <q-item-section>
             <q-item-label lines="1">{{ chat.name }}</q-item-label>
@@ -70,7 +70,7 @@
       </q-list>
     </q-drawer>
 
-    <q-page-container>
+    <q-page-container :class="{ 'bg-grey-17': $q.dark.isActive }">
       <router-view @send="fetchChats" @rename="generateName" />
     </q-page-container>
   </q-layout>
@@ -152,7 +152,7 @@ async function generateName(chatId) {
 
         let char = decoder.decode(value, { stream: true })
 
-        if (!['"', "''"].includes(char)) {
+        if (!['"', '\'', '`'].includes(char)) {
           newName += char
           chats.value[index].name = newName
 
@@ -258,7 +258,7 @@ onMounted(() => {
   if (savedDarkMode !== null) {
     isDark.value = savedDarkMode === 'true'
     $q.dark.set(isDark.value)
-    console.log($q.dark)
+    // console.log($q.dark)
   }
 })
 </script>

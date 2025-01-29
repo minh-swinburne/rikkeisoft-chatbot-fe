@@ -1,10 +1,10 @@
 <template>
-  <q-page class="flex flex-col" :class="{ 'bg-grey-16': $q.dark.isActive }">
+  <q-page class="flex flex-col">
     <q-scroll-area
       ref="chatScrollArea"
-      class="col q-px-xl scroll-area-transition"
+      class="col q-px-md scroll-area-transition"
       :style="{
-        maxWidth: leftDrawerOpen ? 'calc(100vw - 285px)' : '100vw',
+        maxWidth: '100%',
         maxHeight: maxHeightScrollArea,
         transition: 'max-width 0.1s ease',
       }"
@@ -19,52 +19,64 @@
         <q-chat-message
           v-for="(message, index) in sortedMessages"
           :key="index"
-          :name="message.role === 'assistant' ? 'Bot' : authStore.user?.firstname"
+          :name="message.role === 'assistant' ? 'Bot' : authStore.user.firstname"
           :text="[marked(message.content)]"
-          :sent="message.role !== 'assistant'"
+          :sent="message.role === 'user'"
           :text-color="$q.dark.isActive ? 'white' : 'black'"
           :bg-color="
             message.role === 'assistant'
               ? $q.dark.isActive
-                ? 'dark-red'
-                : 'light-red'
-              : $q.dark.isActive
                 ? 'grey-15'
                 : 'grey-3'
+              : $q.dark.isActive
+                ? 'dark-red'
+                : 'light-red'
           "
           :style="{
             maxWidth: '80%',
             alignSelf: message.role === 'assistant' ? 'flex-start' : 'flex-end',
             boxShadow: 'none',
-            padding: '0 16px',
           }"
           :stamp="parseTime(message.time)"
           text-html
-        />
+        >
+          <template #avatar>
+            <user-avatar v-if="message.role === 'user'" :src="authStore.user.avatar_url" size="40px" class="q-mx-sm" bordered />
+            <q-avatar v-else size="40px" class="bordered q-mx-sm">
+              <q-img src="@/assets/logo.svg" width="25px" position="0.5px 0.5px" />
+            </q-avatar>
+          </template>
+        </q-chat-message>
 
         <q-chat-message
           v-if="waiting"
           :text-color="$q.dark.isActive ? 'white' : 'black'"
-          :bg-color="$q.dark.isActive ? 'dark-red' : 'light-red'"
+          :bg-color="$q.dark.isActive ? 'grey-15' : 'grey-3'"
           :style="{
             maxWidth: '80%',
             alignSelf: 'flex-start',
             boxShadow: 'none',
-            padding: '0 16px',
           }"
           name="Bot"
         >
-          <q-spinner-dots size="2rem" />
+          <template #default>
+            <q-spinner-dots size="2rem" />
+          </template>
+          <template #avatar>
+            <q-avatar size="40px" class="bordered q-mx-sm">
+              <q-img src="@/assets/logo.svg" width="25px" position="0.5px 0.5px" />
+            </q-avatar>
+          </template>
         </q-chat-message>
       </div>
     </q-scroll-area>
 
     <q-page-sticky
+      ref="chatSticky"
       position="bottom"
       expand
       :style="{
-        width: '100%',
-        maxWidth: leftDrawerOpen ? 'calc(100vw - 280px)' : '100vw',
+        maxWidth: '100%',
         justifyContent: 'end',
       }"
     >
@@ -72,10 +84,10 @@
         <q-btn fab icon="keyboard_arrow_down" color="primary" />
       </q-page-scroller>
 
-      <q-fab icon="lightbulb" color="primary" class="q-mx-md" direction="left">
+      <q-fab icon="lightbulb" color="primary" class="q-mx-md" direction="left" unelevated>
         <q-card
           :style="{
-            width: leftDrawerOpen ? 'calc(100vw - 380px)' : 'calc(100vw - 100px)',
+            width: `calc(${chatStickyWidth} - 100px)`,
             alignSelf: 'flex-end',
           }"
           class="no-shadow"
@@ -96,7 +108,7 @@
         </q-card>
       </q-fab>
 
-      <q-form :class="{ 'bg-grey-16': $q.dark.isActive }" class="q-pa-md" style="width: 100%">
+      <q-form :class="{ 'bg-grey-17': $q.dark.isActive }" class="q-pa-md" style="width: 100%">
         <chat-input
           ref="chatInput"
           v-model="userInput"
@@ -112,20 +124,20 @@
 
 <script setup>
 import ChatInput from '@/components/ChatInput.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
-import { useLayoutStore } from '@/plugins/stores/layout'
 import { camelize } from '@/utils'
 import { marked } from 'marked'
 import { date, useQuasar } from 'quasar'
-import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ref, watch, computed, nextTick, onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
 
 const $q = useQuasar()
 const $route = useRoute()
 const $router = useRouter()
 const authStore = useAuthStore()
-const layoutStore = useLayoutStore()
+const chatStickyRef = useTemplateRef('chatSticky')
 const chatInputRef = useTemplateRef('chatInput')
 
 const emit = defineEmits(['send', 'rename'])
@@ -136,12 +148,18 @@ const userInput = ref('')
 const waiting = ref(false)
 const chatScrollArea = ref(null)
 const maxHeightScrollArea = ref('calc(100vh - 50px - 88px)')
-
-const leftDrawerOpen = computed(() => layoutStore.leftDrawerOpen && $q.screen.gt.sm)
+const chatStickyWidth = ref('100vw')
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time)),
 )
+
+function updateStickyWidth() {
+  if (chatStickyRef.value) {
+    chatStickyWidth.value = `${chatStickyRef.value.$el.getBoundingClientRect().width}px`
+    // console.log('Sticky width:', chatStickyWidth.value)
+  }
+}
 
 function updateScrollArea() {
   // Add a small delay to allow the input to update its height
@@ -199,6 +217,8 @@ async function sendMessage(query) {
     const confResponse = await apiClient.config.checkStream('answer_generation')
     const streaming = confResponse.data
     const chatResponse = await apiClient.chats.sendMessage($route.params.chatId, query)
+
+    scrollToBottom()
 
     if (streaming) {
       console.log('Streaming response...')
@@ -261,12 +281,17 @@ async function fetchMessages() {
     messages.value = camelize(response.data)
     scrollToBottom()
   } catch (error) {
-    console.error('Error fetching messages:', error)
-    $q.notify({
-      color: 'negative',
-      message: 'Error fetching messages',
-      icon: 'error',
-    })
+    if (error.status === 404 || error.status === 403) {
+      console.log('Chat not found. Redirecting to chat start...')
+      $router.push({ name: 'chat-start' })
+    } else {
+      console.error('Error fetching messages:', error)
+      $q.notify({
+        color: 'negative',
+        message: 'Error fetching messages',
+        icon: 'error',
+      })
+    }
   }
 }
 
@@ -293,22 +318,25 @@ function reloadChat() {
 }
 
 onMounted(() => {
-  window.addEventListener('chat-changed', (event) => {
-    if (event.detail === $route.params.chatId) {
-      console.log('hehehe chat changed')
-      reloadChat()
-    }
-  })
-
   // Check for initialMessage in the route query and send it if present
   const initialMessage = $route.query.initialMessage
+
   if (initialMessage) {
-    sendMessage(decodeURIComponent(initialMessage))
+    console.log('Initial message:', initialMessage)
+    sendMessage(initialMessage)
+    // sendMessage(decodeURIComponent(initialMessage))
     // Remove the initialMessage from the query parameters
     $router.replace({ query: {} })
   } else {
     reloadChat()
   }
+
+  updateStickyWidth()
+  window.addEventListener('resize', updateStickyWidth)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateStickyWidth)
 })
 
 watch(
@@ -322,7 +350,7 @@ watch(
 )
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .scroll-area-transition {
   transition: max-height 0.8s ease-in-out;
 }

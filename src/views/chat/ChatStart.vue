@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center" :class="{ 'bg-grey-16': $q.dark.isActive }">
+  <q-page class="flex flex-center">
     <div class="text-center" style="width: 100%">
       <h1 class="text-h3 q-mb-md q-mx-md" :class="{ 'text-white': $q.dark.isActive }">
         Welcome to RikkeiGPT
@@ -39,7 +39,8 @@ async function startChat() {
     // await fetchChats();
 
     // Redirect to the new chat with the initial message as a query parameter
-    $router.push(`/chat/${chatId}?initialMessage=${encodeURIComponent(userInput.value)}`)
+    $router.push({ name: 'chat-detail', params: { chatId }, query: { initialMessage: userInput.value } })
+    // $router.push(`/chat/${chatId}?initialMessage=${encodeURIComponent(userInput.value)}`)
   } catch (error) {
     console.error('Error creating new chat:', error)
     $q.notify({

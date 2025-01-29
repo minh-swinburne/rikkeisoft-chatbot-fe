@@ -2,7 +2,7 @@
   <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
     <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
       <q-toolbar>
-        <AppNavbar />
+        <app-navbar />
       </q-toolbar>
     </q-header>
 

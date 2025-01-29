@@ -1,6 +1,6 @@
 <template>
   <q-toolbar>
-    <router-link to="/" class="row items-center text-white" style="text-decoration: none;">
+    <router-link to="/" class="row items-center text-white" style="text-decoration: none">
       <app-logo size="30px" />
       <q-toolbar-title>RikkeiGPT</q-toolbar-title>
     </router-link>
@@ -10,13 +10,15 @@
     <q-tabs v-model="tab" inline-label>
       <component
         v-for="item in filteredNavItems"
-        :is="item.children ? QBtnDropdown : QTab"
+        :is="item.children ? QBtnDropdown : QRouteTab"
+        :to="item.children ? null : item.path"
         :key="item.path"
         :name="item.path"
         :label="item.name"
+        class="text-white"
         stretch
         flat
-        @click="handleTabChange(item)"
+        @click="handleTabChange(item, item.path)"
       >
         <q-list v-if="item.children" bordered link>
           <q-item
@@ -24,7 +26,7 @@
             :key="child.path"
             clickable
             v-ripple
-            @click="handleTabChange(child)"
+            @click="handleTabChange(child, item.path + child.path)"
           >
             <q-item-section>{{ child.name }}</q-item-section>
           </q-item>
@@ -35,9 +37,10 @@
     <q-space />
 
     <q-btn
+      :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
+      class="q-mr-sm"
       flat
       round
-      :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
       @click="toggleDarkMode"
     />
 
@@ -57,65 +60,67 @@
             <q-icon :color="$q.dark.isActive ? '' : 'negative'" name="logout" />
           </q-item-section>
 
-          <q-item-section :class="{ 'text-negative': !$q.dark.isActive }"
-            >Logout</q-item-section
-          >
+          <q-item-section :class="{ 'text-negative': !$q.dark.isActive }">Logout</q-item-section>
         </q-item>
       </q-list>
     </q-btn-dropdown>
-    <q-btn v-else color="secondary" to="/login" label="Login" />
+
+    <q-btn v-else color="primary" to="/login" label="Login" />
   </q-toolbar>
 </template>
 
 <script setup>
-import { useAuthStore } from "@/plugins/stores/auth";
-import { useQuasar, QTab, QBtnDropdown } from "quasar";
-import { computed, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import AppLogo from "./AppLogo.vue";
+import { useAuthStore } from '@/plugins/stores/auth'
+import { QBtnDropdown, QRouteTab, useQuasar } from 'quasar'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import AppLogo from './AppLogo.vue'
 
-const $q = useQuasar();
-const $route = useRoute();
-const $router = useRouter();
-const authStore = useAuthStore();
+const $q = useQuasar()
+const $route = useRoute()
+const $router = useRouter()
+const authStore = useAuthStore()
+// console.log($router.options.routes)
 
-const isDark = ref(localStorage.getItem("darkMode") === "true");
-const tab = ref($route.path);
+const isDark = ref(localStorage.getItem('darkMode') === 'true')
+const tab = ref($route.path)
 
 const navItems = [
-  { name: "Chat", path: "/chat" },
-  {
-    name: "Documents",
-    path: "/docs",
-    requiresAdmin: true,
-    children: [
-      { name: "All Documents", path: "/list" },
-      { name: "Upload", path: "/upload" },
-    ],
-  },
-  { name: "Config", path: "/config", requiresAdmin: true },
-];
+  { name: 'Chat', path: '/chat' },
+  { name: 'Documents', path: '/docs' },
+  // {
+  //   name: 'Documents',
+  //   path: '/docs',
+  //   children: [
+  //     { name: 'All Documents', path: '/list' },
+  //     { name: 'Upload', path: '/upload' },
+  //   ],
+  // },
+  { name: 'Config', path: '/config' },
+]
 
 const filteredNavItems = computed(() => {
   return authStore.isAdmin
     ? navItems
-    : navItems.filter((item) => !item.requiresAdmin);
-});
+    : navItems.filter(
+        (item) => !$router.options.routes.find((route) => route.path === item.path).meta.requiresAdmin,
+      )
+})
 
 function logout() {
-  authStore.logout();
-  $router.push("/login");
+  authStore.logout()
+  $router.push('/login')
 }
 
 function toggleDarkMode() {
-  isDark.value = !isDark.value;
-  $q.dark.set(isDark.value);
-  localStorage.setItem("darkMode", isDark.value);
+  isDark.value = !isDark.value
+  $q.dark.set(isDark.value)
+  localStorage.setItem('darkMode', isDark.value)
 }
 
-function handleTabChange(tab) {
+function handleTabChange(tab, path) {
   if (!tab.children) {
-    $router.push(tab.path);
+    $router.push(path)
   }
 }
 </script>

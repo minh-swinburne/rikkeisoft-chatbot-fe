@@ -2,7 +2,7 @@
   <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
     <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
       <q-toolbar>
-        <AppNavbar />
+        <app-navbar />
       </q-toolbar>
     </q-header>
 
@@ -16,7 +16,7 @@
           </h1>
           <p class="text-subtitle2 q-mb-lg">
             Your friendly, intelligent assistant is here to answer your questions, guide you, and
-            provide support 24/7.
+            provide support with documents 24/7.
           </p>
           <q-btn unelevated color="primary" label="Get Started" class="q-mr-sm" />
           <q-btn outline label="Learn More" class="text-white" />
@@ -190,7 +190,7 @@
               round
               flat
               icon="facebook"
-              color="blue"
+              color="white"
               class="q-mx-xs"
               href="https://www.facebook.com/yourcompany"
               target="_blank"
@@ -199,7 +199,7 @@
               round
               flat
               icon="linkedin"
-              color="blue"
+              color="white"
               class="q-mx-xs"
               href="https://www.linkedin.com/company/yourcompany"
               target="_blank"
@@ -208,7 +208,7 @@
               round
               flat
               icon="email"
-              color="secondary"
+              color="white"
               class="q-mx-xs"
               href="mailto:yourcompany@gmail.com"
             />
@@ -228,7 +228,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 const $q = useQuasar()
 const isDark = ref(localStorage.getItem('darkMode') === 'true')
 
-const texts = ref(['Hello World!', 'Welcome to ChatBot!']) // Sentences to type
+const texts = ref(['Hello World!', 'Welcome to RikkeiGPT!']) // Sentences to type
 const typedText = ref('') // Current text being typed
 const showCursor = ref(true) // Blinking cursor state
 const currentCharIndex = ref(0) // Current character in the text

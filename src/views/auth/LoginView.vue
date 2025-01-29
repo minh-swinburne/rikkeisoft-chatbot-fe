@@ -3,9 +3,9 @@
     <div class="q-pa-xl">
       <q-card class="my-card">
         <q-card-section>
-          <div class="q-mb-md q-gutter-md flex flex-center">
-            <q-img src="@/assets/rikkeiGPT.svg" alt="Rikkeisoft logo" fit="fill" height="80px" width="200px" />
-          </div>
+          <router-link to="/home" class="q-mb-md q-gutter-md flex flex-center">
+            <q-img src="@/assets/rikkeiGPT.svg" alt="RikkeiGPT" fit="fill" height="80px" width="200px" />
+          </router-link>
 
           <q-form @submit.prevent="handleNativeLogin">
             <q-input

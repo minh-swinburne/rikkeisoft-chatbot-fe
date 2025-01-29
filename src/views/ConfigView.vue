@@ -2,14 +2,14 @@
   <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
     <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
       <q-toolbar>
-        <AppNavbar />
+        <app-navbar />
       </q-toolbar>
     </q-header>
 
     <q-page-container>
       <q-page padding class="max-width-70 q-pa-md">
         <q-card flat bordered class="q-pa-md">
-          <q-tabs v-model="activeTab" dense class="q-mb-md">
+          <q-tabs v-model="activeTab" class="q-mb-md">
             <q-tab v-for="(tab, key) in tabs" :key="key" :name="key" :label="tab" />
           </q-tabs>
           <q-separator />

@@ -1,191 +1,186 @@
 <template>
-  <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
-    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
-      <q-toolbar>
-        <AppNavbar />
-      </q-toolbar>
-    </q-header>
-
-    <q-page-container>
-      <q-page padding class="row items-center justify-center">
-        <div class="row document-list q-pa-md justify-center" style="max-width: 800px">
-          <div class="col-grow q-mb-md items-center">
-            <div class="row q-col-gutter-lg">
-              <div class="col-grow">
-                <q-input v-model="searchQuery" label="Search" dense>
-                  <template v-slot:append>
-                    <q-icon name="search" />
-                  </template>
-                </q-input>
-              </div>
-              <div class="col-auto">
-                <q-btn-dropdown color="primary" label="Filter" icon="filter_list">
-                  <q-card>
-                    <q-card-section>
-                      <div class="text-h6">Filter by Categories</div>
-                      <q-select
-                        v-model="selectedCategories"
-                        :options="availableCategories"
-                        multiple
-                        dense
-                        use-chips
-                        class="q-mt-sm"
-                      />
-                    </q-card-section>
-                    <q-card-actions align="right">
-                      <q-btn flat label="Clear" @click="clearFilters" />
-                      <q-btn flat label="Apply" v-close-popup />
-                    </q-card-actions>
-                  </q-card>
-                </q-btn-dropdown>
-              </div>
-            </div>
-          </div>
-
-          <q-list bordered separator class="col-grow">
-            <q-item
-              v-for="document in paginatedDocuments"
-              :key="document.id"
-              class="q-my-sm"
-              style="flex-wrap: wrap"
-            >
-              <q-item-section class="col-grow q-mt-sm">
-                <q-item-label class="text-h6">{{ document.title }}</q-item-label>
-                <q-item-label caption lines="2">{{ document.description }}</q-item-label>
-                <q-item-label>
-                  <strong>Categories:</strong>
-                  <q-chip
-                    v-for="(category, index) in document.categories"
-                    :key="index"
-                    :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
-                    dense
-                  >
-                    {{ category.name }}
-                  </q-chip>
-                </q-item-label>
-                <q-item-label>
-                  <strong>Created:</strong> {{ formatDate(document.created_date) }}
-                </q-item-label>
-                <q-item-label>
-                  <strong>Creator:</strong>
-                  <q-chip
-                    :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
-                    clickable
-                    v-ripple
-                    @click="$router.push(`/profile/${document.creator.id}`)"
-                  >
-                    <q-avatar>
-                      <q-img
-                        :src="document.creator.avatar_url"
-                        srcset="https://cdn.quasar.dev/logo-v2/svg/logo-dark.svg"
-                        alt="Creator Avatar"
-                      />
-                    </q-avatar>
-                    {{ document.creator.full_name }}
-                  </q-chip>
-                </q-item-label>
-                <q-item-label>
-                  <strong>Access:</strong> {{ document.restricted ? 'Admin Only' : 'Everyone' }}
-                </q-item-label>
-              </q-item-section>
-
-              <q-item-section class="col-grow q-mt-md">
-                <div class="row q-gutter-sm justify-end">
-                  <q-btn
-                    color="secondary"
-                    icon="visibility"
-                    @click="previewDocument(document)"
-                    label="Preview"
-                  />
-                  <q-btn
-                    color="positive"
-                    icon="download"
-                    @click="downloadDocument(document)"
-                    label="Download"
-                  />
-                  <q-btn color="warning" icon="edit" @click="editDocument(document)" label="Edit" />
-                  <q-btn
-                    color="negative"
-                    icon="delete"
-                    @click="deleteDocument(document)"
-                    label="Delete"
-                  />
-                </div>
-              </q-item-section>
-            </q-item>
-          </q-list>
-
-          <div class="justify-center q-mt-md">
-            <q-pagination v-model="currentPage" :max="totalPages" :max-pages="5" boundary-links />
-          </div>
+  <q-page padding class="row justify-center q-pa-md" style="max-width: 700px">
+    <div class="col-grow q-mb-md items-center">
+      <div class="row q-col-gutter-lg">
+        <div class="col-grow">
+          <q-input v-model="searchQuery" label="Search" dense>
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
         </div>
-      </q-page>
-    </q-page-container>
-
-    <q-dialog v-model="showViewer">
-      <q-card style="width: 90vw; max-width: 900px">
-        <q-card-section class="row items-center q-pb-none q-mb-md">
-          <div class="text-h6">{{ currentDocument.title }} - Preview</div>
-          <q-space />
-          <q-btn icon="close" flat round dense v-close-popup />
-        </q-card-section>
-
-        <q-card-section class="q-pa-none q-mb-lg" align="center">
-          <iframe :src="previewUrl" style="width: 90%; height: 500px" />
-        </q-card-section>
-      </q-card>
-    </q-dialog>
-
-    <q-dialog v-model="showEditForm">
-      <q-card style="width: 500px; max-width: 90vw">
-        <q-card-section>
-          <div class="text-h6">Edit Document</div>
-        </q-card-section>
-        <q-card-section>
-          <q-form @submit="submitEditForm">
-            <q-input v-model="editFormData.title" label="Title" required />
-            <q-input v-model="editFormData.description" type="textarea" label="Description" />
-            <q-select
-              v-model="editFormData.categories"
-              :options="availableCategories"
-              label="Categories"
-              multiple
-            >
-              <template v-slot:selected-item="scope">
-                <q-chip
-                  v-if="editFormData.categories"
-                  removable
+        <div class="col-auto">
+          <q-btn-dropdown color="primary" label="Filter" icon="filter_list">
+            <q-card>
+              <q-card-section>
+                <div class="text-h6">Filter by Categories</div>
+                <q-select
+                  v-model="selectedCategories"
+                  :options="availableCategories"
+                  multiple
                   dense
-                  :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
-                  @remove="scope.removeAtIndex(scope.index)"
-                  :tabindex="scope.tabindex"
-                >
-                  {{ scope.opt }}
-                </q-chip>
-              </template>
-            </q-select>
+                  use-chips
+                  class="q-mt-sm"
+                />
+              </q-card-section>
+              <q-card-actions align="right">
+                <q-btn flat label="Clear" @click="clearFilters" />
+                <q-btn flat label="Apply" v-close-popup />
+              </q-card-actions>
+            </q-card>
+          </q-btn-dropdown>
+        </div>
+      </div>
+    </div>
 
-            <q-option-group
-              v-model="editFormData.restricted"
-              :options="[
-                { label: 'Everyone', value: false },
-                { label: 'Admin Only', value: true },
-              ]"
+    <q-list class="col-grow rounded-borders" bordered separator>
+      <q-item
+        v-for="document in paginatedDocuments"
+        :key="document.id"
+        class="q-my-sm"
+        style="flex-wrap: wrap"
+      >
+        <q-item-section class="col-grow q-mt-sm">
+          <q-item-label class="text-h6">{{ document.title }}</q-item-label>
+          <q-item-label caption lines="2">{{ document.description }}</q-item-label>
+          <q-item-label>
+            <strong>Categories:</strong>
+            <q-chip
+              v-for="(category, index) in document.categories"
+              :key="index"
+              :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+              dense
+            >
+              {{ category.name }}
+            </q-chip>
+          </q-item-label>
+          <q-item-label>
+            <strong>Created:</strong> {{ formatDate(document.created_date) }}
+          </q-item-label>
+          <q-item-label>
+            <strong>Creator:</strong>
+            <q-chip
+              :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+              clickable
+              v-ripple
+              @click="$router.push(`/profile/${document.creator.id}`)"
+            >
+              <user-avatar :src="document.creator.avatar_url" alt="Creator Avatar" />
+              <!-- <q-avatar>
+                    <q-img
+                      :src="document.creator.avatar_url"
+                      :error-src="`https://cdn.quasar.dev/logo-v2/svg/logo${$q.dark.isActive ? '-dark' : ''}.svg`"
+                      alt="Creator Avatar"
+                    />
+                  </q-avatar> -->
+              {{ document.creator.full_name }}
+            </q-chip>
+          </q-item-label>
+          <q-item-label>
+            <strong>Access:</strong> {{ document.restricted ? 'Admin Only' : 'Everyone' }}
+          </q-item-label>
+        </q-item-section>
+
+        <q-item-section class="col-grow q-mt-md">
+          <div class="row q-gutter-sm justify-end">
+            <q-btn
               color="secondary"
+              icon="visibility"
+              @click="previewDocument(document)"
+              label="Preview"
             />
-            <q-card-actions align="right">
-              <q-btn flat label="Cancel" color="secondary" v-close-popup />
-              <q-btn flat label="Save Changes" type="submit" color="secondary" />
-            </q-card-actions>
-          </q-form>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
-  </q-layout>
+            <q-btn
+              color="positive"
+              icon="download"
+              @click="downloadDocument(document)"
+              label="Download"
+            />
+            <q-btn color="warning" icon="edit" @click="editDocument(document)" label="Edit" />
+            <q-btn
+              color="negative"
+              icon="delete"
+              @click="deleteDocument(document)"
+              label="Delete"
+            />
+          </div>
+        </q-item-section>
+      </q-item>
+    </q-list>
+
+    <div class="justify-center q-mt-md">
+      <q-pagination
+        v-model="currentPage"
+        :max="totalPages"
+        :max-pages="5"
+        active-design="unelevated"
+        boundary-links
+      />
+    </div>
+  </q-page>
+
+  <q-dialog v-model="showViewer">
+    <q-card style="width: 90vw; max-width: 900px">
+      <q-card-section class="row items-center q-pb-none q-mb-md">
+        <div class="text-h6">{{ currentDocument.title }} - Preview</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+
+      <q-card-section class="q-pa-none q-mb-lg" align="center">
+        <iframe :src="previewUrl" style="width: 90%; height: 500px" />
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="showEditForm">
+    <q-card style="width: 500px; max-width: 90vw">
+      <q-card-section>
+        <div class="text-h6">Edit Document</div>
+      </q-card-section>
+      <q-card-section>
+        <q-form @submit="submitEditForm">
+          <q-input v-model="editFormData.title" label="Title" required />
+          <q-input v-model="editFormData.description" type="textarea" label="Description" />
+          <q-select
+            v-model="editFormData.categories"
+            :options="availableCategories"
+            label="Categories"
+            multiple
+          >
+            <template v-slot:selected-item="scope">
+              <q-chip
+                v-if="editFormData.categories"
+                removable
+                dense
+                :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+                @remove="scope.removeAtIndex(scope.index)"
+                :tabindex="scope.tabindex"
+              >
+                {{ scope.opt }}
+              </q-chip>
+            </template>
+          </q-select>
+
+          <q-option-group
+            v-model="editFormData.restricted"
+            :options="[
+              { label: 'Everyone', value: false },
+              { label: 'Admin Only', value: true },
+            ]"
+            color="secondary"
+          />
+          <q-card-actions align="right">
+            <q-btn flat label="Cancel" color="secondary" v-close-popup />
+            <q-btn flat label="Save Changes" type="submit" color="secondary" />
+          </q-card-actions>
+        </q-form>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
-import AppNavbar from '@/components/AppNavbar.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
 import { useQuasar } from 'quasar'
 import { computed, onMounted, ref } from 'vue'
@@ -402,9 +397,4 @@ const deleteDocument = async (document) => {
 }
 </script>
 
-<style>
-.max-width-70 {
-  max-width: 70%;
-  margin: 0 auto; /* Optional: centers the list */
-}
-</style>
+<style scoped></style>

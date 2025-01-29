@@ -69,10 +69,6 @@ const leftDrawerOpen = computed({
   set: (value) => layoutStore.setLeftDrawerOpen(value),
 })
 
-if ($route.matched.length === 1) {
-  $router.push(tabs[0].path)
-}
-
 onMounted(() => {
   const savedDarkMode = localStorage.getItem('darkMode')
   if (savedDarkMode !== null) {

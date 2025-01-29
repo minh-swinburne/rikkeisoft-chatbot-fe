@@ -1,6 +1,6 @@
 <template>
-  <q-page padding class="row justify-center q-pa-md" style="max-width: 700px">
-    <div class="col-grow q-mb-md items-center">
+  <q-page padding class="row justify-center items-center q-pa-md" style="max-width: 700px">
+    <div class="col-grow q-mb-md items-center" style="width: 100%;">
       <div class="row q-col-gutter-lg">
         <div class="col-grow">
           <q-input v-model="searchQuery" label="Search" dense>
@@ -33,15 +33,56 @@
       </div>
     </div>
 
-    <q-list class="col-grow rounded-borders" bordered separator>
+    <!-- LOADING SKELETONS -->
+    <q-list v-if="isLoading" class="col-grow rounded-borders" style="width: 100%;" bordered separator>
+      <q-item v-for="i in itemsPerPage" :key="i" class="q-py-md column">
+        <q-item-section class="col-grow q-mt-sm">
+          <q-skeleton type="rect" width="100%" />
+          <q-skeleton type="text" width="80%" class="q-mb-xs" />
+
+          <q-item-label class="flex" style="gap: 10px;">
+            <q-skeleton type="QBadge" />
+            <q-skeleton type="QChip" height="100%" />
+            <q-skeleton type="QChip" height="100%" />
+          </q-item-label>
+
+          <q-item-label class="flex" style="gap: 10px; height: 18px;">
+            <q-skeleton type="QBadge" />
+            <q-skeleton type="text" width="40%" />
+          </q-item-label>
+
+          <q-item-label class="flex" style="gap: 10px;">
+            <q-skeleton type="QBadge" />
+            <q-skeleton type="QChip" height="100%" />
+          </q-item-label>
+
+          <q-item-label class="flex" style="gap: 10px; height: 18px;">
+            <q-skeleton type="QBadge" />
+            <q-skeleton type="text" width="30%" />
+          </q-item-label>
+        </q-item-section>
+
+        <q-item-section class="col-grow q-mt-md">
+          <div class="row q-gutter-sm justify-end">
+            <q-skeleton type="QBtn" />
+            <q-skeleton type="QBtn" />
+            <q-skeleton type="QBtn" />
+            <q-skeleton type="QBtn" />
+          </div>
+        </q-item-section>
+      </q-item>
+    </q-list>
+
+    <!-- ACTUAL DOCUMENT LIST -->
+    <q-list v-else class="col-grow rounded-borders" bordered separator>
       <q-item
         v-for="document in paginatedDocuments"
         :key="document.id"
-        class="q-my-sm"
+        class="q-py-md"
         style="flex-wrap: wrap"
       >
         <q-item-section class="col-grow q-mt-sm">
-          <q-item-label class="text-h6">{{ document.title }}</q-item-label>
+          <q-item-label class="text-h6" lines="1">{{ document.title }}</q-item-label>
           <q-item-label caption lines="2">{{ document.description }}</q-item-label>
           <q-item-label>
             <strong>Categories:</strong>
@@ -114,6 +155,7 @@
         :max-pages="5"
         active-design="unelevated"
         boundary-links
+        direction-links
       />
     </div>
   </q-page>
@@ -190,10 +232,15 @@ const $q = useQuasar()
 const $router = useRouter()
 
 const documents = ref([])
-const showViewer = ref(false)
 const currentDocument = ref(null)
 const previewUrl = ref('')
+const isDark = ref(localStorage.getItem('darkMode') === 'true')
 
+const isLoading = ref(true)
+const currentPage = ref(1)
+const itemsPerPage = 5
+
+const showViewer = ref(false)
 const showEditForm = ref(false)
 const editFormData = ref({
   id: '',
@@ -203,8 +250,8 @@ const editFormData = ref({
   restricted: false,
 })
 
-const isDark = ref(localStorage.getItem('darkMode') === 'true')
-
+const searchQuery = ref('')
+const selectedCategories = ref([])
 const availableCategories = ref([
   'Guidance',
   'Policies',
@@ -214,39 +261,14 @@ const availableCategories = ref([
   'Technical Documentation',
 ])
 
-const searchQuery = ref('')
-const selectedCategories = ref([])
-const currentPage = ref(1)
-const itemsPerPage = 10
-
-const fetchDocuments = async () => {
-  try {
-    const response = await apiClient.docs.listDocs()
-    documents.value = response.data
-  } catch (error) {
-    console.error('Error fetching documents:', error)
-    $q.notify({
-      color: 'negative',
-      message: 'Failed to fetch documents',
-      icon: 'report_problem',
-    })
-  }
-}
-
-onMounted(() => {
-  fetchDocuments()
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode !== null) {
-    isDark.value = savedDarkMode === 'true'
-    $q.dark.set(isDark.value)
-  }
+const totalPages = computed(() => {
+  return Math.ceil(filteredDocuments.value.length / itemsPerPage)
 })
 
-const formatDate = (dateString) => {
-  if (!dateString) return 'Invalid Date'
-  const date = new Date(dateString)
-  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
-}
+const paginatedDocuments = computed(() => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage
+  return filteredDocuments.value.slice(startIndex, startIndex + itemsPerPage)
+})
 
 const filteredDocuments = computed(() => {
   return documents.value.filter((doc) => {
@@ -260,20 +282,41 @@ const filteredDocuments = computed(() => {
   })
 })
 
-const paginatedDocuments = computed(() => {
-  const startIndex = (currentPage.value - 1) * itemsPerPage
-  return filteredDocuments.value.slice(startIndex, startIndex + itemsPerPage)
+onMounted(() => {
+  fetchDocuments()
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode !== null) {
+    isDark.value = savedDarkMode === 'true'
+    $q.dark.set(isDark.value)
+  }
 })
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredDocuments.value.length / itemsPerPage)
-})
-
-const clearFilters = () => {
+function clearFilters() {
   selectedCategories.value = []
 }
 
-const previewDocument = async (document) => {
+function formatDate(dateString) {
+  if (!dateString) return 'Invalid Date'
+  const date = new Date(dateString)
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+async function fetchDocuments() {
+  try {
+    const response = await apiClient.docs.listDocs()
+    documents.value = response.data
+    isLoading.value = false
+  } catch (error) {
+    console.error('Error fetching documents:', error)
+    $q.notify({
+      color: 'negative',
+      message: 'Failed to fetch documents',
+      icon: 'report_problem',
+    })
+  }
+}
+
+async function previewDocument(document) {
   try {
     const response = await apiClient.docs.previewDoc(document.id)
     console.log('Preview response:', response)
@@ -291,7 +334,7 @@ const previewDocument = async (document) => {
   }
 }
 
-const editDocument = (document) => {
+function editDocument(document) {
   editFormData.value = {
     id: document.id,
     title: document.title || '',
@@ -306,7 +349,7 @@ const editDocument = (document) => {
   showEditForm.value = true
 }
 
-const submitEditForm = async () => {
+async function submitEditForm() {
   try {
     const formData = new FormData()
     formData.append('doc_id', editFormData.value.id)
@@ -317,7 +360,9 @@ const submitEditForm = async () => {
 
     await apiClient.docs.editDoc(editFormData.value.id, formData)
 
+    isLoading.value = true
     fetchDocuments()
+
     $q.notify({
       color: 'positive',
       message: 'Document updated successfully',
@@ -333,7 +378,7 @@ const submitEditForm = async () => {
   }
 }
 
-const downloadDocument = async (doc) => {
+async function downloadDocument(doc) {
   try {
     const response = await apiClient.docs.downloadDoc(doc.id)
     const url = window.URL.createObjectURL(new Blob([response.data]))
@@ -358,7 +403,7 @@ const downloadDocument = async (doc) => {
   }
 }
 
-const deleteDocument = async (document) => {
+async function deleteDocument(document) {
   try {
     $q.dialog({
       title: 'Confirm Deletion',

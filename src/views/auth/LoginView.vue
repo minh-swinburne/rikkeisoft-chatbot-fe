@@ -90,13 +90,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { googleTokenLogin } from 'vue3-google-login'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
 import { loginRequest, msalInstance } from '@/plugins/sso/msalConfig'
 
 const $q = useQuasar()
+const $route = useRoute()
 const $router = useRouter()
 const authStore = useAuthStore()
 
@@ -124,7 +125,7 @@ async function handleNativeLogin() {
       icon: 'check_circle',
       message: 'Login successful!',
     })
-    $router.push('/chat')
+    $router.push($route.redirectedFrom || '/chat')
   } catch (error) {
     loading.value = false
     console.error('Login failed', error)

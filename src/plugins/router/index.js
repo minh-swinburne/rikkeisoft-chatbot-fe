@@ -58,7 +58,7 @@ const routes = [
     path: '/config',
     name: 'config',
     component: () => import('@/views/ConfigView.vue'),
-    meta: { requiresAuth: false, requiresAdmin: true },
+    meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
     path: '/profile',
@@ -85,18 +85,27 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   console.log('Checking if user is authenticated...')
+  console.log('To:', to)
   const authStore = useAuthStore()
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const isValidToken = await authStore.validateAccess()
 
+  if (requiresAuth && !isValidToken) {
+    next('/login')
+    return
+  }
   if (isValidToken && !authStore.isAuthenticated) {
     authStore.hydrateUser()
-    next()
-  } else if (requiresAuth && !isValidToken) {
-    next('/login')
-  } else {
-    next()
   }
+
+  const route = router.getRoutes().find((route) => route.path === to.path)
+  // Redirect to the first child route if it exists
+  if (route.children.length > 0) {
+    next(`${route.path}/${route.children[0].path}`)
+    return
+  }
+
+  next()
 })
 
 export default router

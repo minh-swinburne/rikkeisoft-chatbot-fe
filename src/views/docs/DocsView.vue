@@ -48,13 +48,12 @@
 
 <script setup>
 import AppNavbar from '@/components/AppNavbar.vue'
-import { useQuasar } from 'quasar'
-import { useRoute, useRouter } from 'vue-router'
-import { ref, onMounted, computed } from 'vue'
 import { useLayoutStore } from '@/plugins/stores/layout'
+import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
 
 const $q = useQuasar()
-const $route = useRoute()
 const $router = useRouter()
 const layoutStore = useLayoutStore()
 

@@ -1,8 +1,8 @@
 <template>
-  <q-page padding class="row col-grow justify-center q-pa-md" style="max-width: 700px;">
+  <q-page padding class="row col-grow justify-center q-pa-md" style="max-width: 700px">
     <q-card flat bordered class="col-grow q-pa-md">
       <!-- Form Section -->
-      <q-form v-if="authStore.isAdmin" ref="uploadForm" @submit.prevent="submit">
+      <q-form ref="uploadForm" @submit.prevent="submit">
         <!-- Tabs for File or Weblink Upload -->
         <q-tabs v-model="activeTab" class="q-mb-md" dense>
           <q-tab name="file" label="File Upload" />
@@ -114,30 +114,6 @@
           class="full-width"
         />
       </q-form>
-
-      <!-- Access Denied Message -->
-      <q-banner v-else class="q-pa-md">
-        <q-item-label class="text-center text-danger" style="font-weight: 600">
-          Access Denied
-        </q-item-label>
-        <q-item-label class="text-center text-grey-7">
-          You need to be logged in as an admin to upload documents.
-        </q-item-label>
-
-        <!-- Login Button using RouterLink -->
-        <router-link :to="{ path: '/login', query: { redirect: $route.fullPath } }">
-          <q-btn label="Login" color="secondary" class="full-width" />
-        </router-link>
-
-        <!-- Logout Button (if the user is already logged in) -->
-        <q-btn
-          v-if="authStore.user"
-          label="Logout"
-          color="negative"
-          @click="logout"
-          class="full-width q-mt-md"
-        />
-      </q-banner>
     </q-card>
   </q-page>
 </template>
@@ -147,10 +123,8 @@ import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
 import { useQuasar } from 'quasar'
 import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 const $q = useQuasar()
-const $router = useRouter()
 const authStore = useAuthStore()
 // const formRef = useTemplateRef("uploadForm"); // Reference to the form element
 
@@ -186,11 +160,6 @@ const categories = ref([
   'Technical Documentation',
 ])
 const selectedCategories = ref([]) // To store the selected categories
-
-function logout() {
-  authStore.logout()
-  $router.push('/login')
-}
 
 function handleFileUpload(event) {
   const uploadedFile = event.target.files[0]

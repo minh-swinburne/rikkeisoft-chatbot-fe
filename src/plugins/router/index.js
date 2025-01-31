@@ -76,6 +76,23 @@ const routes = [
       },
     ],
   },
+  {
+    path: '/error',
+    name: 'error',
+    // component: () => import('@/views/ErrorView.vue'),
+    children: [
+      {
+        path: '404',
+        name: 'error-404',
+        // component: () => import('@/views/error/NotFound.vue'),
+      },
+      {
+        path: '403',
+        name: 'error-403',
+        component: () => import('@/views/error/AccessDenied.vue'),
+      },
+    ],
+  },
 ]
 
 const router = createRouter({
@@ -86,9 +103,11 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   console.log('Checking if user is authenticated...')
   console.log('To:', to)
+
   const authStore = useAuthStore()
-  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const isValidToken = await authStore.validateAccess()
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin)
 
   if (requiresAuth && !isValidToken) {
     next('/login')
@@ -97,15 +116,18 @@ router.beforeEach(async (to, from, next) => {
   if (isValidToken && !authStore.isAuthenticated) {
     authStore.hydrateUser()
   }
+  if (requiresAdmin && !authStore.isAdmin) {
+    next('/error/403')
+    return
+  }
 
   const route = router.getRoutes().find((route) => route.path === to.path)
   // Redirect to the first child route if it exists
   if (route.children.length > 0) {
     next(`${route.path}/${route.children[0].path}`)
-    return
+  } else {
+    next()
   }
-
-  next()
 })
 
 export default router

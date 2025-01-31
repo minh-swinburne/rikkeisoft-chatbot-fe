@@ -7,37 +7,39 @@
       outlined
       autofocus
       required
-      :class="{ 'q-mb-md': !!isInvalidUsername }"
       :rules="[
-        (val) => (val && val.length > 0) || 'Username is required',
+        (val) => !!val || 'Username is required',
         (val) =>
           (val && /^[a-zA-Z][a-zA-Z0-9_]{3,20}$/.test(val)) ||
           'Username must start with a letter and contain only alphanumeric characters or underscores',
       ]"
     />
-    <div class="row q-col-gutter-sm">
-      <div class="col-6">
+
+    <div class="row q-col-gutter-sm q-mt-none">
+      <div class="col-sm-6 col-12 q-pt-none">
         <q-input
           v-model="firstname"
           autocomplete="given-name"
           label="First Name"
           outlined
           required
-          :class="{ 'q-mb-md': firstname.length == 0 }"
-          :rules="[(val) => (val && val.length > 0) || 'First name is required']"
+          :rules="[(val) => !!val || 'First name is required']"
         />
       </div>
-      <div class="col-6">
+
+      <div class="col-sm-6 col-12 q-pt-none">
         <q-input
           v-model="lastname"
           autocomplete="family-name"
           label="Last Name (Optional)"
           outlined
+          :rules="[(val) => true]"
         />
       </div>
     </div>
-    <div class="row q-col-gutter-sm items-center">
-      <div class="col">
+
+    <div class="row q-col-gutter-sm q-mt-none items-center">
+      <div class="col q-pt-none">
         <q-input
           v-model="email"
           autocomplete="email"
@@ -45,9 +47,8 @@
           type="email"
           outlined
           required
-          :class="{ 'q-mb-md': !!isInvalidEmail }"
           :rules="[
-            (val) => (val && val.length > 0) || 'Email is required',
+            (val) => !!val || 'Email is required',
             (val) =>
               (val && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(val)) ||
               'Invalid email address',
@@ -55,8 +56,9 @@
         />
       </div>
     </div>
-    <div class="row q-col-gutter-sm">
-      <div class="col-6">
+
+    <div class="row q-col-gutter-sm q-mt-none">
+      <div class="col-sm-6 col-12 q-pt-none" style="min-width: 250px;">
         <q-input
           v-model="password"
           autocomplete="new-password"
@@ -64,8 +66,7 @@
           outlined
           required
           :type="isPwd ? 'password' : 'text'"
-          :class="{ 'q-mb-md': password.length == 0 }"
-          :rules="[(val) => (val && val.length > 0) || 'Password is required']"
+          :rules="[(val) => !!val || 'Password is required']"
         >
           <template v-slot:append>
             <q-icon
@@ -76,7 +77,8 @@
           </template>
         </q-input>
       </div>
-      <div class="col-6">
+
+      <div class="col-sm-6 col-12 q-pt-none" style="min-width: 250px;">
         <q-input
           v-model="confirmPassword"
           autocomplete="new-password"
@@ -84,30 +86,29 @@
           type="password"
           outlined
           required
-          :class="{
-            'q-mb-md': confirmPassword.length == 0 || password !== confirmPassword,
-          }"
           :rules="[
-            (val) => (val && val.length > 0) || 'Confirm password is required',
+            (val) => !!val || 'Confirm password is required',
             (val) => val === password || 'Passwords do not match',
           ]"
         />
       </div>
     </div>
-    <div class="q-mt-md login-btn">
+
+    <div class="q-mt-md">
       <q-btn
-        :loading="loading"
+        :loading="props.authenticating"
         type="submit"
         label="Register"
         color="primary"
         class="full-width"
+        unelevated
       />
     </div>
   </q-form>
 
   <q-btn
     :loading="props.authenticating"
-    class="q-mt-md full-width"
+    class="q-mt-sm full-width"
     no-caps
     outline
     @click="emit('auth-google')"
@@ -124,7 +125,13 @@
     </template>
   </q-btn>
 
-  <q-btn :loading="props.authenticating" class="q-mt-sm full-width" no-caps outline @click="emit('auth-microsoft')">
+  <q-btn
+    :loading="props.authenticating"
+    class="q-mt-sm full-width"
+    no-caps
+    outline
+    @click="emit('auth-microsoft')"
+  >
     <template v-slot:default>
       <div class="row items-center no-wrap">
         <q-icon
@@ -144,10 +151,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useQuasar } from 'quasar'
-import { useAuthStore } from '@/plugins/stores/auth'
 import { apiClient } from '@/plugins/api'
+import { useAuthStore } from '@/plugins/stores/auth'
 
 const $q = useQuasar()
 const authStore = useAuthStore()
@@ -163,19 +170,6 @@ const loading = ref(false)
 
 const props = defineProps(['authenticating'])
 const emit = defineEmits(['submit', 'auth-google', 'auth-microsoft'])
-
-const isInvalidUsername = computed(() => {
-  if (username.value.length === 0) return 'Username is required'
-  return /^[a-zA-Z][a-zA-Z0-9_]{3,20}$/.test(username.value)
-    ? false
-    : 'Username must start with a letter and contain only alphanumeric characters or underscores'
-})
-const isInvalidEmail = computed(() => {
-  if (email.value.length === 0) return 'Email is required'
-  return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email.value)
-    ? false
-    : 'Invalid email address'
-})
 
 async function register() {
   try {
@@ -212,5 +206,4 @@ async function register() {
 }
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

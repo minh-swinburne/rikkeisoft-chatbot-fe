@@ -6,9 +6,9 @@
       outlined
       autofocus
       required
-      :class="{ 'q-mb-md': username.length == 0 }"
-      :rules="[(val) => (val && val.length > 0) || 'Username or Email is required']"
+      :rules="[(val) => !!val || 'Username or Email is required']"
     />
+
     <q-input
       v-model="password"
       autocomplete="current-password"
@@ -16,8 +16,7 @@
       outlined
       required
       :type="isPwd ? 'password' : 'text'"
-      :class="{ 'q-mb-md': password.length == 0 }"
-      :rules="[(val) => (val && val.length > 0) || 'Password is required']"
+      :rules="[(val) => !!val || 'Password is required']"
     >
       <template v-slot:append>
         <q-icon
@@ -27,6 +26,7 @@
         />
       </template>
     </q-input>
+
     <div class="q-mt-md">
       <q-btn
         :loading="props.authenticating"
@@ -39,7 +39,13 @@
     </div>
   </q-form>
 
-  <q-btn :loading="props.authenticating" class="q-mt-sm full-width" no-caps outline @click="emit('auth-google')">
+  <q-btn
+    :loading="props.authenticating"
+    class="q-mt-sm full-width"
+    no-caps
+    outline
+    @click="emit('auth-google')"
+  >
     <template v-slot:default>
       <div class="row no-wrap">
         <q-icon
@@ -52,7 +58,13 @@
     </template>
   </q-btn>
 
-  <q-btn :loading="props.authenticating" class="q-mt-sm full-width" no-caps outline @click="emit('auth-microsoft')">
+  <q-btn
+    :loading="props.authenticating"
+    class="q-mt-sm full-width"
+    no-caps
+    outline
+    @click="emit('auth-microsoft')"
+  >
     <template v-slot:default>
       <div class="row no-wrap">
         <q-icon
@@ -68,15 +80,21 @@
 
   <div class="row items-center justify-center q-mt-md">
     <p class="q-mb-none">Don't have an account?</p>
-    <q-btn :to="{ name: 'auth-register' }" class="full-width" color="primary" label="Register" flat />
+    <q-btn
+      :to="{ name: 'auth-register' }"
+      class="full-width"
+      color="primary"
+      label="Register"
+      flat
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useQuasar } from 'quasar'
-import { useAuthStore } from '@/plugins/stores/auth'
 import { apiClient } from '@/plugins/api'
+import { useAuthStore } from '@/plugins/stores/auth'
 
 const $q = useQuasar()
 const authStore = useAuthStore()
@@ -118,5 +136,4 @@ async function login() {
 }
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

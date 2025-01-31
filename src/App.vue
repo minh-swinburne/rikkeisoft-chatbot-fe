@@ -34,6 +34,10 @@ export default {
 //   background-clip: padding-box;
 // }
 
+.q-field--error {
+  margin-bottom: 8px;
+}
+
 a, .link {
   color: $primary;
 }

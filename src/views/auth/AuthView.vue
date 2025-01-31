@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex flex-center bg-grey-16">
-    <div class="q-pa-xl">
+    <div class="q-py-xl q-px-md">
       <q-card class="q-pa-lg">
         <q-card-section>
           <router-link to="/home" class="q-mb-md q-gutter-md flex flex-center">

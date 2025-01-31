@@ -9,14 +9,21 @@ const routes = [
     component: () => import('@/views/HomeView.vue'),
   },
   {
-    path: '/login',
-    name: 'login',
-    component: () => import('@/views/auth/LoginView.vue'),
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: () => import('@/views/auth/RegisterView.vue'),
+    path: '/auth',
+    name: 'auth',
+    component: () => import('@/views/auth/AuthView.vue'),
+    children: [
+      {
+        path: 'login',
+        name: 'auth-login',
+        component: () => import('@/views/auth/LoginForm.vue'),
+      },
+      {
+        path: 'register',
+        name: 'auth-register',
+        component: () => import('@/views/auth/RegisterForm.vue'),
+      },
+    ],
   },
   {
     path: '/chat',

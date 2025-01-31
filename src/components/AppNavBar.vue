@@ -65,7 +65,7 @@
       </q-list>
     </q-btn-dropdown>
 
-    <q-btn v-else color="primary" to="/login" label="Login" />
+    <q-btn v-else :to="{ name: 'auth-login' }" color="primary" label="Login" />
   </q-toolbar>
 </template>
 
@@ -109,7 +109,7 @@ const filteredNavItems = computed(() => {
 
 function logout() {
   authStore.logout()
-  $router.push('/login')
+  $router.push({ name: 'home' })
 }
 
 function toggleDarkMode() {

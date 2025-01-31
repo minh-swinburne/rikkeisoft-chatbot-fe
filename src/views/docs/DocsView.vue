@@ -51,13 +51,12 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import { useLayoutStore } from '@/plugins/stores/layout'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
-import { computed, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 
 const $q = useQuasar()
 const $router = useRouter()
 const layoutStore = useLayoutStore()
 
-const isDark = ref(localStorage.getItem('darkMode') === 'true')
 const tabs = [
   { name: 'View Documents', path: { name: 'docs-list' } },
   { name: 'Upload Document', path: { name: 'docs-upload' } },
@@ -66,14 +65,6 @@ const tabs = [
 const leftDrawerOpen = computed({
   get: () => layoutStore.leftDrawerOpen,
   set: (value) => layoutStore.setLeftDrawerOpen(value),
-})
-
-onMounted(() => {
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode !== null) {
-    isDark.value = savedDarkMode === 'true'
-    $q.dark.set(isDark.value)
-  }
 })
 
 function toggleLeftDrawer() {

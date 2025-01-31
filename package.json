@@ -13,6 +13,7 @@
   "dependencies": {
     "@azure/msal-browser": "^4.0.2",
     "@quasar/extras": "^1.16.16",
+    "@vueuse/core": "^12.5.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",

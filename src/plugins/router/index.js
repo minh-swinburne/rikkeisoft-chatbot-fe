@@ -117,14 +117,14 @@ router.beforeEach(async (to, from, next) => {
   const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin)
 
   if (requiresAuth && !isValidToken) {
-    next('/login')
+    next({ name: 'auth-login' })
     return
   }
   if (isValidToken && !authStore.isAuthenticated) {
     authStore.hydrateUser()
   }
   if (requiresAdmin && !authStore.isAdmin) {
-    next('/error/403')
+    next({ name: 'error-403' })
     return
   }
 

@@ -90,7 +90,6 @@ const $router = useRouter()
 const layoutStore = useLayoutStore()
 
 const chats = ref([])
-const isDark = ref(false)
 
 const leftDrawerOpen = computed({
   get: () => layoutStore.leftDrawerOpen,
@@ -254,11 +253,5 @@ async function deleteChat(chat) {
 
 onMounted(() => {
   fetchChats()
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode !== null) {
-    isDark.value = savedDarkMode === 'true'
-    $q.dark.set(isDark.value)
-    // console.log($q.dark)
-  }
 })
 </script>

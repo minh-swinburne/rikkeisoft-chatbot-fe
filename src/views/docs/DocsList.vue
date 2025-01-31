@@ -1,10 +1,10 @@
 <template>
   <q-page padding class="row justify-center items-center q-pa-md" style="max-width: 700px">
-    <div class="col-grow q-mb-md items-center" style="width: 100%;">
+    <div class="col-grow q-mb-md items-center" style="width: 100%">
       <div class="row q-col-gutter-lg">
         <div class="col-grow">
           <q-input v-model="searchQuery" label="Search" dense>
-            <template v-slot:append>
+            <template #append>
               <q-icon name="search" />
             </template>
           </q-input>
@@ -34,29 +34,35 @@
     </div>
 
     <!-- LOADING SKELETONS -->
-    <q-list v-if="isLoading" class="col-grow rounded-borders" style="width: 100%;" bordered separator>
+    <q-list
+      v-if="isLoading"
+      class="col-grow rounded-borders"
+      style="width: 100%"
+      bordered
+      separator
+    >
       <q-item v-for="i in itemsPerPage" :key="i" class="q-py-md column">
         <q-item-section class="col-grow q-mt-sm">
           <q-skeleton type="rect" width="100%" />
           <q-skeleton type="text" width="80%" class="q-mb-xs" />
 
-          <q-item-label class="flex" style="gap: 10px;">
+          <q-item-label class="flex" style="gap: 10px">
             <q-skeleton type="QBadge" />
             <q-skeleton type="QChip" height="100%" />
             <q-skeleton type="QChip" height="100%" />
           </q-item-label>
 
-          <q-item-label class="flex" style="gap: 10px; height: 18px;">
+          <q-item-label class="flex" style="gap: 10px; height: 18px">
             <q-skeleton type="QBadge" />
             <q-skeleton type="text" width="40%" />
           </q-item-label>
 
-          <q-item-label class="flex" style="gap: 10px;">
+          <q-item-label class="flex" style="gap: 10px">
             <q-skeleton type="QBadge" />
             <q-skeleton type="QChip" height="100%" />
           </q-item-label>
 
-          <q-item-label class="flex" style="gap: 10px; height: 18px;">
+          <q-item-label class="flex" style="gap: 10px; height: 18px">
             <q-skeleton type="QBadge" />
             <q-skeleton type="text" width="30%" />
           </q-item-label>
@@ -189,7 +195,7 @@
             label="Categories"
             multiple
           >
-            <template v-slot:selected-item="scope">
+            <template #selected-item="scope">
               <q-chip
                 v-if="editFormData.categories"
                 removable
@@ -234,7 +240,6 @@ const $router = useRouter()
 const documents = ref([])
 const currentDocument = ref(null)
 const previewUrl = ref('')
-const isDark = ref(localStorage.getItem('darkMode') === 'true')
 
 const isLoading = ref(true)
 const currentPage = ref(1)
@@ -284,11 +289,6 @@ const filteredDocuments = computed(() => {
 
 onMounted(() => {
   fetchDocuments()
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode !== null) {
-    isDark.value = savedDarkMode === 'true'
-    $q.dark.set(isDark.value)
-  }
 })
 
 function clearFilters() {

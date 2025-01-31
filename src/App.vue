@@ -7,10 +7,16 @@
   </q-layout>
 </template>
 
-<script>
-export default {
-  name: 'App',
-}
+<script setup>
+import { provide } from 'vue'
+import { useQuasar } from 'quasar'
+import { useDark } from '@vueuse/core'
+
+const $q = useQuasar()
+const isDark = useDark({ storageKey: 'dark' })
+
+provide('isDark', isDark)
+$q.dark.set(isDark.value)
 </script>
 
 <style lang="scss">

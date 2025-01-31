@@ -70,10 +70,10 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '@/plugins/stores/auth'
-import { QBtnDropdown, QRouteTab, useQuasar } from 'quasar'
-import { computed, ref } from 'vue'
+import { ref, computed, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useQuasar, QBtnDropdown, QRouteTab } from 'quasar'
+import { useAuthStore } from '@/plugins/stores/auth'
 import AppLogo from './AppLogo.vue'
 
 const $q = useQuasar()
@@ -82,20 +82,12 @@ const $router = useRouter()
 const authStore = useAuthStore()
 // console.log($router.options.routes)
 
-const isDark = ref(localStorage.getItem('darkMode') === 'true')
+const isDark = inject('isDark')
 const tab = ref($route.path)
 
 const navItems = [
   { name: 'Chat', path: '/chat' },
   { name: 'Documents', path: '/docs' },
-  // {
-  //   name: 'Documents',
-  //   path: '/docs',
-  //   children: [
-  //     { name: 'All Documents', path: '/list' },
-  //     { name: 'Upload', path: '/upload' },
-  //   ],
-  // },
   { name: 'Config', path: '/config' },
 ]
 
@@ -113,9 +105,8 @@ function logout() {
 }
 
 function toggleDarkMode() {
-  isDark.value = !isDark.value
-  $q.dark.set(isDark.value)
-  localStorage.setItem('darkMode', isDark.value)
+  $q.dark.set(!$q.dark.isActive)
+  isDark.value = $q.dark.isActive
 }
 
 function handleTabChange(tab, path) {

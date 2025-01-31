@@ -58,7 +58,7 @@
     </div>
 
     <div class="row q-col-gutter-sm q-mt-none">
-      <div class="col-sm-6 col-12 q-pt-none" style="min-width: 250px;">
+      <div class="col-sm-6 col-12 q-pt-none" style="min-width: 250px">
         <q-input
           v-model="password"
           autocomplete="new-password"
@@ -68,7 +68,7 @@
           :type="isPwd ? 'password' : 'text'"
           :rules="[(val) => !!val || 'Password is required']"
         >
-          <template v-slot:append>
+          <template #append>
             <q-icon
               :name="isPwd ? 'visibility_off' : 'visibility'"
               class="cursor-pointer"
@@ -78,7 +78,7 @@
         </q-input>
       </div>
 
-      <div class="col-sm-6 col-12 q-pt-none" style="min-width: 250px;">
+      <div class="col-sm-6 col-12 q-pt-none" style="min-width: 250px">
         <q-input
           v-model="confirmPassword"
           autocomplete="new-password"
@@ -113,7 +113,7 @@
     outline
     @click="emit('auth-google')"
   >
-    <template v-slot:default>
+    <template #default>
       <div class="row items-center no-wrap">
         <q-icon
           name="img:https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
@@ -132,7 +132,7 @@
     outline
     @click="emit('auth-microsoft')"
   >
-    <template v-slot:default>
+    <template #default>
       <div class="row items-center no-wrap">
         <q-icon
           name="img:https://learn.microsoft.com/en-us/azure/active-directory/develop/media/howto-add-branding-in-azure-ad-apps/ms-symbollockup_mssymbol_19.png"
@@ -151,10 +151,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useQuasar } from 'quasar'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
+import { useQuasar } from 'quasar'
+import { ref } from 'vue'
 
 const $q = useQuasar()
 const authStore = useAuthStore()

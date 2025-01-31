@@ -24,8 +24,6 @@
 </template>
 
 <script setup>
-import { useQuasar } from 'quasar'
 import AppNavbar from '@/components/AppNavbar.vue'
 
-const $q = useQuasar()
 </script>

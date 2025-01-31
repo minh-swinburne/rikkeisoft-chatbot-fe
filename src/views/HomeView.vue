@@ -226,7 +226,6 @@ import { useQuasar } from 'quasar'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 const $q = useQuasar()
-const isDark = ref(localStorage.getItem('darkMode') === 'true')
 
 const texts = ref(['Hello World!', 'Welcome to RikkeiGPT!']) // Sentences to type
 const typedText = ref('') // Current text being typed
@@ -263,12 +262,6 @@ const startCursorBlink = () => {
 onMounted(() => {
   startCursorBlink()
   typeText()
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode !== null) {
-    isDark.value = savedDarkMode === 'true'
-    $q.dark.set(isDark.value)
-    console.log($q.dark)
-  }
 })
 
 onBeforeUnmount(() => {

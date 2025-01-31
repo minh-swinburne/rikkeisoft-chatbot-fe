@@ -18,7 +18,7 @@
       :type="isPwd ? 'password' : 'text'"
       :rules="[(val) => !!val || 'Password is required']"
     >
-      <template v-slot:append>
+      <template #append>
         <q-icon
           :name="isPwd ? 'visibility_off' : 'visibility'"
           class="cursor-pointer"
@@ -46,8 +46,8 @@
     outline
     @click="emit('auth-google')"
   >
-    <template v-slot:default>
-      <div class="row no-wrap">
+    <template #default>
+      <div class="row items-center no-wrap">
         <q-icon
           name="img:https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
           size="18px"
@@ -65,8 +65,8 @@
     outline
     @click="emit('auth-microsoft')"
   >
-    <template v-slot:default>
-      <div class="row no-wrap">
+    <template #default>
+      <div class="row items-center no-wrap">
         <q-icon
           name="img:https://learn.microsoft.com/en-us/azure/active-directory/develop/media/howto-add-branding-in-azure-ad-apps/ms-symbollockup_mssymbol_19.png"
           size="18px"
@@ -91,10 +91,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useQuasar } from 'quasar'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
+import { useQuasar } from 'quasar'
+import { ref } from 'vue'
 
 const $q = useQuasar()
 const authStore = useAuthStore()

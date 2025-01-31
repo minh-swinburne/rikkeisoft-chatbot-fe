@@ -94,7 +94,6 @@ import { useQuasar } from 'quasar'
 import { onMounted, ref, watch } from 'vue'
 
 const $q = useQuasar()
-const isDark = ref(localStorage.getItem('darkMode') === 'true')
 
 const tabs = {
   answer_generation: 'Answer Generation',
@@ -145,11 +144,6 @@ const loadConfig = async (tab) => {
 
 onMounted(() => {
   loadConfig(activeTab.value)
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode !== null) {
-    isDark.value = savedDarkMode === 'true'
-    $q.dark.set(isDark.value)
-  }
 })
 
 watch(activeTab, (newTab) => {

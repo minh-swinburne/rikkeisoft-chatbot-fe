@@ -24,7 +24,7 @@
           @input="handleFileUpload"
           :rules="[(val) => !!val || 'Field is required']"
         >
-          <template v-slot:append>
+          <template #append>
             <q-icon name="attach_file" />
           </template>
         </q-file>
@@ -122,13 +122,11 @@
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
 import { useQuasar } from 'quasar'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 
 const $q = useQuasar()
 const authStore = useAuthStore()
 // const formRef = useTemplateRef("uploadForm"); // Reference to the form element
-
-const isDark = ref(localStorage.getItem('darkMode') === 'true')
 
 const uploadForm = ref(null) // Reference to the form element
 const activeTab = ref('file') // Default tab is "File Upload"
@@ -233,14 +231,6 @@ function submit() {
 
   console.log($q.notify)
 }
-
-onMounted(() => {
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode !== null) {
-    isDark.value = savedDarkMode === 'true'
-    $q.dark.set(isDark.value)
-  }
-})
 </script>
 
 <style scoped></style>

@@ -15,7 +15,7 @@
               <q-avatar size="100px">
                 <q-img :src="avatarUrl" />
                 <q-file v-model="avatarFile" accept="image/*" style="display: none">
-                  <template v-slot:append>
+                  <template #append>
                     <q-icon name="attach_file" />
                   </template>
                 </q-file>
@@ -95,7 +95,6 @@ import { useQuasar } from 'quasar'
 import { onMounted, ref } from 'vue'
 
 const $q = useQuasar()
-const isDark = ref(localStorage.getItem('darkMode') === 'true')
 
 const email = ref('')
 const firstname = ref('')
@@ -158,11 +157,6 @@ onMounted(async () => {
     avatarUrl.value = userData.avatarUrl || '/placeholder.svg?height=100&width=100'
   } catch (error) {
     console.error('Error fetching user data:', error)
-  }
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode !== null) {
-    isDark.value = savedDarkMode === 'true'
-    $q.dark.set(isDark.value)
   }
 })
 </script>

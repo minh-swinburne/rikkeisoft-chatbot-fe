@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center bg-grey-16">
+  <q-page :class="'flex flex-center ' + ($q.dark.isActive ? 'bg-grey-17' : '')">
     <div class="q-py-xl q-px-md">
       <q-card class="q-pa-lg">
         <q-card-section>
@@ -25,12 +25,12 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+import { useQuasar } from 'quasar'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/plugins/stores/auth'
 import { apiClient } from '@/plugins/api'
 import { loginRequest, msalInstance } from '@/plugins/sso/msalConfig'
-import { useAuthStore } from '@/plugins/stores/auth'
-import { useQuasar } from 'quasar'
-import { onMounted, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
 import { googleTokenLogin } from 'vue3-google-login'
 
 const $q = useQuasar()
@@ -102,10 +102,6 @@ async function authenticateMicrosoft() {
     authStore.logout()
   }
 }
-
-onMounted(() => {
-  $q.dark.set(false)
-})
 </script>
 
 <style scoped></style>

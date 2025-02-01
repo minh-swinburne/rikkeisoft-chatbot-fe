@@ -9,74 +9,89 @@
     <q-page-container>
       <q-page padding class="max-width-70 q-pa-md">
         <q-card flat bordered class="q-pa-md">
-          <q-tabs v-model="activeTab" class="q-mb-md">
+          <q-tabs v-model="activeTab" class="q-mb-md" active-color="primary">
             <q-tab v-for="(tab, key) in tabs" :key="key" :name="key" :label="tab" />
           </q-tabs>
           <q-separator />
           <q-tab-panels v-model="activeTab">
             <q-tab-panel v-for="(tab, key) in tabs" :key="key" :name="key">
-              <q-form @submit="handleSubmit(key)">
+              <q-form @submit.prevent="saveConfig(tab)">
                 <div class="row items-center justify-between q-mb-md">
                   <h5 class="q-my-none">{{ tab }}</h5>
+
+                  <q-space />
+
                   <q-btn
                     :label="isEditing ? 'Apply' : 'Edit'"
-                    color="primary"
-                    @click="toggleEdit"
                     :icon="isEditing ? 'check' : 'edit'"
+                    :loading="loading"
+                    color="primary"
+                    unelevated
+                    @click="toggleEdit(true)"
+                  />
+
+                  <q-btn
+                    v-if="isEditing"
+                    :loading="loading"
                     :class="{ 'q-ml-sm': $q.screen.gt.xs }"
+                    label="Cancel"
+                    icon="close"
+                    color="negative"
+                    flat
+                    @click="toggleEdit(false)"
                   />
                 </div>
                 <q-input
                   v-model="config.instructions"
-                  outlined
+                  :readonly="!isEditing"
                   type="textarea"
                   label="Instructions"
-                  :readonly="!isEditing"
-                  rows="12"
                   class="instruction-textarea"
+                  autogrow
+                  outlined
                 />
 
                 <q-input
                   v-if="config.messageTemplate"
                   v-model="config.messageTemplate"
-                  outlined
+                  :readonly="!isEditing"
                   type="textarea"
                   label="Message Template"
-                  :readonly="!isEditing"
-                  rows="4"
                   class="q-mt-md"
+                  autogrow
+                  outlined
                 />
 
                 <q-select
                   v-model="config.model"
                   :options="config.modelOptions"
+                  :readonly="!isEditing"
                   label="Model"
-                  outlined
-                  :disable="!isEditing"
                   class="q-mt-md"
+                  outlined
                 />
 
                 <q-input
                   v-model.number="config.maxTokens"
-                  outlined
+                  :readonly="!isEditing"
                   type="number"
                   label="Max Tokens"
-                  :readonly="!isEditing"
-                  :min="1"
-                  :max="8192"
+                  min="1"
+                  max="8192"
                   class="q-mt-md"
+                  outlined
                 />
 
                 <q-input
                   v-model.number="config.temperature"
-                  outlined
+                  :readonly="!isEditing"
                   type="number"
                   label="Temperature"
-                  :readonly="!isEditing"
-                  :step="0.1"
-                  :min="0"
-                  :max="1"
+                  step="0.1"
+                  min="0"
+                  max="1"
                   class="q-mt-md"
+                  outlined
                 />
               </q-form>
             </q-tab-panel>
@@ -103,6 +118,7 @@ const tabs = {
 
 const activeTab = ref('answer_generation')
 const isEditing = ref(false)
+const loading = ref(true)
 const config = ref({
   instructions: '',
   messageTemplate: null,
@@ -112,16 +128,25 @@ const config = ref({
   temperature: 0.5,
 })
 
-const loadConfig = async (tab) => {
+onMounted(() => {
+  loadConfig(activeTab.value)
+})
+
+watch(activeTab, (newTab) => {
+  loadConfig(newTab)
+})
+
+async function toggleEdit(save = false) {
+  if (isEditing.value && save) {
+    await saveConfig(activeTab.value)
+  }
+  await loadConfig(activeTab.value)
+  isEditing.value = !isEditing.value
+}
+
+async function loadConfig(tab) {
+  loading.value = true
   try {
-    config.value = {
-      instructions: '',
-      messageTemplate: null,
-      modelOptions: [],
-      model: '',
-      maxTokens: 1,
-      temperature: 0.5,
-    }
     const response = await apiClient.config.getConfig(tab)
     config.value = {
       instructions: response.data.system_prompt,
@@ -140,24 +165,11 @@ const loadConfig = async (tab) => {
       icon: 'report_problem',
     })
   }
+  loading.value = false
 }
 
-onMounted(() => {
-  loadConfig(activeTab.value)
-})
-
-watch(activeTab, (newTab) => {
-  loadConfig(newTab)
-})
-
-const toggleEdit = () => {
-  if (isEditing.value) {
-    handleSubmit(activeTab.value)
-  }
-  isEditing.value = !isEditing.value
-}
-
-const handleSubmit = async (tab) => {
+async function saveConfig(tab) {
+  loading.value = true
   try {
     const response = await apiClient.config.updateConfig(tab, config)
     console.log('Updated config:', response.data)
@@ -174,6 +186,7 @@ const handleSubmit = async (tab) => {
       icon: 'report_problem',
     })
   }
+  loading.value = false
 }
 </script>
 

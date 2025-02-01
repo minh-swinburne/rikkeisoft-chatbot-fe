@@ -128,7 +128,7 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  const route = router.getRoutes().find((route) => route.path === to.path)
+  const route = router.getRoutes().find((route) => route.name === to.name)
   // Redirect to the first child route if it exists
   if (route.children.length > 0) {
     next(`${route.path}/${route.children[0].path}`)

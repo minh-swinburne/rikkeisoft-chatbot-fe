@@ -2,6 +2,13 @@
 // @import '~quasar-styl';
 // @import '~quasar-addon-styl';
 
+.bg-dark-page {
+  background-color: $dark-page !important;
+}
+.bg-shadow {
+  background-color: $shadow !important;
+}
+
 .text-light-red {
   color: $light-red !important;
 }

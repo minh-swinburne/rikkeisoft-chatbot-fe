@@ -1,7 +1,7 @@
 <template>
-  <q-page :class="'flex flex-center ' + ($q.dark.isActive ? 'bg-grey-17' : '')">
+  <q-page class="flex flex-center">
     <div class="q-py-xl q-px-md">
-      <q-card class="q-pa-lg">
+      <q-card class="q-pa-lg" bordered flat>
         <q-card-section>
           <router-link to="/home" class="q-mb-md q-gutter-md flex flex-center">
             <q-img

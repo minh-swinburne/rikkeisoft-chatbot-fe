@@ -8,15 +8,13 @@
 </template>
 
 <script setup>
-import { provide } from 'vue'
+import { useLayoutStore } from '@/plugins/stores/layout'
 import { useQuasar } from 'quasar'
-import { useDark } from '@vueuse/core'
 
 const $q = useQuasar()
-const isDark = useDark({ storageKey: 'dark' })
+const layoutStore = useLayoutStore()
 
-provide('isDark', isDark)
-$q.dark.set(isDark.value)
+$q.dark.set(layoutStore.isDark)
 </script>
 
 <style lang="scss">
@@ -40,14 +38,20 @@ $q.dark.set(isDark.value)
 //   background-clip: padding-box;
 // }
 
+.q-page .q-list {
+  background: white;
+}
+
 .q-field--error {
   margin-bottom: 8px;
 }
 
-a, .link {
+a,
+.link {
   color: $primary;
 }
-.body--dark a, .body--dark .link {
+.body--dark a,
+.body--dark .link {
   color: $link;
 }
 
@@ -69,7 +73,22 @@ input:is(:-webkit-autofill, :autofill) {
 .body--dark {
   input:is(:-webkit-autofill, :autofill) {
     -webkit-text-fill-color: white;
-    box-shadow: inset 0 0 0 500px var(--q-dark) !important;
+    box-shadow: inset 0 0 0 500px $grey-17 !important;
+  }
+
+  .q-header,
+  .q-drawer {
+    background: $dark-page !important;
+  }
+
+  .q-page-container {
+    background: $dark !important;
+  }
+
+  .q-card,
+  .q-tab-panels,
+  .q-page .q-list {
+    background: $grey-17 !important;
   }
 }
 </style>

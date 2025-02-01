@@ -1,6 +1,6 @@
 <template>
-  <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
-    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
+  <q-layout view="hHh LpR fFf">
+    <q-header bordered>
       <q-toolbar>
         <q-btn
           icon="menu"
@@ -19,7 +19,6 @@
       show-if-above
       bordered
       :width="280"
-      :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-1'"
     >
       <q-list>
         <q-item-label header class="flex justify-between items-center">
@@ -37,8 +36,8 @@
           v-for="chat in chats"
           :key="chat.id"
           :to="{ name: 'chat-detail', params: { chatId: chat.id } }"
-          :active-class="$q.dark.isActive ? 'bg-grey-15' : 'bg-grey-4'"
           :style="{ borderRadius: '5px', color: 'inherit' }"
+          active-class="bg-shadow"
           class="q-ma-sm q-pa-sm"
           clickable
           v-ripple
@@ -70,7 +69,7 @@
       </q-list>
     </q-drawer>
 
-    <q-page-container :class="{ 'bg-grey-17': $q.dark.isActive }">
+    <q-page-container>
       <router-view @send="fetchChats" @rename="generateName" />
     </q-page-container>
   </q-layout>

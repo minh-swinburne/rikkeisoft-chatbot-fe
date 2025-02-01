@@ -3,6 +3,8 @@
     <q-scroll-area
       ref="chatScrollArea"
       class="col q-px-md scroll-area-transition"
+      content-style="padding-top: 16px"
+      content-active-style="padding-top: 16px"
       :style="{
         maxWidth: '100%',
         maxHeight: maxHeightScrollArea,

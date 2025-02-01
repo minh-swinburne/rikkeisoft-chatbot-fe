@@ -65,24 +65,32 @@
       </q-list>
     </q-btn-dropdown>
 
-    <q-btn v-else :to="{ name: 'auth-login' }" color="primary" label="Login" />
+    <q-btn
+      v-else
+      :to="{ name: 'auth-login' }"
+      :color="$q.dark.isActive ? 'primary' : 'white'"
+      :text-color="$q.dark.isActive ? 'white' : 'black'"
+      label="Login"
+      unelevated
+    />
   </q-toolbar>
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useQuasar, QBtnDropdown, QRouteTab } from 'quasar'
+import { useLayoutStore } from '@/plugins/stores/layout'
 import { useAuthStore } from '@/plugins/stores/auth'
+import { useQuasar, QBtnDropdown, QRouteTab } from 'quasar'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import AppLogo from './AppLogo.vue'
 
 const $q = useQuasar()
 const $route = useRoute()
 const $router = useRouter()
 const authStore = useAuthStore()
+const layoutStore = useLayoutStore()
 // console.log($router.options.routes)
 
-const isDark = inject('isDark')
 const tab = ref($route.path)
 
 const navItems = [
@@ -95,7 +103,8 @@ const filteredNavItems = computed(() => {
   return authStore.isAdmin
     ? navItems
     : navItems.filter(
-        (item) => !$router.options.routes.find((route) => route.path === item.path).meta.requiresAdmin,
+        (item) =>
+          !$router.options.routes.find((route) => route.path === item.path).meta.requiresAdmin,
       )
 })
 
@@ -106,7 +115,7 @@ function logout() {
 
 function toggleDarkMode() {
   $q.dark.set(!$q.dark.isActive)
-  isDark.value = $q.dark.isActive
+  layoutStore.isDark = $q.dark.isActive
 }
 
 function handleTabChange(tab, path) {

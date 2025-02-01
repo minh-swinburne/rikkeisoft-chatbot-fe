@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import { jwtDecode } from "jwt-decode";
 import { googleLogout } from "vue3-google-login";
-// import { msalInstance } from "@/plugins/config/msalConfig";
 import { apiClient } from "@/plugins/api";
 
 export const useAuthStore = defineStore("auth", {

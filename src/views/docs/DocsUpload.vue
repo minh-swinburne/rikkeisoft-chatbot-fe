@@ -4,7 +4,7 @@
       <!-- Form Section -->
       <q-form ref="uploadForm" @submit.prevent="submit">
         <!-- Tabs for File or Weblink Upload -->
-        <q-tabs v-model="activeTab" class="q-mb-md" dense>
+        <q-tabs v-model="activeTab" class="q-mb-md" active-color="primary">
           <q-tab name="file" label="File Upload" />
           <q-tab name="link" label="Web Link Upload" />
         </q-tabs>

@@ -1,17 +1,17 @@
 export const docsAPI = (client) => {
-  const prefix = "docs";
+  const prefix = 'docs'
 
   return {
     listDocs: () => client.get(`${prefix}`),
 
     uploadDoc: (formData) =>
       client.post(`${prefix}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Content-Type': 'multipart/form-data' },
       }),
 
     editDoc: (id, formData) =>
       client.put(`${prefix}/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Content-Type': 'multipart/form-data' },
       }),
 
     // downloadDoc: (id) =>
@@ -20,5 +20,5 @@ export const docsAPI = (client) => {
     previewDoc: (id) => client.get(`${prefix}/${id}/preview`),
 
     deleteDoc: (id) => client.delete(`${prefix}/${id}`),
-  };
-};
+  }
+}

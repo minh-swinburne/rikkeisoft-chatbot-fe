@@ -1,56 +1,52 @@
-import { defineStore } from "pinia";
-import { jwtDecode } from "jwt-decode";
-import { googleLogout } from "vue3-google-login";
-import { apiClient } from "@/plugins/api";
+import { apiClient } from '@/plugins/api'
+import { useStorage } from '@vueuse/core'
+import { jwtDecode } from 'jwt-decode'
+import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
+import { googleLogout } from 'vue3-google-login'
 
-export const useAuthStore = defineStore("auth", {
-  state: () => ({
-    user: null, // Store user information
-  }),
+export const useAuthStore = defineStore('auth', () => {
+  // **State**
+  const accessToken = useStorage('access-token', null)
+  const refreshToken = useStorage('refresh-token', null)
+  const user = ref(accessToken.value ? jwtDecode(accessToken.value) : null)
 
-  getters: {
-    isAuthenticated: (state) => !!state.user, // Check if the user is authenticated
-    isAdmin: (state) => state.user?.roles.includes("admin"), // Check if the user is an admin
-  },
+  // **Getters**
+  const isAuthenticated = computed(() => !!user.value)
+  const isAdmin = computed(() => user.value?.roles.includes('admin'))
 
-  actions: {
-    hydrateUser() {
-      const accessToken = localStorage.getItem("access_token");
-      this.user = accessToken ? jwtDecode(accessToken) : null;
-    },
+  // **Actions**
+  function hydrateUser() {
+    user.value = accessToken.value ? jwtDecode(accessToken.value) : null
+  }
 
-    login(accessToken, refreshToken) {
-      localStorage.setItem("access_token", accessToken); // Store the JWT token in localStorage
-      localStorage.setItem("refresh_token", refreshToken); // Store the refresh token in
-      this.hydrateUser();
+  function login(newAccessToken, newRefreshToken) {
+    accessToken.value = newAccessToken
+    refreshToken.value = newRefreshToken
+    hydrateUser()
+    apiClient.client.setToken(newAccessToken)
+  }
 
-      apiClient.client.setToken(accessToken);
-    },
+  function logout() {
+    user.value = null
+    accessToken.value = null
+    refreshToken.value = null
 
-    logout() {
-      this.user = null; // Clear user information upon logout
-      this.accessToken = null;
-      this.refreshToken = null;
+    googleLogout()
+    apiClient.client.clearToken()
+  }
 
-      googleLogout(); // Logout from Google
-      apiClient.client.clearToken();
-
-      // Clear the JWT token from localStorage
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-    },
-
-    async validateAccess() {
-      const hasToken = !!localStorage.getItem("access_token") && !!localStorage.getItem("refresh_token")
+  async function validateAccess() {
+    const hasToken = !!accessToken.value && !!refreshToken.value
 
     if (!hasToken) {
-      console.warn('No token found in cookies. User is not logged in.')
+      console.warn('No token found. User is not logged in.')
       return false
     }
 
     try {
       if (!apiClient.client.getToken()) {
-        apiClient.client.setToken(localStorage.getItem('access_token'))
+        apiClient.client.setToken(accessToken.value)
       }
       const response = await apiClient.auth.validateToken()
       return response.data.valid
@@ -58,18 +54,29 @@ export const useAuthStore = defineStore("auth", {
       console.error('Token validation failed:', error.response?.data || error)
       return false
     }
-    },
+  }
 
-    async refreshAccess() {
-      // Attempt to refresh the token
-      try {
-        const response = await apiClient.auth.refreshToken();
-        const { access_token, refresh_token } = response.data;
-        this.login(access_token, refresh_token); // Log in with the new tokens
-      } catch (error) {
-        console.error("Token refresh failed:", error.response?.data || error);
-        this.logout(); // Log out if the token refresh fails
-      }
-    },
-  },
-});
+  async function refreshAccess() {
+    try {
+      const response = await apiClient.auth.refreshToken()
+      const { access_token, refresh_token } = response.data
+      login(access_token, refresh_token)
+    } catch (error) {
+      console.error('Token refresh failed:', error.response?.data || error)
+      logout()
+    }
+  }
+
+  return {
+    user,
+    accessToken,
+    refreshToken,
+    isAuthenticated,
+    isAdmin,
+    hydrateUser,
+    login,
+    logout,
+    validateAccess,
+    refreshAccess,
+  }
+})

@@ -1,10 +1,10 @@
 export const authAPI = (client) => {
-  const prefix = "auth";
+  const prefix = 'auth'
 
   return {
     authenticateNative: (params) =>
       client.post(`${prefix}/native`, params, {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         withCredentials: true,
       }),
 
@@ -12,7 +12,7 @@ export const authAPI = (client) => {
       client.post(
         `${prefix}/google`,
         { access_token: accessToken },
-        { headers: { "Content-Type": "application/json" } }
+        { headers: { 'Content-Type': 'application/json' } },
       ),
 
     authenticateMicrosoft: (accessToken, idToken) =>
@@ -24,21 +24,21 @@ export const authAPI = (client) => {
         },
         {
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
       ),
 
     registerUser: (userDetails) =>
       client.post(`${prefix}/register`, userDetails, {
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }),
 
     validateToken: () =>
       client.get(`${prefix}/validate`, {
         withCredentials: true,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }),
 
     refreshToken: (refreshToken) =>
@@ -46,5 +46,5 @@ export const authAPI = (client) => {
         withCredentials: true,
         headers: { Authorization: `Bearer ${refreshToken}` },
       }),
-  };
-};
+  }
+}

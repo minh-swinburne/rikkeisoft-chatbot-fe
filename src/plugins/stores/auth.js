@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { googleLogout } from 'vue3-google-login'
+import { msalInstance } from '@/plugins/sso/msalConfig'
 
 export const useAuthStore = defineStore('auth', () => {
   // **State**
@@ -28,11 +29,17 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function logout() {
+    if (this.user?.provider === 'google') {
+      googleLogout() // Logout from Google
+    } else if (this.user?.provider === 'microsoft') {
+      console.log('Logging out from Microsoft...')
+      msalInstance.initialize() // Initialize MSAL
+      msalInstance.logoutPopup() // Logout from Microsoft
+    }
+
     user.value = null
     accessToken.value = null
     refreshToken.value = null
-
-    googleLogout()
     apiClient.client.clearToken()
   }
 

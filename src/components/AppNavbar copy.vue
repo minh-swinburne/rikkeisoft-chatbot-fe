@@ -47,7 +47,7 @@
     <q-btn-dropdown v-if="authStore.user" flat no-caps>
       <template #label>
         <user-avatar :src="authStore.user?.avatar_url" size="30px" class="q-mr-sm" bordered />
-        {{ authStore.user?.firstname }} {{ authStore.user?.lastname }}
+        <span >{{ authStore.user?.firstname }} {{ authStore.user?.lastname }}</span>
       </template>
       <q-list>
         <q-item clickable v-ripple @click="$router.push('/profile')">

@@ -24,7 +24,7 @@ export const msalConfig = {
 }
 
 export const loginRequest = {
-  scopes: ['openid', 'profile', 'email'], // Scopes requested during login
+  scopes: ['User.Read', 'openid', 'profile', 'email'], // Scopes requested during login
 }
 
 export const msalInstance = new PublicClientApplication(msalConfig)

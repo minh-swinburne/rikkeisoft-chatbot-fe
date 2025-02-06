@@ -170,66 +170,62 @@ function handleFileUpload(event) {
   }
 }
 
-function submit() {
-  uploadForm.value.validate().then((success) => {
+async function submit() {
+  const success = await uploadForm.value.validate()
+  if (success) {
     uploading.value = true
-    if (success) {
-      console.log('Form submitted successfully!')
+    console.log('Form submitted successfully!', uploading.value)
 
-      // Construct FormData
-      const formData = new FormData()
+    // Construct FormData
+    const formData = new FormData()
 
-      // Append form data fields
-      if (file.value && activeTab.value === 'file') {
-        formData.append('file', file.value)
-      } else if (activeTab.value === 'link' && link.value) {
-        formData.append('link', link.value)
-      }
+    // Append form data fields
+    if (file.value && activeTab.value === 'file') {
+      formData.append('file', file.value)
+    } else if (activeTab.value === 'link' && link.value) {
+      formData.append('link', link.value)
+    }
 
-      formData.append('title', title.value)
-      formData.append('description', description.value || '') // Optional
-      formData.append('created_date', createdDate.value || new Date().toISOString().slice(0, 10)) // Use today as default
-      formData.append('creator', creator.value)
-      formData.append('restricted', restricted.value === 'all' ? 'false' : 'true')
+    formData.append('title', title.value)
+    formData.append('description', description.value || '') // Optional
+    formData.append('created_date', createdDate.value || new Date().toISOString().slice(0, 10)) // Use today as default
+    formData.append('creator', creator.value)
+    formData.append('restricted', restricted.value === 'all' ? 'false' : 'true')
 
-      selectedCategories.value.forEach((category) => {
-        formData.append('categories', category)
+    selectedCategories.value.forEach((category) => {
+      formData.append('categories', category)
+    })
+
+    // Debug FormData entries
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value)
+    }
+
+    try {
+      const response = await apiClient.docs.uploadDoc(formData)
+
+      console.log('Upload success:', response.data)
+      $q.notify({
+        type: 'positive',
+        message: 'Document uploaded successfully!',
       })
-
-      // Debug FormData entries
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value)
+    } catch (error) {
+      console.error('Upload failed:', error.response || error)
+      if (error.response) {
+        console.error('Error details:', error.response.data) // Log error details from server response
       }
-      // Submit form data via Axios
-      apiClient.docs
-        .uploadDoc(formData)
-        .then((response) => {
-          console.log('Upload success:', response.data)
-          $q.notify({
-            type: 'positive',
-            message: 'Document uploaded successfully!',
-          })
-        })
-        .catch((error) => {
-          console.error('Upload failed:', error.response || error)
-          if (error.response) {
-            console.error('Error details:', error.response.data) // Log error details from server response
-          }
-          $q.notify({
-            type: 'negative',
-            message: 'An error occurred while uploading the document.',
-          })
-        })
-    } else {
       $q.notify({
         type: 'negative',
-        message: 'Please fill in all required fields.',
+        message: 'An error occurred while uploading the document.',
       })
     }
     uploading.value = false
-  })
-
-  console.log($q.notify)
+  } else {
+    $q.notify({
+      type: 'negative',
+      message: 'Please fill in all required fields.',
+    })
+  }
 }
 </script>
 

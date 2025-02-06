@@ -1,6 +1,6 @@
 <template>
   <q-page padding class="row justify-center items-center q-pa-md" style="max-width: 700px">
-    <div class="col-grow q-mb-md items-center" style="width: 100%">
+    <div class="col-grow q-mb-lg items-center" style="width: 100%">
       <div class="row q-col-gutter-lg">
         <div class="col-grow">
           <q-input v-model="searchQuery" label="Search" dense>
@@ -14,8 +14,14 @@
             <q-card>
               <q-card-section>
                 <div class="text-h6">Filter by Categories</div>
-                <q-select v-model="selectedCategories" :options="availableCategories" multiple dense use-chips
-                  class="q-mt-sm" />
+                <q-select
+                  v-model="selectedCategories"
+                  :options="availableCategories"
+                  multiple
+                  dense
+                  use-chips
+                  class="q-mt-sm"
+                />
               </q-card-section>
               <q-card-actions align="right">
                 <q-btn flat label="Clear" @click="clearFilters" />
@@ -28,7 +34,13 @@
     </div>
 
     <!-- LOADING SKELETONS -->
-    <q-list v-if="isLoading" class="col-grow rounded-borders" style="width: 100%" bordered separator>
+    <q-list
+      v-if="isLoading"
+      class="col-grow rounded-borders"
+      style="width: 100%"
+      bordered
+      separator
+    >
       <q-item v-for="i in itemsPerPage" :key="i" class="q-py-md column">
         <q-item-section class="col-grow q-mt-sm">
           <q-skeleton type="rect" width="100%" />
@@ -69,14 +81,27 @@
 
     <!-- ACTUAL DOCUMENT LIST -->
     <q-list v-else class="col-grow rounded-borders" bordered separator>
-      <q-item v-for="document in paginatedDocuments" :key="document.id" class="q-py-md" style="flex-wrap: wrap">
+      <q-item
+        v-for="document in paginatedDocuments"
+        :key="document.id"
+        class="q-py-md"
+        style="flex-wrap: wrap"
+      >
         <q-item-section class="col-grow q-mt-sm">
           <q-item-label class="text-h6" lines="1">{{ document.title }}</q-item-label>
-          <q-item-label caption lines="2">{{ document.description }}</q-item-label>
+          <q-item-label caption lines="2" class="q-mb-sm">{{ document.description }}</q-item-label>
+          <q-item-label>
+            <strong>ID: </strong>
+            <span class="text-caption">{{ document.id }}</span>
+          </q-item-label>
           <q-item-label>
             <strong>Categories:</strong>
-            <q-chip v-for="(category, index) in document.categories" :key="index"
-              :color="$q.dark.isActive ? 'grey-9' : 'grey-4'" dense>
+            <q-chip
+              v-for="(category, index) in document.categories"
+              :key="index"
+              :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+              dense
+            >
               {{ category.name }}
             </q-chip>
           </q-item-label>
@@ -126,7 +151,6 @@
               @click="downloadDocument(document)"
             />
             <q-btn
-              :loading="editting"
               color="warning"
               icon="edit"
               label="Edit"
@@ -134,7 +158,7 @@
               @click="editDocument(document)"
             />
             <q-btn
-              :loading="deleting"
+              :loading="deleting && document == currentDocument"
               color="negative"
               icon="delete"
               label="Delete"
@@ -147,8 +171,14 @@
     </q-list>
 
     <div class="justify-center q-mt-md">
-      <q-pagination v-model="currentPage" :max="totalPages" :max-pages="5" active-design="unelevated" boundary-links
-        direction-links />
+      <q-pagination
+        v-model="currentPage"
+        :max="totalPages"
+        :max-pages="5"
+        active-design="unelevated"
+        boundary-links
+        direction-links
+      />
     </div>
   </q-page>
 
@@ -168,29 +198,57 @@
 
   <q-dialog v-model="showEditForm">
     <q-card style="width: 500px; max-width: 90vw">
-      <q-card-section>
+      <q-card-section class="q-pb-none">
         <div class="text-h6">Edit Document</div>
       </q-card-section>
       <q-card-section>
-        <q-form @submit="submitEditForm">
-          <q-input v-model="editFormData.title" label="Title" required />
-          <q-input v-model="editFormData.description" type="textarea" label="Description" />
-          <q-select v-model="editFormData.categories" :options="availableCategories" label="Categories" multiple>
+        <q-form class="q-gutter-md" @submit="submitEditForm">
+          <q-input v-model="editFormData.title" label="Title" outlined required />
+          <q-input
+            v-model="editFormData.description"
+            type="textarea"
+            label="Description"
+            outlined
+          />
+          <q-select
+            v-model="editFormData.categories"
+            :options="availableCategories"
+            label="Categories"
+            multiple
+            outlined
+          >
             <template #selected-item="scope">
-              <q-chip v-if="editFormData.categories" removable dense :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
-                @remove="scope.removeAtIndex(scope.index)" :tabindex="scope.tabindex">
+              <q-chip
+                v-if="editFormData.categories"
+                removable
+                dense
+                :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+                @remove="scope.removeAtIndex(scope.index)"
+                :tabindex="scope.tabindex"
+              >
                 {{ scope.opt }}
               </q-chip>
             </template>
           </q-select>
 
-          <q-option-group v-model="editFormData.restricted" :options="[
-            { label: 'Everyone', value: false },
-            { label: 'Admin Only', value: true },
-          ]" color="secondary" />
+          <q-option-group
+            v-model="editFormData.restricted"
+            :options="[
+              { label: 'Everyone', value: false },
+              { label: 'Admin Only', value: true },
+            ]"
+            color="primary"
+          />
           <q-card-actions align="right">
-            <q-btn flat label="Cancel" color="secondary" v-close-popup />
-            <q-btn flat label="Save Changes" type="submit" color="secondary" />
+            <q-btn label="Cancel" icon="close" color="negative" flat v-close-popup />
+            <q-btn
+              :loading="editting"
+              label="Save Changes"
+              icon="check"
+              type="submit"
+              color="primary"
+              unelevated
+            />
           </q-card-actions>
         </q-form>
       </q-card-section>
@@ -199,11 +257,12 @@
 </template>
 
 <script setup>
+import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
+import _ from 'lodash'
 import { useQuasar } from 'quasar'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import UserAvatar from '@/components/UserAvatar.vue'
 
 const $q = useQuasar()
 const $router = useRouter()
@@ -330,19 +389,11 @@ function editDocument(document) {
 }
 
 async function submitEditForm() {
+  editting.value = true
   try {
-    const formData = new FormData()
-    formData.append('title', editFormData.value.title)
-    formData.append('description', editFormData.value.description)
-    // formData.append('categories', JSON.stringify(editFormData.value.categories)) // foreach
-    formData.append('restricted', editFormData.value.restricted)
+    await apiClient.docs.editDoc(editFormData.value.id, { ...editFormData.value, id: _ })
 
-    editFormData.value.categories.forEach((category) => {
-        formData.append('categories', category)
-    })
-
-    await apiClient.docs.editDoc(editFormData.value.id, { id: _, ...editFormData.value })
-
+    showEditForm.value = false
     isLoading.value = true
     fetchDocuments()
 
@@ -359,19 +410,21 @@ async function submitEditForm() {
       icon: 'report_problem',
     })
   }
+  editting.value = false
 }
 
 async function downloadDocument(doc) {
+  downloading.value = true
   try {
-    downloading.value = true
     const response = await apiClient.docs.downloadDoc(doc.id)
     const link = document.createElement('a')
+
     link.href = response.data.url
     link.setAttribute('download', doc.filename)
     document.body.appendChild(link)
     link.click()
     link.remove()
-    downloading.value = false
+
     $q.notify({
       color: 'positive',
       message: 'Document downloaded successfully',
@@ -379,13 +432,13 @@ async function downloadDocument(doc) {
     })
   } catch (error) {
     console.error('Error downloading document:', error)
-    downloading.value = false
     $q.notify({
       color: 'negative',
       message: 'Failed to download document',
       icon: 'report_problem',
     })
   }
+  downloading.value = false
 }
 
 async function deleteDocument(document) {
@@ -393,9 +446,19 @@ async function deleteDocument(document) {
     $q.dialog({
       title: 'Confirm Deletion',
       message: `Are you sure you want to delete "${document.title}"?`,
-      cancel: true,
-      persistent: true,
+      ok: {
+        color: 'negative',
+        label: 'Yes',
+        unelevated: true,
+      },
+      cancel: {
+        color: $q.dark.isActive ? 'white' : 'black',
+        label: 'No',
+        flat: true,
+      },
     }).onOk(async () => {
+      deleting.value = true
+      currentDocument.value = document
       try {
         await apiClient.docs.deleteDoc(document.id)
         documents.value = documents.value.filter((doc) => doc.id !== document.id)
@@ -413,6 +476,7 @@ async function deleteDocument(document) {
           icon: 'report_problem',
         })
       }
+      deleting.value = false
     })
   } catch (error) {
     if (error) {

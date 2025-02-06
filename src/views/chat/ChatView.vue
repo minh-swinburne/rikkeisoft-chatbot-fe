@@ -35,11 +35,11 @@
         <q-item
           v-for="chat in chats"
           :key="chat.id"
-          :to="{ name: 'chat-detail', params: { chatId: chat.id } }"
           :style="{ borderRadius: '5px', color: 'inherit' }"
           active-class="bg-shadow"
           class="q-ma-sm q-pa-sm"
           clickable
+          @click="$router.push({ name: 'chat-detail', params: { chatId: chat.id } })"
           v-ripple
         >
           <q-item-section>
@@ -56,10 +56,10 @@
               @click.stop
             >
               <q-list>
-                <q-item clickable v-close-popup @click="renameChat(chat)">
+                <q-item clickable v-close-popup @click.stop="renameChat(chat)">
                   <q-item-section>Rename</q-item-section>
                 </q-item>
-                <q-item clickable v-close-popup @click="deleteChat(chat)">
+                <q-item clickable v-close-popup @click.stop="deleteChat(chat)">
                   <q-item-section>Delete</q-item-section>
                 </q-item>
               </q-list>
@@ -214,8 +214,16 @@ async function deleteChat(chat) {
     $q.dialog({
       title: 'Confirm Deletion',
       message: 'Are you sure you want to delete this chat?',
-      ok: 'Yes',
-      cancel: 'No',
+      ok: {
+        color: 'negative',
+        label: 'Yes',
+        unelevated: true,
+      },
+      cancel: {
+        color: $q.dark.isActive ? 'white' : 'black',
+        label: 'No',
+        flat: true,
+      },
     }).onOk(async () => {
       try {
         await apiClient.chats.deleteChat(chat.id)

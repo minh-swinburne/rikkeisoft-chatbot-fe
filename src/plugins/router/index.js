@@ -72,16 +72,16 @@ const routes = [
     name: 'profile',
     component: () => import('@/views/ProfileView.vue'),
     meta: { requiresAuth: true },
-    children: [
-      {
-        path: '/me',
-        // component: () => import("@/views/profile/ProfileDetail.vue"),
-      },
-      {
-        path: '/:userId',
-        // component: () => import("@/views/profile/ProfileDetail.vue"),
-      },
-    ],
+    // children: [
+    //   {
+    //     path: 'me',
+    //     // component: () => import("@/views/profile/ProfileDetail.vue"),
+    //   },
+    //   {
+    //     path: ':userId',
+    //     // component: () => import("@/views/profile/ProfileDetail.vue"),
+    //   },
+    // ],
   },
   {
     path: '/error',

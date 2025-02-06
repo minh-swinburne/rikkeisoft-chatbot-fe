@@ -4,7 +4,7 @@
       :src="resolvedSrc"
       :error-src="defaultAvatar"
       :alt="props.alt"
-      loading-show-delay="500"
+      loading-show-delay="1000"
     />
   </q-avatar>
 </template>
@@ -12,7 +12,7 @@
 <script setup>
 import defaultAvatar from '@/assets/default_avatar.jpg'
 
-const props = defineProps(['src', 'alt',  'bordered'])
+const props = defineProps(['src', 'alt', 'bordered'])
 const resolvedSrc = props.src || defaultAvatar
 
 // console.log('Avatar source:', props.src)

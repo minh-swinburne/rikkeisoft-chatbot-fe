@@ -171,7 +171,7 @@ async function loadConfig(tab) {
 async function saveConfig(tab) {
   loading.value = true
   try {
-    const response = await apiClient.config.updateConfig(tab, config)
+    const response = await apiClient.config.updateConfig(tab, config.value)
     console.log('Updated config:', response.data)
     $q.notify({
       color: 'positive',

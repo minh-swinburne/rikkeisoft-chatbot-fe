@@ -6,11 +6,11 @@ export const configAPI = (client) => {
 
     updateConfig: (tab, config) =>
       client.put(`${prefix}/${tab}`, {
-        system_prompt: config.value.instructions,
-        message_template: config.value.messageTemplate?.split('\n') || null,
-        model: config.value.model,
-        max_tokens: parseInt(config.value.maxTokens),
-        temperature: parseFloat(config.value.temperature),
+        system_prompt: config.instructions,
+        message_template: config.messageTemplate?.split('\n') || null,
+        model: config.model,
+        max_tokens: parseInt(config.maxTokens),
+        temperature: parseFloat(config.temperature),
       }),
 
     checkStream: (tab) => client.get(`${prefix}/${tab}/stream`),

@@ -9,10 +9,8 @@ export const docsAPI = (client) => {
         headers: { 'Content-Type': 'multipart/form-data' },
       }),
 
-    editDoc: (id, formData) =>
-      client.put(`${prefix}/${id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }),
+    editDoc: (id, updates) =>
+      client.put(`${prefix}/${id}`, updates),
 
     deleteDoc: (id) => client.delete(`${prefix}/${id}`),
 

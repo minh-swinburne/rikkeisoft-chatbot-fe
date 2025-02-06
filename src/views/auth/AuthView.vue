@@ -14,6 +14,7 @@
           </router-link>
 
           <router-view
+            :authenticating="authenticating"
             @submit="handleSubmit"
             @auth-google="authenticateGoogle"
             @auth-microsoft="authenticateMicrosoft"

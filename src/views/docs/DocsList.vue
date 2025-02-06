@@ -10,7 +10,7 @@
           </q-input>
         </div>
         <div class="col-auto">
-          <q-btn-dropdown color="primary" label="Filter" icon="filter_list">
+          <q-btn-dropdown color="primary" label="Filter" icon="filter_list" unelevated>
             <q-card>
               <q-card-section>
                 <div class="text-h6">Filter by Categories</div>
@@ -110,17 +110,17 @@
               :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
               clickable
               v-ripple
-              @click="$router.push(`/profile/${document.creator.id}`)"
+              @click="$router.push(`/profile/${document.creator_user.id}`)"
             >
-              <user-avatar :src="document.creator.avatar_url" alt="Creator Avatar" />
+              <user-avatar :src="document.creator_user.avatar_url" alt="Creator Avatar" />
               <!-- <q-avatar>
                     <q-img
-                      :src="document.creator.avatar_url"
+                      :src="document.creator_user.avatar_url"
                       :error-src="`https://cdn.quasar.dev/logo-v2/svg/logo${$q.dark.isActive ? '-dark' : ''}.svg`"
                       alt="Creator Avatar"
                     />
                   </q-avatar> -->
-              {{ document.creator.full_name }}
+              {{ document.creator_user.full_name }}
             </q-chip>
           </q-item-label>
           <q-item-label>
@@ -134,19 +134,28 @@
               color="secondary"
               icon="visibility"
               label="Preview"
+              unelevated
               @click="previewDocument(document)"
             />
             <q-btn
               color="positive"
               icon="download"
               label="Download"
+              unelevated
               @click="downloadDocument(document)"
             />
-            <q-btn color="warning" icon="edit" label="Edit" @click="editDocument(document)" />
+            <q-btn
+              color="warning"
+              icon="edit"
+              label="Edit"
+              unelevated
+              @click="editDocument(document)"
+            />
             <q-btn
               color="negative"
               icon="delete"
               label="Delete"
+              unelevated
               @click="deleteDocument(document)"
             />
           </div>
@@ -228,11 +237,11 @@
 </template>
 
 <script setup>
-import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
 import { useQuasar } from 'quasar'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 const $q = useQuasar()
 const $router = useRouter()
@@ -306,6 +315,7 @@ async function fetchDocuments() {
     const response = await apiClient.docs.listDocs()
     documents.value = response.data
     isLoading.value = false
+    console.log('Documents:', documents.value)
   } catch (error) {
     console.error('Error fetching documents:', error)
     $q.notify({

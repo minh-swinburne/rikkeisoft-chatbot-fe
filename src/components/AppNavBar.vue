@@ -45,7 +45,10 @@
     />
 
     <q-btn-dropdown v-if="authStore.user" flat no-caps>
-      <template #label> Welcome, {{ authStore.user?.firstname }} </template>
+      <template #label>
+        <user-avatar :src="authStore.user?.avatar_url" size="30px" class="q-mr-sm" bordered />
+        {{ authStore.user?.firstname }} {{ authStore.user?.lastname }}
+      </template>
       <q-list>
         <q-item clickable v-ripple @click="$router.push('/profile')">
           <q-item-section avatar>
@@ -83,6 +86,7 @@ import { useQuasar, QBtnDropdown, QRouteTab } from 'quasar'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppLogo from './AppLogo.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 const $q = useQuasar()
 const $route = useRoute()

@@ -108,9 +108,9 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  console.log('Checking if user is authenticated...')
-  console.log('From:', from)
-  console.log('To:', to)
+  // console.log('Checking if user is authenticated...')
+  // console.log('From:', from)
+  // console.log('To:', to)
 
   const authStore = useAuthStore()
   const isValidToken = await authStore.validateAccess()

@@ -5,7 +5,7 @@
     :dark="$q.dark.isActive"
     :input-style="{ maxHeight: `${maxHeight}px` }"
     placeholder="Ask something..."
-    input-class="chat-input q-ml-sm q-py-md"
+    input-class="chat-input q-pl-sm q-py-md"
     outlined
     rounded
     autogrow

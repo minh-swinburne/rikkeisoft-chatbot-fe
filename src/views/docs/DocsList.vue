@@ -133,21 +133,21 @@
             <q-btn
               color="secondary"
               icon="visibility"
-              @click="previewDocument(document)"
               label="Preview"
+              @click="previewDocument(document)"
             />
             <q-btn
               color="positive"
               icon="download"
-              @click="downloadDocument(document)"
               label="Download"
+              @click="downloadDocument(document)"
             />
-            <q-btn color="warning" icon="edit" @click="editDocument(document)" label="Edit" />
+            <q-btn color="warning" icon="edit" label="Edit" @click="editDocument(document)" />
             <q-btn
               color="negative"
               icon="delete"
-              @click="deleteDocument(document)"
               label="Delete"
+              @click="deleteDocument(document)"
             />
           </div>
         </q-item-section>
@@ -167,7 +167,7 @@
   </q-page>
 
   <q-dialog v-model="showViewer">
-    <q-card style="width: 90vw; max-width: 900px">
+    <q-card style="width: 90vw; max-width: 1000px">
       <q-card-section class="row items-center q-pb-none q-mb-md">
         <div class="text-h6">{{ currentDocument.title }} - Preview</div>
         <q-space />
@@ -175,7 +175,7 @@
       </q-card-section>
 
       <q-card-section class="q-pa-none q-mb-lg" align="center">
-        <iframe :src="previewUrl" style="width: 90%; height: 500px" />
+        <iframe :src="previewUrl" style="width: 90%; height: 550px" />
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -319,11 +319,11 @@ async function fetchDocuments() {
 async function previewDocument(document) {
   try {
     const response = await apiClient.docs.previewDoc(document.id)
-    console.log('Preview response:', response)
-    previewUrl.value = response.data
-    console.log('Preview URL:', previewUrl.value)
+    previewUrl.value = response.data.url
     currentDocument.value = document
     showViewer.value = true
+    console.log('Preview response:', response)
+    console.log('Preview URL:', previewUrl.value)
   } catch (error) {
     console.error('Error previewing document:', error)
     $q.notify({
@@ -381,9 +381,8 @@ async function submitEditForm() {
 async function downloadDocument(doc) {
   try {
     const response = await apiClient.docs.downloadDoc(doc.id)
-    const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
-    link.href = url
+    link.href = response.data.url
     link.setAttribute('download', doc.filename)
     document.body.appendChild(link)
     link.click()

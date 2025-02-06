@@ -188,7 +188,7 @@ function submit() {
 
       formData.append('title', title.value)
       formData.append('description', description.value || '') // Optional
-      formData.append('createdDate', createdDate.value || new Date().toISOString().slice(0, 10)) // Use today as default
+      formData.append('created_date', createdDate.value || new Date().toISOString().slice(0, 10)) // Use today as default
       formData.append('creator', creator.value)
       formData.append('restricted', restricted.value === 'all' ? 'false' : 'true')
 

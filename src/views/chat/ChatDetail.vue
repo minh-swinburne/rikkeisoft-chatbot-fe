@@ -110,7 +110,7 @@
         </q-card>
       </q-fab>
 
-      <q-form :class="{ 'bg-grey-17': $q.dark.isActive }" class="q-pa-md" style="width: 100%">
+      <q-form class="q-pa-md" style="width: 100%">
         <chat-input
           ref="chatInput"
           v-model="userInput"
@@ -358,4 +358,13 @@ watch(
 }
 </style>
 
-<style lang="scss"></style>
+<style lang="scss">
+.q-message-text {
+  padding: 12px;
+}
+.q-message-text :not(li) > {
+  ul, ol {
+    margin-top: -8px;
+  }
+}
+</style>

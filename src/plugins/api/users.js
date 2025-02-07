@@ -6,18 +6,17 @@ export const usersAPI = (client) => {
 
     getCurrentUser: () => client.get(`${prefix}/me`),
 
-    getUser: (id) => client.get(`${prefix}/${id}`),
+    getUser: (userId) => client.get(`${prefix}/${userId}`),
 
-    createUser: (userDetails) =>
-      client.post(`${prefix}`, userDetails, {
-        headers: { 'Content-Type': 'application/json' },
-      }),
+    updateCurrentUser: (updates) => client.put(`${prefix}/me`, updates),
 
-    updateUser: (id, userDetails) =>
-      client.put(`${prefix}/${id}`, userDetails, {
-        headers: { 'Content-Type': 'application/json' },
-      }),
+    assignRole: (userId, role) => client.put(`${prefix}/${userId}/role/assign`, role),
 
-    deleteUser: (id) => client.delete(`${prefix}/${id}`),
+    revokeRole: (userId, role) => client.put(`${prefix}/${userId}/role/revoke`, role),
+
+    deleteUser: () => client.delete(`${prefix}/me`),
+
+    uploadAvatar: (avatarFile) =>
+      client.post(`${prefix}/avatar/upload`, { avatar_file: avatarFile }, { headers: { 'Content-Type': 'multipart/form-data' } }),
   }
 }

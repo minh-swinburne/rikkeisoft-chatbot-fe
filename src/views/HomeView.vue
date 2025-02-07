@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
+  <q-layout view="hHh LpR fFf">
     <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
       <q-toolbar>
         <app-navbar />
@@ -61,8 +61,9 @@
         </div>
       </div>
 
-      <div class="how-it-works-section q-pa-lg text-center">
-        <h2 class="text-h5 q-mb-md text-white">How It Works</h2>
+      <!-- How It Works Section (Updated) -->
+      <div class="features-section q-pa-lg">
+        <h2 class="text-h5 text-center q-mb-md">How It Works</h2>
         <div class="row justify-center">
           <div class="col-xs-12 col-sm-4 q-px-sm q-pb-lg">
             <q-card class="text-center">
@@ -98,54 +99,37 @@
         </div>
       </div>
 
-      <!-- Testimonials Section -->
+      <!-- Developers Section (Updated) -->
       <div
         id="Testimonials"
-        class="testimonials-section q-pa-lg text-center"
+        class="developers-section q-pa-lg text-center"
         :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-grey-2 text-dark'"
       >
         <h2 class="text-h5 q-mb-xl">Developers</h2>
-        <q-carousel
-          v-model="testimonialIndex"
-          navigation
-          :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-grey-2 text-dark'"
-          control-color="primary"
-          height="300px"
-        >
-          <!-- Slide 1 -->
-          <q-carousel-slide name="slide-1">
-            <q-img
-              src="@/assets/background_2.jpg"
-              style="border-radius: 50%; width: 100px; height: 100px; margin: auto"
-              alt="Nguyen Thi Thanh Minh"
-            />
-            <h6>Nguyen Thi Thanh Minh</h6>
-          </q-carousel-slide>
-
-          <!-- Slide 2 -->
-          <q-carousel-slide name="slide-2">
-            <q-img
-              src="@/assets/background_3.jpg"
-              style="border-radius: 50%; width: 100px; height: 100px; margin: auto"
-              alt="Duong Viet Minh Hoang"
-            />
-            <h6>Duong Viet Minh Hoang</h6>
-          </q-carousel-slide>
-
-          <!-- Slide 3 -->
-          <q-carousel-slide name="slide-3">
-            <q-img
-              src="@/assets/background_4.jpg"
-              style="border-radius: 50%; width: 100px; height: 100px; margin: auto"
-              alt="Nguyen Si Thanh Trung"
-            />
-            <h6>Nguyen Si Thanh Trung</h6>
-          </q-carousel-slide>
-        </q-carousel>
+        <div class="row justify-center">
+          <div class="col-xs-12 col-sm-4 q-px-md q-pb-lg">
+            <q-avatar size="100px" class="q-mb-sm">
+              <img src="@/assets/background_3.jpg" alt="Duong Viet Minh Hoang" />
+            </q-avatar>
+            <h6 class="q-mt-sm q-pa-sm">Duong Viet Minh Hoang</h6>
+          </div>
+          <div class="col-xs-12 col-sm-4 q-px-md q-pb-lg">
+            <q-avatar size="100px" class="q-mb-sm">
+              <img src="@/assets/background_2.jpg" alt="Nguyen Thi Thanh Minh" />
+            </q-avatar>
+            <h6 class="q-mt-sm q-pa-sm">Nguyen Thi Thanh Minh</h6>
+          </div>
+          <div class="col-xs-12 col-sm-4 q-px-md q-pb-lg">
+            <q-avatar size="100px" class="q-mb-sm">
+              <img src="@/assets/background_4.jpg" alt="Nguyen Si Thanh Trung" />
+            </q-avatar>
+            <h6 class="q-mt-sm q-pa-sm">Nguyen Si Thanh Trung</h6>
+          </div>
+        </div>
       </div>
 
       <!-- Footer -->
-      <q-footer class="bg-light text-white q-px-lg q-pt-sm q-pb-xs static-footer">
+      <q-footer class="text-white q-px-lg q-pt-sm q-pb-xs static-footer" >
         <div class="row items-center justify-around q-col-gutter-md">
           <!-- Company Info -->
           <div class="col-12 col-sm-4 text-center">
@@ -156,19 +140,19 @@
           </div>
 
           <!-- Contact Links -->
-          <div class="col-12 col-sm-4">
-            <q-list dense>
+          <div class="col-12 col-sm-4 ">
+            <q-list dense class="bg-primary ">
               <q-item clickable tag="a" href="mailto:yourcompany@gmail.com" target="_blank">
                 <q-item-section avatar>
-                  <q-icon name="email" color="secondary" />
+                  <q-icon name="email" color="white" />
                 </q-item-section>
-                <q-item-section class="text-caption">Gmail</q-item-section>
+                <q-item-section class="text-caption text-white">Gmail</q-item-section>
               </q-item>
               <q-item clickable tag="a" href="https://www.facebook.com/yourcompany" target="_blank">
                 <q-item-section avatar>
-                  <q-icon name="facebook" color="blue" />
+                  <q-icon name="facebook" color="white" />
                 </q-item-section>
-                <q-item-section class="text-caption">Facebook</q-item-section>
+                <q-item-section class="text-caption text-white">Facebook</q-item-section>
               </q-item>
               <q-item
                 clickable
@@ -177,9 +161,9 @@
                 target="_blank"
               >
                 <q-item-section avatar>
-                  <q-icon name="linkedin" color="blue" />
+                  <q-icon name="linkedin" color="white" />
                 </q-item-section>
-                <q-item-section class="text-caption">LinkedIn</q-item-section>
+                <q-item-section class="text-caption text-white">LinkedIn</q-item-section>
               </q-item>
             </q-list>
           </div>
@@ -294,14 +278,6 @@ onBeforeUnmount(() => {
   bottom: 0;
   padding: 10px 0;
   font-size: 0.875rem;
-  background-color: #af3c3c; /* Light gray background */
-  color: #000000; /* Dark gray text */
-}
-.how-it-works-section {
-  background:
-    linear-gradient(rgba(236, 158, 158, 0.5), rgba(96, 45, 45, 0.5)),
-    url('@/assets/background.png') no-repeat center center;
-  background-size: cover;
 }
 @keyframes blink {
   50% {

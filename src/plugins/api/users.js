@@ -18,5 +18,7 @@ export const usersAPI = (client) => {
 
     uploadAvatar: (avatarFile) =>
       client.post(`${prefix}/avatar/upload`, { avatar_file: avatarFile }, { headers: { 'Content-Type': 'multipart/form-data' } }),
+
+    listSSO: () => client.get(`${prefix}/sso`),
   }
 }

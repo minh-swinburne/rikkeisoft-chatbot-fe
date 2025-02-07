@@ -22,6 +22,7 @@
           active-class="bg-shadow"
           class="q-ma-sm q-pa-sm"
           clickable
+          @click="$router.push('/profile')"
           v-ripple>
           <q-item-section>Profile</q-item-section>
         </q-item>
@@ -31,6 +32,7 @@
           active-class="bg-shadow"
           class="q-ma-sm q-pa-sm"
           clickable
+          @click="$router.push('/sso')"
           v-ripple>
           <q-item-section>Authentication</q-item-section>
         </q-item>

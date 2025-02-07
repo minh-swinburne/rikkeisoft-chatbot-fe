@@ -84,6 +84,12 @@ const routes = [
     // ],
   },
   {
+    path: '/sso',
+    name: 'sso',
+    component: () => import('@/views/LinkPage.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
     path: '/error',
     name: 'error',
     // component: () => import('@/views/ErrorView.vue'),

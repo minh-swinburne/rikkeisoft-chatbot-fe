@@ -88,7 +88,7 @@ input:is(:-webkit-autofill, :autofill) {
   .q-card,
   .q-tab-panels,
   .q-page .q-list {
-    background: $grey-17 !important;
+    background: $grey-17;
   }
 }
 </style>

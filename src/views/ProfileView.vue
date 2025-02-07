@@ -96,7 +96,7 @@
               <div class="text-subtitle1 text-white q-mb-sm">Avatar <span class="text-grey-6"></span></div>
               <div class="row items-center q-gutter-x-md">
                 <q-avatar size="80px">
-                  <q-img :src="avatarUrl" />
+                  <q-img :src="avatarUrl"/>
                 </q-avatar>
                 <div>
                   <q-btn

@@ -32,15 +32,6 @@
           class="q-ma-sm q-pa-sm"
           clickable
           v-ripple>
-          <q-item-section>Account</q-item-section>
-        </q-item>
-        
-        <q-item
-         :style="{ borderRadius: '5px', color: 'inherit' }"
-          active-class="bg-shadow"
-          class="q-ma-sm q-pa-sm"
-          clickable
-          v-ripple>
           <q-item-section>Authentication</q-item-section>
         </q-item>
         
@@ -137,6 +128,7 @@
               </div>
             </div>
 
+
             <!-- Name Section - First and Last name in same row -->
             <div>
               <div class="text-subtitle1 text-white q-mb-sm">Name</div>
@@ -190,7 +182,9 @@
             </div>
 
             <!-- Only show Password fields when editing -->
+
             <template v-if="isEditing">
+              <div class="text-h4 text-white">Account Settings</div>
               <div>
                 <div class="text-subtitle1 text-white q-mb-sm">Old Password</div>
                 <q-input

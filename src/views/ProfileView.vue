@@ -1,6 +1,6 @@
 <template>
-  <q-layout view="hHh LpR fFf" class="bg-dark">
-    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
+  <q-layout view="hHh LpR fFf">
+    <q-header bordered>
       <q-toolbar>
         <app-navbar />
       </q-toolbar>
@@ -73,7 +73,7 @@
       </q-list>
     </q-drawer>
 
-    <q-page-container class="bg-dark">
+    <q-page-container>
       <q-page padding>
         <div class="content-width q-pa-md">
           <div class="row items-center justify-between q-mb-lg">
@@ -110,18 +110,21 @@
                 <div>
                   <q-btn
                     flat
-                    color="primary"
-                    label="Upload file"
-                    @click="$refs.avatarInput.click()"
+                    label="Upload Image"
+                    @click="$refs.avatarInput.pickFiles()"
+                    no-caps
                     :disable="!isEditing"
+                    style="height: 50px; font-size: larger;"
                   />
                   <q-btn
-                    v-if="avatarUrl !== '/placeholder.svg?height=100&width=100'"
+                    v-if="avatarUrl !== '/src/assets/default_avatar.jpg'"
                     flat
                     color="grey-6"
                     label="Remove"
                     @click="removeAvatar"
+                    no-caps
                     :disable="!isEditing"
+                    style="height: 50px; font-size: larger;"
                   />
                 </div>
                 <q-file
@@ -129,6 +132,7 @@
                   accept="image/*"
                   style="display: none"
                   ref="avatarInput"
+                  @update:model-value="previewImage"
                 />
               </div>
             </div>
@@ -140,10 +144,9 @@
                 <div class="col-12 col-sm-6">
                   <q-input
                     v-model="firstname"
-                    dark
                     outlined
+                    autofocus
                     label="First name"
-                    class="bg-dark"
                     :readonly="!isEditing"
                     :rules="[(val) => !!val || 'First name is required']"
                   />
@@ -151,10 +154,9 @@
                 <div class="col-12 col-sm-6">
                   <q-input
                     v-model="lastname"
-                    dark
                     outlined
+                    autofocus
                     label="Last name"
-                    class="bg-dark"
                     :readonly="!isEditing"
                     :rules="[(val) => !!val || 'Last name is required']"
                   />
@@ -167,11 +169,10 @@
               <div class="text-subtitle1 text-white q-mb-sm">Email</div>
               <q-input
                 v-model="email"
-                dark
                 outlined
+                autofocus
                 type="email"
-                class="bg-dark"
-                :readonly="!isEditing"
+                :readonly="true"
                 :rules="[(val) => !!val || 'Email is required', isValidEmail]"
               />
             </div>
@@ -181,26 +182,36 @@
               <div class="text-subtitle1 text-white q-mb-sm">Username</div>
               <q-input
                 v-model="username"
-                dark
                 outlined
-                class="bg-dark"
+                autofocus
                 :readonly="!isEditing"
                 :rules="[(val) => !!val || 'Username is required']"
               />
             </div>
 
-            <!-- Only show password fields when editing -->
+            <!-- Only show Password fields when editing -->
             <template v-if="isEditing">
+              <div>
+                <div class="text-subtitle1 text-white q-mb-sm">Old Password</div>
+                <q-input
+                  v-model="oldPassword"
+                  outlined
+                  autofocus
+                  type="Password"
+                  :rules="[
+                    (val) => (!val && !newPassword) || 'Old password required',
+                  ]"
+                />
+              </div>
               <div>
                 <div class="text-subtitle1 text-white q-mb-sm">New Password</div>
                 <q-input
-                  v-model="password"
-                  dark
+                  v-model="newPassword"
                   outlined
-                  type="password"
-                  class="bg-dark"
+                  autofocus
+                  type="Password"
                   :rules="[
-                    (val) => !val || val.length >= 8 || 'Password must be at least 8 characters',
+                    (val) => (!val && !oldPassword) || val.length >= 8 || 'Password must be at least 8 characters',
                   ]"
                 />
               </div>
@@ -208,12 +219,11 @@
               <div>
                 <div class="text-subtitle1 text-white q-mb-sm">Confirm New Password</div>
                 <q-input
-                  v-model="confirmPassword"
-                  dark
+                  v-model="confirmnewPassword"
                   outlined
-                  type="password"
-                  class="bg-dark"
-                  :rules="[(val) => !password || val === password || 'Passwords do not match']"
+                  autofocus
+                  type="Password"
+                  :rules="[(val) => (!val && !newPassword) || val === newPassword || 'Passwords do not match']"
                 />
               </div>
             </template>
@@ -228,9 +238,12 @@
 import AppNavbar from '@/components/AppNavbar.vue'
 import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
+import { useAuthStore } from '@/plugins/stores/auth'
 import { apiClient } from '@/plugins/api'
 
 const $q = useQuasar()
+const authStore = useAuthStore()
+
 const leftDrawerOpen = ref(true)
 const loading = ref(false)
 const isEditing = ref(false)
@@ -240,10 +253,12 @@ const email = ref('')
 const firstname = ref('')
 const lastname = ref('')
 const username = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const avatarUrl = ref('/placeholder.svg?height=100&width=100')
+const oldPassword = ref('')
+const newPassword = ref('')
+const confirmnewPassword = ref('')
+const avatarUrl = ref('/src/assets/default_avatar.jpg')
 const avatarFile = ref(null)
+
 
 const isValidEmail = (val) => {
   const emailPattern =
@@ -252,7 +267,7 @@ const isValidEmail = (val) => {
 }
 
 const removeAvatar = () => {
-  avatarUrl.value = '/placeholder.svg?height=100&width=100'
+  avatarUrl.value = '/src/assets/default_avatar.jpg'
   avatarFile.value = null
 }
 
@@ -266,49 +281,65 @@ const toggleEdit = async (save = false) => {
       firstname.value = originalData.value.firstname
       lastname.value = originalData.value.lastname
       username.value = originalData.value.username
-      avatarUrl.value = originalData.value.avatarUrl || '/placeholder.svg?height=100&width=100'
+      avatarUrl.value = originalData.value.avatar_url || '/src/assets/default_avatar.jpg'
     }
-    password.value = ''
-    confirmPassword.value = ''
+    newPassword.value = ''
+    confirmnewPassword.value = ''
   }
   isEditing.value = !isEditing.value
 }
 
+const previewImage = (file) => {
+  if (file) {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      avatarUrl.value = reader.result;
+    };
+  }
+};
+
+const uploadAvatar = async (file) => {
+  const response = await apiClient.users.uploadAvatar(file)
+  return response.data.url
+}
+
+
 const onSubmit = async () => {
   try {
     loading.value = true
-    const formData = new FormData()
-    formData.append('email', email.value)
-    formData.append('firstname', firstname.value)
-    formData.append('lastname', lastname.value)
-    formData.append('username', username.value)
-    if (password.value) {
-      formData.append('password', password.value)
-    }
-    if (avatarFile.value) {
-      formData.append('avatar', avatarFile.value)
-    }
+    avatarUrl.value = await uploadAvatar(avatarFile.value)
+    console.log(avatarUrl.value)
+    const response = await apiClient.users.updateCurrentUser({
+      firstname: firstname.value,
+      lastname: lastname.value,
+      username: username.value,
+      old_password: oldPassword.value,
+      new_password: newPassword.value,
+      avatar_url: avatarUrl.value
+    })
 
-    const response = await apiClient.users.updateUser(formData)
+    const { access_token, refresh_token } = response.data
+    authStore.login(access_token, refresh_token)
+    isEditing.value = false
 
-    if (response.status === 200) {
-      $q.notify({
-        color: 'positive',
-        textColor: 'white',
-        icon: 'cloud_done',
-        message: 'Profile updated successfully'
-      })
-      // Update original data after successful save
-      originalData.value = {
-        email: email.value,
-        firstname: firstname.value,
-        lastname: lastname.value,
-        username: username.value,
-        avatarUrl: avatarUrl.value
-      }
-      isEditing.value = false
+    $q.notify({
+      color: 'positive',
+      textColor: 'white',
+      icon: 'cloud_done',
+      message: 'Profile updated successfully'
+    })
+
+    // Update original data after successful save
+    originalData.value = {
+      email: email.value,
+      firstname: firstname.value,
+      lastname: lastname.value,
+      username: username.value,
+      avatarUrl: avatarUrl.value
     }
   } catch (error) {
+    isEditing.value = false
     console.error('Error updating profile:', error)
     $q.notify({
       color: 'negative',
@@ -316,6 +347,15 @@ const onSubmit = async () => {
       icon: 'warning',
       message: 'Failed to update profile'
     })
+    if (originalData.value) {
+      email.value = originalData.value.email
+      firstname.value = originalData.value.firstname
+      lastname.value = originalData.value.lastname
+      username.value = originalData.value.username
+      avatarUrl.value = originalData.value.avatar_url || '/src/assets/default_avatar.jpg'
+    }
+    newPassword.value = ''
+    confirmnewPassword.value = ''
   } finally {
     loading.value = false
   }
@@ -324,12 +364,13 @@ const onSubmit = async () => {
 // Load user data when component mounts
 onMounted(async () => {
   try {
-    const userData = await apiClient.users.getCurrentUser()
+    const response = await apiClient.users.getCurrentUser()
+    const userData = response.data
     email.value = userData.email
     firstname.value = userData.firstname
-    lastname.value = userData.lastname
+    lastname.value = userData.lastname  
     username.value = userData.username
-    avatarUrl.value = userData.avatarUrl || '/placeholder.svg?height=100&width=100'
+    avatarUrl.value = userData.avatar_url || '/src/assets/default_avatar.jpg'
     
     // Store original data for cancel functionality
     originalData.value = { ...userData }
@@ -343,17 +384,5 @@ onMounted(async () => {
 .content-width {
   max-width: 800px;
   margin: 0 auto;
-}
-
-:deep(.q-field__control) {
-  background: #1A1B1E !important;
-}
-
-:deep(.q-field--outlined .q-field__control:before) {
-  border-color: rgba(255, 255, 255, 0.1);
-}s
-
-:deep(.q-field--outlined .q-field__control:hover:before) {
-  border-color: rgba(255, 255, 255, 0.2);
 }
 </style>

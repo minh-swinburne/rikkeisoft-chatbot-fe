@@ -257,9 +257,9 @@
 </template>
 
 <script setup>
+import _ from 'lodash'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
-import _ from 'lodash'
 import { useQuasar } from 'quasar'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'

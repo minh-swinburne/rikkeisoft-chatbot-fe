@@ -307,7 +307,10 @@ async function uploadAvatar(file) {
 async function saveChanges() {
   try {
     loading.value = true
-    await uploadAvatar(avatarFile.value)
+    const url = await uploadAvatar(avatarFile.value)
+    if (url && url !== avatarUrl.value) {
+      avatarUrl.value = url
+    }
     console.log(avatarUrl.value)
     const response = await apiClient.users.updateCurrentUser({
       firstname: firstname.value,

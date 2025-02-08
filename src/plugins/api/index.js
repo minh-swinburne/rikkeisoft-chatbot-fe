@@ -5,7 +5,7 @@ import { configAPI } from './config'
 import { docsAPI } from './docs'
 import { usersAPI } from './users'
 
-const baseURL = 'http://127.0.0.1:8000/api/v1/'
+const baseURL = import.meta.env.VITE_API_BASE_URL
 const client = new Client(baseURL)
 
 export const apiClient = {

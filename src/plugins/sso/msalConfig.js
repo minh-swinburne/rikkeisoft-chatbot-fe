@@ -3,10 +3,10 @@ import { PublicClientApplication } from '@azure/msal-browser'
 
 export const msalConfig = {
   auth: {
-    clientId: 'c89161ba-67a4-49c0-99a0-49dd53feda18',
-    authority: 'https://login.microsoftonline.com/common', // Default authority
-    redirectUri: window.location.origin,
-    postLogoutRedirectUri: window.location.origin,
+    clientId: import.meta.env.VITE_MSAL_CLIENT_ID,
+    authority: import.meta.env.VITE_MSAL_AUTHORITY,
+    redirectUri: import.meta.env.VITE_REDIRECT_URI,
+    postLogoutRedirectUri: import.meta.env.VITE_REDIRECT_URI,
   },
   cache: {
     cacheLocation: 'localStorage', // Store tokens in localStorage

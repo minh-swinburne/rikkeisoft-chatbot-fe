@@ -1,3 +1,3 @@
 export default {
-  clientId: '1047088098330-2d17mgbf5bdugkvkh69i0ah65c40hp65.apps.googleusercontent.com',
+  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
 }

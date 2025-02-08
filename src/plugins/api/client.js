@@ -42,6 +42,6 @@ export class Client {
       Authorization: token,
     }
 
-    return fetch(this.baseURL + url, { ...options, headers })
+    return fetch(`${this.baseURL}/${url}`, { ...options, headers })
   }
 }

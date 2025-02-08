@@ -1,7 +1,7 @@
 <template>
   <q-avatar :class="{ bordered: props.bordered }">
     <q-img
-      :src="resolvedSrc"
+      :src="props.src || defaultAvatar"
       :error-src="defaultAvatar"
       :alt="props.alt"
       loading-show-delay="1000"
@@ -13,7 +13,6 @@
 import defaultAvatar from '@/assets/default_avatar.jpg'
 
 const props = defineProps(['src', 'alt', 'bordered'])
-const resolvedSrc = props.src || defaultAvatar
 
 // console.log('Avatar source:', props.src)
 </script>

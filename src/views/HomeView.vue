@@ -121,7 +121,7 @@
           </div>
           <div class="col-xs-12 col-sm-4 q-px-md q-pb-lg">
             <q-avatar size="100px" class="q-mb-sm">
-              <img src="@/assets/background_4.jpg" alt="Nguyen Si Thanh Trung" />
+              <img src="@/assets/background_4.jpg" alt="Nguyen Sy Thanh Trung" />
             </q-avatar>
             <h6 class="q-mt-sm q-pa-sm">Nguyen Si Thanh Trung</h6>
           </div>

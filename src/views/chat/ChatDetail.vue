@@ -18,13 +18,11 @@
           flexDirection: 'column',
         }"
       >
-        <template v-if="isMessageLoading">
+        <template v-if="loading">
           <q-chat-message
             v-for="i in 4"
             :key="i"
-            :name="i % 2 === 0 ? 'Bot' : authStore.user.firstname"
             :sent="i % 2 !== 0"
-            :text-color="$q.dark.isActive ? 'white' : 'black'"
             :bg-color="
               i % 2 === 0
                 ? $q.dark.isActive
@@ -35,15 +33,30 @@
                   : 'light-red'
             "
             :style="{
-              maxWidth: '80%',
+              width: `calc(${randomWidth(50, 0.8)})`,
+              minWidth: '300px',
               alignSelf: i % 2 === 0 ? 'flex-start' : 'flex-end',
               boxShadow: 'none',
             }"
+            size="8"
           >
-            <template #avatar>
-              <q-skeleton type="QAvatar" size="40px" />
+            <template #name>
+              <q-skeleton type="QBadge" class="q-mb-sm" />
             </template>
-            <q-skeleton type="rect" :height="`8em`" width="900px" class="q-mt-sm" />
+            <template #avatar>
+              <q-skeleton type="QAvatar" size="40px" class="q-mx-sm" />
+            </template>
+            <div class="col-grow">
+              <q-skeleton type="text" :width="randomWidth(80)" />
+              <q-skeleton type="text" :width="randomWidth(80)" />
+              <q-skeleton type="text" :width="randomWidth(80)" />
+              <q-skeleton type="text" :width="randomWidth(80, 0.25)" />
+              <q-skeleton type="text" width="0%" />
+              <q-skeleton type="text" :width="randomWidth(80)" />
+              <q-skeleton type="text" :width="randomWidth(80)" />
+              <q-skeleton type="text" :width="randomWidth(80, 0.4)" />
+            </div>
+            <!-- <q-skeleton type="rect" height="8em" class="q-mt-sm" /> -->
           </q-chat-message>
         </template>
 
@@ -182,11 +195,47 @@ const waiting = ref(false)
 const chatScrollArea = ref(null)
 const maxHeightScrollArea = ref('calc(100vh - 50px - 88px)')
 const chatStickyWidth = ref('100vw')
-const isMessageLoading = ref(true)
+const loading = ref(true)
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time)),
 )
+
+onMounted(() => {
+  // Check for initialMessage in the route query and send it if present
+  const initialMessage = $route.query.initialMessage
+
+  if (initialMessage) {
+    console.log('Initial message:', initialMessage)
+    sendMessage(initialMessage)
+    // sendMessage(decodeURIComponent(initialMessage))
+    // Remove the initialMessage from the query parameters
+    $router.replace({ query: {} })
+  }
+
+  reloadChat()
+  updateStickyWidth()
+  window.addEventListener('resize', updateStickyWidth)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateStickyWidth)
+})
+
+watch(
+  () => $route.params.chatId,
+  (newChatId, oldChatId) => {
+    if (newChatId !== oldChatId) {
+      console.log('hahaha')
+      reloadChat()
+    }
+  },
+)
+
+function reloadChat() {
+  fetchMessages()
+  fetchSuggestions()
+}
 
 function updateStickyWidth() {
   if (chatStickyRef.value) {
@@ -310,7 +359,7 @@ async function sendMessage(query) {
 async function fetchMessages() {
   try {
     console.log('Fetching messages...')
-    isMessageLoading.value = true
+    loading.value = true
     const response = await apiClient.chats.listMessages($route.params.chatId)
     messages.value = camelize(response.data)
     scrollToBottom()
@@ -326,7 +375,7 @@ async function fetchMessages() {
       })
     }
   } finally {
-    isMessageLoading.value = false
+    loading.value = false
   }
 }
 
@@ -347,42 +396,9 @@ function scrollToBottom() {
   })
 }
 
-function reloadChat() {
-  fetchMessages()
-  fetchSuggestions()
+function randomWidth(bias = 75, weight = 1) {
+  return Math.floor(Math.random() * (100 - bias) + bias) * weight + '%'
 }
-
-onMounted(() => {
-  // Check for initialMessage in the route query and send it if present
-  const initialMessage = $route.query.initialMessage
-
-  if (initialMessage) {
-    console.log('Initial message:', initialMessage)
-    sendMessage(initialMessage)
-    // sendMessage(decodeURIComponent(initialMessage))
-    // Remove the initialMessage from the query parameters
-    $router.replace({ query: {} })
-  } else {
-    reloadChat()
-  }
-
-  updateStickyWidth()
-  window.addEventListener('resize', updateStickyWidth)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateStickyWidth)
-})
-
-watch(
-  () => $route.params.chatId,
-  (newChatId, oldChatId) => {
-    if (newChatId !== oldChatId) {
-      console.log('hahaha')
-      reloadChat()
-    }
-  },
-)
 </script>
 
 <style lang="scss" scoped>
@@ -394,6 +410,10 @@ watch(
 <style lang="scss">
 .q-message-text {
   padding: 12px;
+}
+
+.q-message-name--sent {
+  justify-self: flex-end;
 }
 
 .q-message-text a, .link {

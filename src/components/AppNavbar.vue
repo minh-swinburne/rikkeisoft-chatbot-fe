@@ -13,7 +13,7 @@
         :is="item.children ? QBtnDropdown : QRouteTab"
         :to="item.children ? null : item.path"
         :key="item.path"
-        :name="item.path"
+        :name="item.path.name"
         :label="item.name"
         class="text-white"
         stretch
@@ -44,20 +44,29 @@
       @click="toggleDarkMode"
     />
 
-    <q-btn-dropdown v-if="authStore.user" flat no-caps>
+    <q-btn-dropdown v-if="authStore.user" persistent no-caps flat>
       <template #label>
         <user-avatar :src="authStore.user?.avatar_url" size="30px" class="q-mr-sm" bordered />
-        <span >{{ authStore.user?.firstname }} {{ authStore.user?.lastname }}</span>
+        <span>{{ authStore.user?.firstname }} {{ authStore.user?.lastname }}</span>
       </template>
       <q-list>
-        <q-item clickable v-ripple @click="$router.push('/profile')">
+        <q-item
+          v-for="item in menuItems"
+          :key="item.name"
+          :to="item.path"
+          active-class=""
+          clickable
+          v-ripple
+        >
           <q-item-section avatar>
-            <q-icon name="person" />
+            <q-icon :name="item.icon" />
           </q-item-section>
 
-          <q-item-section>Profile</q-item-section>
+          <q-item-section>{{ item.name }}</q-item-section>
         </q-item>
+
         <q-separator />
+
         <q-item clickable v-ripple @click="logout">
           <q-item-section avatar>
             <q-icon :color="$q.dark.isActive ? '' : 'negative'" name="logout" />
@@ -80,13 +89,13 @@
 </template>
 
 <script setup>
-import { useLayoutStore } from '@/plugins/stores/layout'
+import UserAvatar from '@/components/UserAvatar.vue'
 import { useAuthStore } from '@/plugins/stores/auth'
-import { useQuasar, QBtnDropdown, QRouteTab } from 'quasar'
+import { useLayoutStore } from '@/plugins/stores/layout'
+import { QBtnDropdown, QRouteTab, useQuasar } from 'quasar'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppLogo from './AppLogo.vue'
-import UserAvatar from '@/components/UserAvatar.vue'
 
 const $q = useQuasar()
 const $route = useRoute()
@@ -98,18 +107,26 @@ const layoutStore = useLayoutStore()
 const tab = ref($route.path)
 
 const navItems = [
-  { name: 'Chat', path: '/chat' },
-  { name: 'Documents', path: '/docs' },
-  { name: 'Config', path: '/config' },
+  { name: 'Chat', path: { name: 'chat' } },
+  { name: 'Documents', path: { name: 'docs' } },
+  // { name: 'Users', path: { name: 'users-list' } },
+  { name: 'Config', path: { name: 'config' } },
+]
+
+const menuItems = [
+  { name: 'Profile', icon: 'person', path: { name: 'settings-profile' } },
+  { name: 'Settings', icon: 'settings', path: { name: 'settings-auth' } },
 ]
 
 const filteredNavItems = computed(() => {
   return authStore.isAdmin
     ? navItems
     : navItems.filter(
-        (item) =>
-          !$router.options.routes.find((route) => route.path === item.path).meta.requiresAdmin,
-      )
+      (item) => {
+        const route = $router.options.routes.find((route) => route.name === item.path.name)
+        return !route.meta?.requiresAdmin
+      }
+    )
 })
 
 function logout() {

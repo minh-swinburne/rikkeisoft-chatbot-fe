@@ -218,8 +218,9 @@ async function submit() {
         type: 'negative',
         message: 'An error occurred while uploading the document.',
       })
+    } finally {
+      uploading.value = false
     }
-    uploading.value = false
   } else {
     $q.notify({
       type: 'negative',

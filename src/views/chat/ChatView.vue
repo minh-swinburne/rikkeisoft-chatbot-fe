@@ -117,9 +117,8 @@ async function fetchChats() {
   } catch (error) {
     console.error('Error fetching chats:', error)
     $q.notify({
-      color: 'negative',
+      type: 'negative',
       message: 'Error fetching chats',
-      icon: 'error',
     })
   }
 }

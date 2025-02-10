@@ -46,15 +46,6 @@ $q.dark.set(layoutStore.isDark)
   margin-bottom: 8px;
 }
 
-a,
-.link {
-  color: $primary;
-}
-.body--dark a,
-.body--dark .link {
-  color: $link;
-}
-
 input:is(:-webkit-autofill, :autofill) {
   -webkit-background-clip: text;
   -webkit-text-fill-color: black;

@@ -269,9 +269,9 @@ async function sendMessage(query) {
   } catch (error) {
     console.error('Error sending message:', error)
     $q.notify({
+      icon: 'error',
       color: 'negative',
       message: "An error occurred while fetching the bot's response.",
-      icon: 'error',
     })
   }
 }
@@ -289,9 +289,9 @@ async function fetchMessages() {
     } else {
       console.error('Error fetching messages:', error)
       $q.notify({
+        icon: 'error',
         color: 'negative',
         message: 'Error fetching messages',
-        icon: 'error',
       })
     }
   }
@@ -362,9 +362,20 @@ watch(
 .q-message-text {
   padding: 12px;
 }
+
+.q-message-text a, .link {
+  color: $primary;
+}
+
 .q-message-text :not(li) > {
   ul, ol {
     margin-top: -8px;
+  }
+}
+
+.body--dark {
+  .q-message-text a, .link {
+    color: $link;
   }
 }
 </style>

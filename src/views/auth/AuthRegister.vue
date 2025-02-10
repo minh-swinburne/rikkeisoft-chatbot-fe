@@ -107,39 +107,22 @@
   </q-form>
 
   <q-btn
+    v-for="(provider, key) in ssoProviders"
+    :key="key"
     :loading="props.authenticating"
     class="q-mt-sm full-width"
     no-caps
     outline
-    @click="emit('auth-google')"
+    @click="emit('auth', key)"
   >
     <template #default>
       <div class="row items-center no-wrap">
         <q-icon
-          name="img:https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+          :name="`img:${provider.logo}`"
           size="18px"
           class="q-mr-sm"
         />
-        <div>Continue with Google</div>
-      </div>
-    </template>
-  </q-btn>
-
-  <q-btn
-    :loading="props.authenticating"
-    class="q-mt-sm full-width"
-    no-caps
-    outline
-    @click="emit('auth-microsoft')"
-  >
-    <template #default>
-      <div class="row items-center no-wrap">
-        <q-icon
-          name="img:https://learn.microsoft.com/en-us/azure/active-directory/develop/media/howto-add-branding-in-azure-ad-apps/ms-symbollockup_mssymbol_19.png"
-          size="18px"
-          class="q-mr-sm"
-        />
-        <div>Continue with Microsoft</div>
+        <div>Continue with {{ provider.name }}</div>
       </div>
     </template>
   </q-btn>
@@ -152,6 +135,7 @@
 
 <script setup>
 import { apiClient } from '@/plugins/api'
+import { ssoProviders } from '@/plugins/sso'
 import { useAuthStore } from '@/plugins/stores/auth'
 import { useQuasar } from 'quasar'
 import { ref } from 'vue'
@@ -169,7 +153,7 @@ const isPwd = ref(true)
 const loading = ref(false)
 
 const props = defineProps(['authenticating'])
-const emit = defineEmits(['submit', 'auth-google', 'auth-microsoft'])
+const emit = defineEmits(['submit', 'auth'])
 
 async function register() {
   try {
@@ -188,16 +172,14 @@ async function register() {
     loading.value = false
 
     $q.notify({
-      color: 'positive',
-      icon: 'check_circle',
+      type: 'positive',
       message: 'Registration successful!',
     })
   } catch (error) {
     console.error('Registration failed', error)
 
     $q.notify({
-      color: 'negative',
-      icon: 'report_problem',
+      type: 'negative',
       message: 'Registration failed',
     })
 

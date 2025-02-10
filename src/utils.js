@@ -15,4 +15,12 @@ function camelize(data) {
   return data;
 }
 
-export { camelize };
+function censorEmail(email) {
+  const [local, domain] = email.split("@");
+  if (local.length <= 4) {
+    return `${local[0]}****@${domain}`;
+  }
+  return `${local.slice(0, 3)}****${local.slice(-2)}@${domain}`;
+}
+
+export { camelize, censorEmail }

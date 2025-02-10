@@ -16,12 +16,12 @@ const routes = [
       {
         path: 'login',
         name: 'auth-login',
-        component: () => import('@/views/auth/LoginForm.vue'),
+        component: () => import('@/views/auth/AuthLogin.vue'),
       },
       {
         path: 'register',
         name: 'auth-register',
-        component: () => import('@/views/auth/RegisterForm.vue'),
+        component: () => import('@/views/auth/AuthRegister.vue'),
       },
     ],
   },
@@ -68,43 +68,59 @@ const routes = [
     meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
-    path: '/profile',
-    name: 'profile',
-    component: () => import('@/views/ProfileView.vue'),
+    path: '/settings',
+    name: 'settings',
+    component: () => import('@/views/settings/SettingsView.vue'),
     meta: { requiresAuth: true },
-    // children: [
-    //   {
-    //     path: 'me',
-    //     // component: () => import("@/views/profile/ProfileDetail.vue"),
-    //   },
-    //   {
-    //     path: ':userId',
-    //     // component: () => import("@/views/profile/ProfileDetail.vue"),
-    //   },
-    // ],
+    children: [
+      {
+        path: 'profile',
+        name: 'settings-profile',
+        component: () => import('@/views/settings/SettingsProfile.vue'),
+      },
+      {
+        path: 'auth',
+        name: 'settings-auth',
+        component: () => import('@/views/settings/SettingsAuth.vue'),
+      },
+    ],
   },
-  {
-    path: '/sso',
-    name: 'sso',
-    component: () => import('@/views/LinkPage.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
-  },
+  // {
+  //   path: '/profile',
+  //   name: 'profile',
+  //   component: () => import('@/views/ProfileView.vue'),
+  //   meta: { requiresAuth: true },
+  //   // children: [
+  //   //   {
+  //   //     path: 'me',
+  //   //     // component: () => import("@/views/profile/ProfileDetail.vue"),
+  //   //   },
+  //   //   {
+  //   //     path: ':userId',
+  //   //     // component: () => import("@/views/profile/ProfileDetail.vue"),
+  //   //   },
+  //   // ],
+  // },
   {
     path: '/error',
     name: 'error',
-    // component: () => import('@/views/ErrorView.vue'),
+    component: () => import('@/views/error/ErrorView.vue'),
     children: [
       {
         path: '404',
         name: 'error-404',
-        // component: () => import('@/views/error/NotFound.vue'),
+        component: () => import('@/views/error/ErrorNotFound.vue'),
       },
       {
         path: '403',
         name: 'error-403',
-        component: () => import('@/views/error/AccessDenied.vue'),
+        component: () => import('@/views/error/ErrorAccessDenied.vue'),
       },
     ],
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: { name: 'error-404' },
   },
 ]
 

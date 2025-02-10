@@ -21,7 +21,7 @@
       :width="280"
     >
       <q-list class="q-my-md">
-        <q-item-label header>Documents</q-item-label>
+        <q-item-label header>Settings</q-item-label>
 
         <q-item
           v-for="(tab, index) in tabs"
@@ -57,8 +57,8 @@ const $router = useRouter()
 const layoutStore = useLayoutStore()
 
 const tabs = [
-  { name: 'Current Documents', path: { name: 'docs-list' } },
-  { name: 'Upload New Document', path: { name: 'docs-upload' } },
+  { name: 'My Profile', path: { name: 'settings-profile' } },
+  { name: 'Authentication', path: { name: 'settings-auth' } },
 ]
 
 const leftDrawerOpen = computed({
@@ -70,5 +70,3 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 </script>
-
-<style scoped></style>

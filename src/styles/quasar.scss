@@ -16,6 +16,13 @@
   background-color: $primary !important;
 }
 
+.text-link {
+  color: $link !important;
+}
+.bg-link {
+  background-color: $link !important;
+}
+
 .text-light-red {
   color: $light-red !important;
 }
@@ -49,4 +56,8 @@
 }
 .bg-grey-17 {
   background-color: $grey-17 !important;
+}
+
+.border-negative {
+  border-color: $negative !important;
 }

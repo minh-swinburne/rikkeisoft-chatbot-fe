@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh LpR fFf">
-    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
+    <q-header bordered>
       <q-toolbar>
         <app-navbar />
       </q-toolbar>
@@ -217,7 +217,6 @@ const showCursor = ref(true) // Blinking cursor state
 const currentCharIndex = ref(0) // Current character in the text
 const currentTextIndex = ref(0) // Tracks which sentence is being typed
 let cursorInterval = null // Interval for cursor blinking
-const testimonialIndex = ref('slide-1') // Default to the first slide
 
 const typeText = () => {
   const currentText = texts.value[currentTextIndex.value]

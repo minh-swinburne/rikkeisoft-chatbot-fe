@@ -44,9 +44,8 @@ async function startChat() {
   } catch (error) {
     console.error('Error creating new chat:', error)
     $q.notify({
-      color: 'negative',
+      type: 'negative',
       message: 'Error creating new chat',
-      icon: 'error',
     })
   }
 }

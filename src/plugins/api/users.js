@@ -14,11 +14,21 @@ export const usersAPI = (client) => {
 
     revokeRole: (userId, role) => client.put(`${prefix}/${userId}/role/revoke`, role),
 
-    deleteUser: () => client.delete(`${prefix}/me`),
+    deleteCurrentUser: () => client.delete(`${prefix}/me`),
 
     uploadAvatar: (avatarFile) =>
-      client.post(`${prefix}/avatar/upload`, { avatar_file: avatarFile }, { headers: { 'Content-Type': 'multipart/form-data' } }),
+      client.post(
+        `${prefix}/me/avatar`,
+        { avatar_file: avatarFile },
+        { headers: { 'Content-Type': 'multipart/form-data' } },
+      ),
+
+    deleteAvatar: () => client.delete(`${prefix}/me/avatar`),
 
     listSSO: () => client.get(`${prefix}/me/sso`),
+
+    linkSSO: (provider, authData) => client.post(`${prefix}/me/sso/${provider}`, authData),
+
+    unlinkSSO: (provider) => client.delete(`${prefix}/me/sso/${provider}`),
   }
 }

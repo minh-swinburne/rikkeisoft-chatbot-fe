@@ -1,6 +1,6 @@
 <template>
-  <q-layout view="hHh LpR fFf" :class="{ 'bg-dark': $q.dark.isActive }">
-    <q-header bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-primary'">
+  <q-layout view="hHh LpR fFf">
+    <q-header bordered>
       <q-toolbar>
         <app-navbar />
       </q-toolbar>
@@ -9,7 +9,7 @@
     <q-page-container>
       <q-page padding class="max-width-70 q-pa-md">
         <q-card flat bordered class="q-pa-md">
-          <q-tabs v-model="activeTab" class="q-mb-md" active-color="primary">
+          <q-tabs v-model="activeTab" class="q-mb-md" active-class="link">
             <q-tab v-for="(tab, key) in tabs" :key="key" :name="key" :label="tab" />
           </q-tabs>
           <q-separator />
@@ -160,9 +160,8 @@ async function loadConfig(tab) {
   } catch (error) {
     console.error('Error fetching config:', error)
     $q.notify({
-      color: 'negative',
+      type: 'negative',
       message: 'Failed to load configuration.',
-      icon: 'report_problem',
     })
   }
   loading.value = false
@@ -174,16 +173,14 @@ async function saveConfig(tab) {
     const response = await apiClient.config.updateConfig(tab, config.value)
     console.log('Updated config:', response.data)
     $q.notify({
-      color: 'positive',
+      type: 'positive',
       message: `${tabs[tab]} configuration updated successfully.`,
-      icon: 'check_circle',
     })
   } catch (error) {
     console.error('Error updating config:', error.response || error)
     $q.notify({
-      color: 'negative',
+      type: 'negative',
       message: 'Failed to update configuration.',
-      icon: 'report_problem',
     })
   }
   loading.value = false

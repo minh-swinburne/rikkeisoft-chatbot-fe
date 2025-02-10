@@ -3,8 +3,8 @@
     <q-scroll-area
       ref="chatScrollArea"
       class="col q-px-md scroll-area-transition"
-      content-style="padding-top: 16px"
-      content-active-style="padding-top: 16px"
+      content-style="padding-top: 16px; max-width: 100%"
+      content-active-style="padding-top: 16px; max-width: 100%"
       :style="{
         maxWidth: '100%',
         maxHeight: maxHeightScrollArea,
@@ -65,7 +65,6 @@
             v-for="(message, index) in sortedMessages"
             :key="index"
             :name="message.role === 'assistant' ? 'Bot' : authStore.user.firstname"
-            :text="[marked(message.content)]"
             :sent="message.role === 'user'"
             :text-color="$q.dark.isActive ? 'white' : 'black'"
             :bg-color="
@@ -83,7 +82,6 @@
               boxShadow: 'none',
             }"
             :stamp="parseTime(message.time)"
-            text-html
           >
             <template #avatar>
               <user-avatar v-if="message.role === 'user'" :src="authStore.user.avatar_url" size="40px" class="q-mx-sm" bordered />
@@ -91,6 +89,16 @@
                 <q-img src="@/assets/logo.svg" width="25px" position="0.5px 0.5px" />
               </q-avatar>
             </template>
+            <div>
+              <template v-for="(part, i) in parseMessage(message.content)" :key="i">
+                <v-code-block
+                  v-if="part.type === 'code'"
+                  :code="part.content"
+                  :lang="part.lang"
+                />
+                <span v-else v-html="marked(part.content)"></span>
+              </template>
+            </div>
           </q-chat-message>
         </template>
 
@@ -169,8 +177,6 @@
 </template>
 
 <script setup>
-import ChatInput from '@/components/ChatInput.vue'
-import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
 import { camelize } from '@/utils'
@@ -178,6 +184,9 @@ import { marked } from 'marked'
 import { date, useQuasar } from 'quasar'
 import { useRoute, useRouter } from 'vue-router'
 import { ref, watch, computed, nextTick, onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
+import { VCodeBlock } from '@wdns/vue-code-block'
+import ChatInput from '@/components/ChatInput.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 const $q = useQuasar()
 const $route = useRoute()
@@ -207,13 +216,18 @@ onMounted(() => {
 
   if (initialMessage) {
     console.log('Initial message:', initialMessage)
-    sendMessage(initialMessage)
+    loading.value = false
+    sendMessage(initialMessage).then(() => {
+      // console.log('Renaming chat...')
+      emit('rename', $route.params.chatId)
+    })
     // sendMessage(decodeURIComponent(initialMessage))
     // Remove the initialMessage from the query parameters
     $router.replace({ query: {} })
+  } else {
+    reloadChat()
   }
 
-  reloadChat()
   updateStickyWidth()
   window.addEventListener('resize', updateStickyWidth)
 })
@@ -301,7 +315,7 @@ async function sendMessage(query) {
     const streaming = confResponse.data
     const chatResponse = await apiClient.chats.sendMessage($route.params.chatId, query)
 
-    scrollToBottom()
+    scrollToBottom(true)
 
     if (streaming) {
       console.log('Streaming response...')
@@ -338,14 +352,10 @@ async function sendMessage(query) {
 
       waiting.value = false
       messages.value.push({ role: responseData.role, content: botResponse })
-      scrollToBottom()
-    }
-
-    if (messages.value.length === 2) {
-      emit('rename', $route.params.chatId)
     }
 
     emit('send')
+    scrollToBottom(true)
     fetchSuggestions()
   } catch (error) {
     console.error('Error sending message:', error)
@@ -362,7 +372,7 @@ async function fetchMessages() {
     loading.value = true
     const response = await apiClient.chats.listMessages($route.params.chatId)
     messages.value = camelize(response.data)
-    scrollToBottom()
+    scrollToBottom(true)
   } catch (error) {
     if (error.status === 404 || error.status === 403) {
       console.log('Chat not found. Redirecting to chat start...')
@@ -388,16 +398,36 @@ async function fetchSuggestions() {
   }
 }
 
-function scrollToBottom() {
+function scrollToBottom(force = false) {
   nextTick(() => {
-    if (chatScrollArea.value) {
-      chatScrollArea.value.setScrollPosition('vertical', 99999)
+    if (chatScrollArea.value && (force || chatScrollArea.value.getScroll().verticalPercentage > 0.9)) {
+      console.log('Scrolling to bottom...')
+      chatScrollArea.value.setScrollPercentage('vertical', 1, 300)
     }
   })
 }
 
 function randomWidth(bias = 75, weight = 1) {
   return Math.floor(Math.random() * (100 - bias) + bias) * weight + '%'
+}
+
+function parseMessage(content) {
+  const tokens = marked.lexer(content); // Tokenize the Markdown content
+  let parts = [];
+
+  tokens.forEach((token) => {
+    if (token.type === "paragraph" || token.type === "text") {
+      parts.push({ type: "text", content: token.text });
+    } else if (token.type === "code") {
+      parts.push({
+        type: "code",
+        lang: token.lang || "plaintext", // Default to plaintext if no language is detected
+        content: token.text,
+      });
+    }
+  });
+
+  return parts;
 }
 </script>
 
@@ -408,8 +438,19 @@ function randomWidth(bias = 75, weight = 1) {
 </style>
 
 <style lang="scss">
+.q-message-container {
+  > div:not(.q-avatar) {
+    max-width: 100%;
+  }
+}
+
 .q-message-text {
   padding: 12px;
+
+  pre {
+    max-width: 100%;
+    overflow-x: auto;
+  }
 }
 
 .q-message-name--sent {

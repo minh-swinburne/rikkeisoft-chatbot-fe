@@ -22,22 +22,23 @@
                   <q-space />
 
                   <q-btn
-                    :label="isEditing ? 'Apply' : 'Edit'"
-                    :icon="isEditing ? 'check' : 'edit'"
+                    v-if="isEditing"
                     :loading="loading"
+                    label="Apply"
+                    icon="check"
                     color="primary"
                     unelevated
                     @click="toggleEdit(true)"
                   />
 
                   <q-btn
-                    v-if="isEditing"
                     :loading="loading"
+                    :flat="isEditing"
+                    :label="isEditing ? 'Cancel' : 'Edit'"
+                    :icon="isEditing ? 'close' : 'edit'"
                     :class="{ 'q-ml-sm': $q.screen.gt.xs }"
-                    label="Cancel"
-                    icon="close"
                     color="negative"
-                    flat
+                    unelevated
                     @click="toggleEdit(false)"
                   />
                 </div>
@@ -138,9 +139,12 @@ watch(activeTab, (newTab) => {
 
 async function toggleEdit(save = false) {
   if (isEditing.value && save) {
+    console.log('Saving config...')
     await saveConfig(activeTab.value)
+  } else {
+    console.log('Loading config...')
+    await loadConfig(activeTab.value)
   }
-  await loadConfig(activeTab.value)
   isEditing.value = !isEditing.value
 }
 

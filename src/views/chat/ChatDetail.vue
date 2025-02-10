@@ -18,37 +18,68 @@
           flexDirection: 'column',
         }"
       >
-        <q-chat-message
-          v-for="(message, index) in sortedMessages"
-          :key="index"
-          :name="message.role === 'assistant' ? 'Bot' : authStore.user.firstname"
-          :text="[marked(message.content)]"
-          :sent="message.role === 'user'"
-          :text-color="$q.dark.isActive ? 'white' : 'black'"
-          :bg-color="
-            message.role === 'assistant'
-              ? $q.dark.isActive
-                ? 'grey-15'
-                : 'grey-3'
-              : $q.dark.isActive
-                ? 'dark-red'
-                : 'light-red'
-          "
-          :style="{
-            maxWidth: '80%',
-            alignSelf: message.role === 'assistant' ? 'flex-start' : 'flex-end',
-            boxShadow: 'none',
-          }"
-          :stamp="parseTime(message.time)"
-          text-html
-        >
-          <template #avatar>
-            <user-avatar v-if="message.role === 'user'" :src="authStore.user.avatar_url" size="40px" class="q-mx-sm" bordered />
-            <q-avatar v-else size="40px" class="bordered q-mx-sm">
-              <q-img src="@/assets/logo.svg" width="25px" position="0.5px 0.5px" />
-            </q-avatar>
-          </template>
-        </q-chat-message>
+        <template v-if="isMessageLoading">
+          <q-chat-message
+            v-for="i in 4"
+            :key="i"
+            :name="i % 2 === 0 ? 'Bot' : authStore.user.firstname"
+            :sent="i % 2 !== 0"
+            :text-color="$q.dark.isActive ? 'white' : 'black'"
+            :bg-color="
+              i % 2 === 0
+                ? $q.dark.isActive
+                  ? 'grey-15'
+                  : 'grey-3'
+                : $q.dark.isActive
+                  ? 'dark-red'
+                  : 'light-red'
+            "
+            :style="{
+              maxWidth: '80%',
+              alignSelf: i % 2 === 0 ? 'flex-start' : 'flex-end',
+              boxShadow: 'none',
+            }"
+          >
+            <template #avatar>
+              <q-skeleton type="QAvatar" size="40px" />
+            </template>
+            <q-skeleton type="rect" :height="`8em`" width="900px" class="q-mt-sm" />
+          </q-chat-message>
+        </template>
+        
+        <template v-else>
+          <q-chat-message
+            v-for="(message, index) in sortedMessages"
+            :key="index"
+            :name="message.role === 'assistant' ? 'Bot' : authStore.user.firstname"
+            :text="[marked(message.content)]"
+            :sent="message.role === 'user'"
+            :text-color="$q.dark.isActive ? 'white' : 'black'"
+            :bg-color="
+              message.role === 'assistant'
+                ? $q.dark.isActive
+                  ? 'grey-15'
+                  : 'grey-3'
+                : $q.dark.isActive
+                  ? 'dark-red'
+                  : 'light-red'
+            "
+            :style="{
+              maxWidth: '80%',
+              alignSelf: message.role === 'assistant' ? 'flex-start' : 'flex-end',
+              boxShadow: 'none',
+            }"
+            :stamp="parseTime(message.time)"
+            text-html
+          >
+            <template #avatar>
+              <user-avatar v-if="message.role === 'user'" :src="authStore.user.avatar_url" size="40px" class="q-mx-sm" bordered />
+              <q-avatar v-else size="40px" class="bordered q-mx-sm">
+                <q-img src="@/assets/logo.svg" width="25px" position="0.5px 0.5px" />
+              </q-avatar>
+            </template>
+          </q-chat-message>
+        </template>
 
         <q-chat-message
           v-if="waiting"
@@ -151,6 +182,7 @@ const waiting = ref(false)
 const chatScrollArea = ref(null)
 const maxHeightScrollArea = ref('calc(100vh - 50px - 88px)')
 const chatStickyWidth = ref('100vw')
+const isMessageLoading = ref(true)
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time)),
@@ -279,6 +311,7 @@ async function sendMessage(query) {
 async function fetchMessages() {
   try {
     console.log('Fetching messages...')
+    isMessageLoading.value = true
     const response = await apiClient.chats.listMessages($route.params.chatId)
     messages.value = camelize(response.data)
     scrollToBottom()
@@ -294,6 +327,8 @@ async function fetchMessages() {
         icon: 'error',
       })
     }
+  } finally {
+    isMessageLoading.value = false
   }
 }
 

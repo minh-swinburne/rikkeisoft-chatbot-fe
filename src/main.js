@@ -14,7 +14,7 @@ const pinia = createPinia()
 const VCodeBlock = createVCodeBlock({
   highlightjs: true,
   persistentCopyButton: true,
-  theme: 'github-dark-dimmed',
+  // theme: 'github-dark-dimmed',
 })
 
 app.use(pinia)

@@ -95,8 +95,9 @@
                   v-if="part.type === 'code'"
                   :code="part.content"
                   :lang="part.lang"
+                  :theme="$q.dark.isActive ? 'github-dark-dimmed' : 'github'"
                 />
-                <span v-else v-html="marked(part.content)"></span>
+                <div v-else v-html="marked(part.content)"></div>
               </template>
             </div>
           </q-chat-message>
@@ -209,6 +210,23 @@ const loading = ref(true)
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time)),
 )
+
+const renderer = {
+  link: ({ href, title, text }) => `<a href="${href}" title="${title}" class="link" target="_blank">${text}</a>`,
+
+  heading: ({ tokens, depth: level }) => {
+    const text = tokens.map((token) => token.text).join('')
+    const newLevel = level <= 3 ? level + 3 : level
+    return `<h${level} class="q-mb-sm text-h${newLevel}">${text}</h${level}>`
+  },
+
+  codespan: ({ text }) => {
+    console.log('Code block:', text)
+    return `<code class="message-codespan q-px-xs rounded-borders">${text}</code>`
+  },
+}
+marked.use({ renderer })
+console.log(marked('Hello, [World](https://example.com "Title for Tooltip")!'))
 
 onMounted(() => {
   // Check for initialMessage in the route query and send it if present
@@ -414,16 +432,18 @@ function randomWidth(bias = 75, weight = 1) {
 function parseMessage(content) {
   const tokens = marked.lexer(content); // Tokenize the Markdown content
   let parts = [];
+  // console.log('Parsing message:', content)
+  console.log('Tokens:', tokens)
 
   tokens.forEach((token) => {
-    if (token.type === "paragraph" || token.type === "text") {
-      parts.push({ type: "text", content: token.text });
-    } else if (token.type === "code") {
+    if (token.type === "code") {
       parts.push({
         type: "code",
         lang: token.lang || "plaintext", // Default to plaintext if no language is detected
         content: token.text,
       });
+    } else {
+      parts.push({ type: "text", content: token.raw });
     }
   });
 
@@ -447,9 +467,8 @@ function parseMessage(content) {
 .q-message-text {
   padding: 12px;
 
-  pre {
-    max-width: 100%;
-    overflow-x: auto;
+  .message-codespan {
+    background: #88888840;
   }
 }
 

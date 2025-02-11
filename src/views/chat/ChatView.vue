@@ -148,6 +148,8 @@ async function generateName(chatId) {
         if (streamDone) break
 
         let chunk = decoder.decode(value, { stream: true })
+        chunk = chunk.replace(/(\r\n|\n|\r)/gm, '') // Remove newlines
+        chunk = chunk.replace(/"*/g, '') // Remove quotes
 
         newName += chunk
         done = streamDone

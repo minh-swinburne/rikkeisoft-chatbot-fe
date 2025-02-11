@@ -4,6 +4,7 @@ import { ref } from 'vue'
 
 export const useLayoutStore = defineStore('layout', () => {
   const leftDrawerOpen = ref(false)
+  const avatarCacheBust = ref(Date.now())
   const isDark = useDark({ storageKey: 'color-scheme' })
 
   function setLeftDrawerOpen(value) {
@@ -14,10 +15,16 @@ export const useLayoutStore = defineStore('layout', () => {
     leftDrawerOpen.value = !leftDrawerOpen.value
   }
 
+  function bustAvatarCache() {
+    avatarCacheBust.value = Date.now()
+  }
+
   return {
     leftDrawerOpen,
+    avatarCacheBust,
     isDark,
     setLeftDrawerOpen,
     toggleLeftDrawer,
+    bustAvatarCache,
   }
 })

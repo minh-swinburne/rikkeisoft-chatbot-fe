@@ -65,7 +65,10 @@
 
         <!-- Join Date Section -->
         <div class="q-mb-md">
-          <div class="text-subtitle1 q-mb-sm">Joined Date: <span class="text-subtitle2">{{ date.formatDate(joinedDate, 'MMM Do, YYYY') }}</span></div>
+          <div class="text-subtitle1 q-mb-sm">
+            Joined Date:
+            <span class="text-subtitle2">{{ date.formatDate(joinedDate, 'MMM Do, YYYY') }}</span>
+          </div>
         </div>
 
         <!-- Name Section - First and Last name in same row -->
@@ -115,11 +118,13 @@
 import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
-import { useQuasar, date } from 'quasar'
+import { useLayoutStore } from '@/plugins/stores/layout'
+import { date, useQuasar } from 'quasar'
 import { onMounted, ref } from 'vue'
 
 const $q = useQuasar()
 const authStore = useAuthStore()
+const layoutStore = useLayoutStore()
 
 const loading = ref(false)
 const isEditing = ref(false)
@@ -184,7 +189,11 @@ function previewImage(file) {
 
 async function uploadAvatar(file) {
   const response = await apiClient.users.uploadAvatar(file)
-  return response.data.url
+  const url = response.data.url
+  if (url && url !== avatarUrl.value) {
+    avatarUrl.value = url
+  }
+  layoutStore.bustAvatarCache()
 }
 
 async function removeAvatar() {
@@ -197,10 +206,7 @@ async function saveChanges() {
     loading.value = true
 
     if (avatarFile.value) {
-      const url = await uploadAvatar(avatarFile.value)
-      if (url && url !== avatarUrl.value) {
-        avatarUrl.value = url
-      }
+      await uploadAvatar(avatarFile.value)
     } else if (!avatarUrl.value) {
       await apiClient.users.deleteAvatar()
     }

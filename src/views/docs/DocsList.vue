@@ -1,6 +1,6 @@
 <template>
-  <q-page padding class="row justify-center items-center q-pa-md" style="max-width: 700px">
-    <div class="col-grow q-mb-lg items-center" style="width: 100%">
+  <q-page padding class="row justify-center items-start q-pa-md" style="max-width: 700px">
+    <div class="col-grow items-center q-mb-lg" style="width: 100%">
       <div class="row q-col-gutter-lg">
         <div class="col-grow">
           <q-input v-model="searchQuery" label="Search" dense>
@@ -9,20 +9,65 @@
             </template>
           </q-input>
         </div>
+
         <div class="col-auto">
           <q-btn-dropdown color="primary" label="Filter" icon="filter_list" unelevated>
-            <q-card>
+            <q-card style="min-width: 250px">
               <q-card-section>
-                <div class="text-h6">Filter by Categories</div>
-                <q-select
-                  v-model="selectedCategories"
-                  :options="availableCategories"
-                  multiple
+                <div class="text-h6">Categories</div>
+                <q-toggle
+                  v-model="filterCatMatchAll"
+                  label="Match All"
+                  color="primary"
+                  class="q-my-sm justify-between"
+                  style="width: 100%"
+                  left-label
                   dense
-                  use-chips
+                />
+                <q-select
+                  v-model="filterCatSelected"
+                  :options="availableCategories"
                   class="q-mt-sm"
+                  multiple
+                  outlined
+                  dense
+                >
+                  <template #selected-item="scope">
+                    <q-chip
+                      v-if="editFormData.categories"
+                      class="bg-shadow"
+                      removable
+                      dense
+                      @remove="scope.removeAtIndex(scope.index)"
+                      :tabindex="scope.tabindex"
+                    >
+                      {{ scope.opt }}
+                    </q-chip>
+                  </template>
+                </q-select>
+              </q-card-section>
+
+              <q-card-section class="q-py-none">
+                <div class="text-h6">Creator</div>
+                <q-input v-model="filterCreator" class="q-mt-sm" outlined dense />
+              </q-card-section>
+
+              <q-card-section>
+                <div class="text-h6">Access</div>
+                <q-select
+                  v-model="filterAccess"
+                  :options="[
+                    { label: 'Everyone', value: false },
+                    { label: 'Admin Only', value: true },
+                  ]"
+                  color="primary"
+                  class="q-mt-sm"
+                  clearable
+                  outlined
+                  dense
                 />
               </q-card-section>
+
               <q-card-actions align="right">
                 <q-btn flat label="Clear" @click="clearFilters" />
                 <q-btn flat label="Apply" v-close-popup />
@@ -80,7 +125,7 @@
     </q-list>
 
     <!-- ACTUAL DOCUMENT LIST -->
-    <q-list v-else class="col-grow rounded-borders" bordered separator>
+    <q-list v-else-if="totalPages > 0" class="col-grow rounded-borders" bordered separator>
       <q-item
         v-for="document in paginatedDocuments"
         :key="document.id"
@@ -99,7 +144,7 @@
             <q-chip
               v-for="(category, index) in document.categories"
               :key="index"
-              :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
+              class="bg-shadow"
               dense
             >
               {{ category.name }}
@@ -110,21 +155,21 @@
           </q-item-label>
           <q-item-label>
             <strong>Creator:</strong>
-            <q-chip
-              :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
-              clickable
-              v-ripple
-              @click="$router.push(`/profile/${document.creator_user.id}`)"
-            >
-              <user-avatar :src="document.creator_user.avatar_url" alt="Creator Avatar" />
-              <!-- <q-avatar>
-                    <q-img
-                      :src="document.creator_user.avatar_url"
-                      :error-src="`https://cdn.quasar.dev/logo-v2/svg/logo${$q.dark.isActive ? '-dark' : ''}.svg`"
-                      alt="Creator Avatar"
-                    />
-                  </q-avatar> -->
-              {{ document.creator_user.full_name }}
+            <q-chip class="bg-shadow" clickable v-ripple>
+              <router-link
+                :to="{ name: 'user-profile', params: { userId: document.creator_user.id } }"
+                class="row items-center"
+              >
+                <user-avatar :src="document.creator_user.avatar_url" alt="Creator Avatar" />
+                <!-- <q-avatar>
+                      <q-img
+                        :src="document.creator_user.avatar_url"
+                        :error-src="`https://cdn.quasar.dev/logo-v2/svg/logo${$q.dark.isActive ? '-dark' : ''}.svg`"
+                        alt="Creator Avatar"
+                      />
+                    </q-avatar> -->
+                {{ document.creator_user.full_name }}
+              </router-link>
             </q-chip>
           </q-item-label>
           <q-item-label>
@@ -170,8 +215,11 @@
       </q-item>
     </q-list>
 
+    <h4 v-else class="text-center">No documents found</h4>
+
     <div class="justify-center q-mt-md">
       <q-pagination
+        v-if="totalPages > 0"
         v-model="currentPage"
         :max="totalPages"
         :max-pages="5"
@@ -214,15 +262,16 @@
             v-model="editFormData.categories"
             :options="availableCategories"
             label="Categories"
+            use-chips
             multiple
             outlined
           >
             <template #selected-item="scope">
               <q-chip
                 v-if="editFormData.categories"
+                class="bg-shadow"
                 removable
                 dense
-                :color="$q.dark.isActive ? 'grey-9' : 'grey-4'"
                 @remove="scope.removeAtIndex(scope.index)"
                 :tabindex="scope.tabindex"
               >
@@ -257,15 +306,13 @@
 </template>
 
 <script setup>
-import _ from 'lodash'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
+import _ from 'lodash'
 import { useQuasar } from 'quasar'
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 const $q = useQuasar()
-const $router = useRouter()
 
 const documents = ref([])
 const currentDocument = ref(null)
@@ -291,7 +338,11 @@ const editFormData = ref({
 })
 
 const searchQuery = ref('')
-const selectedCategories = ref([])
+const filterCatMatchAll = ref(false)
+const filterCatSelected = ref([])
+const filterCreator = ref('')
+const filterAccess = ref(null)
+
 const availableCategories = ref([
   'Guidance',
   'Policies',
@@ -314,11 +365,21 @@ const filteredDocuments = computed(() => {
   return documents.value.filter((doc) => {
     const matchesSearch =
       doc.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      doc.description.toLowerCase().includes(searchQuery.value.toLowerCase())
+      doc.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      doc.id.includes(searchQuery.value)
+
     const matchesCategories =
-      selectedCategories.value.length === 0 ||
-      doc.categories.some((cat) => selectedCategories.value.includes(cat))
-    return matchesSearch && matchesCategories
+      filterCatSelected.value.length === 0 ||
+      (filterCatMatchAll.value
+        ? filterCatSelected.value.every((category) =>
+            doc.categories.map((cat) => cat.name).includes(category),
+          )
+        : doc.categories.some((cat) => filterCatSelected.value.includes(cat.name)))
+
+    const matchesCreator = doc.creator_user.full_name.toLowerCase().includes(filterCreator.value.toLowerCase())
+    const matchesAccess = filterAccess.value ? filterAccess.value.value === doc.restricted : true
+
+    return matchesSearch && matchesCategories && matchesCreator && matchesAccess
   })
 })
 
@@ -327,7 +388,10 @@ onMounted(() => {
 })
 
 function clearFilters() {
-  selectedCategories.value = []
+  filterCatMatchAll.value = false
+  filterCatSelected.value = []
+  filterCreator.value = ''
+  filterAccess.value = false
 }
 
 function formatDate(dateString) {

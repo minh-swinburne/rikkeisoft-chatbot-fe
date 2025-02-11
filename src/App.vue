@@ -28,6 +28,11 @@ $q.dark.set(layoutStore.isDark)
   /* color: #2c3e50; */
 }
 
+a {
+  color: black;
+  text-decoration: none;
+}
+
 // ::-webkit-scrollbar {
 //   background: transparent;
 // }
@@ -62,6 +67,10 @@ input:is(:-webkit-autofill, :autofill) {
 }
 
 .body--dark {
+  a {
+    color: white;
+  }
+  
   input:is(:-webkit-autofill, :autofill) {
     -webkit-text-fill-color: white;
     box-shadow: inset 0 0 0 500px $grey-17 !important;

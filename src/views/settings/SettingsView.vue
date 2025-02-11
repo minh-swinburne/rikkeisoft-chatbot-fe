@@ -2,24 +2,12 @@
   <q-layout view="hHh LpR fFf">
     <q-header bordered>
       <q-toolbar>
-        <q-btn
-          icon="menu"
-          aria-label="Menu"
-          flat
-          dense
-          round
-          @click="toggleLeftDrawer"
-        />
+        <q-btn icon="menu" aria-label="Menu" flat dense round @click="toggleLeftDrawer" />
         <app-navbar />
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-      :width="280"
-    >
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered :width="280">
       <q-list class="q-my-md">
         <q-item-label header>Settings</q-item-label>
 
@@ -28,7 +16,7 @@
           :key="index"
           :to="tab.path"
           :style="{ borderRadius: '5px', color: 'inherit' }"
-          active-class="bg-shadow"
+          active-class="bg-shadow-2"
           class="q-ma-sm q-pa-sm"
           clickable
           v-ripple
@@ -48,10 +36,10 @@
 </template>
 
 <script setup>
-import { useLayoutStore } from '@/plugins/stores/layout'
-import { useRouter } from 'vue-router'
-import { computed } from 'vue'
 import AppNavbar from '@/components/AppNavbar.vue'
+import { useLayoutStore } from '@/plugins/stores/layout'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 
 const $router = useRouter()
 const layoutStore = useLayoutStore()

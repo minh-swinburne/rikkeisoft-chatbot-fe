@@ -153,7 +153,7 @@
               <div v-for="(suggestion, index) in suggestions" :key="index" class="col-auto">
                 <q-chip
                   :label="suggestion"
-                  :color="$q.dark.isActive ? 'grey-9' : 'grey-3'"
+                  class="bg-shadow"
                   @click="applySuggestion(suggestion)"
                   clickable
                 />
@@ -222,7 +222,7 @@ const renderer = {
 
   codespan: ({ text }) => {
     console.log('Code block:', text)
-    return `<code class="message-codespan q-px-xs rounded-borders">${text}</code>`
+    return `<code class="bg-shadow q-px-xs rounded-borders">${text}</code>`
   },
 }
 marked.use({ renderer })
@@ -466,10 +466,6 @@ function parseMessage(content) {
 
 .q-message-text {
   padding: 12px;
-
-  .message-codespan {
-    background: #88888840;
-  }
 }
 
 .q-message-name--sent {

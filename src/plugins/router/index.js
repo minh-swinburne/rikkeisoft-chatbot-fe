@@ -85,6 +85,24 @@ const routes = [
       },
     ],
   },
+  {
+    path: '/user',
+    name: 'user',
+    component: () => import('@/views/user/UserView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+    children: [
+      {
+        path: 'list',
+        name: 'user-list',
+        component: () => import('@/views/user/UserList.vue'),
+      },
+      {
+        path: 'profile',
+        name: 'user-profile',
+        component: () => import('@/views/user/UserProfile.vue'),
+      },
+    ],
+  },
   // {
   //   path: '/profile',
   //   name: 'profile',

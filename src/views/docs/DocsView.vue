@@ -28,7 +28,7 @@
           :key="index"
           :to="tab.path"
           :style="{ borderRadius: '5px', color: 'inherit' }"
-          active-class="bg-shadow"
+          active-class="bg-shadow-2"
           class="q-ma-sm q-pa-sm"
           clickable
           v-ripple

@@ -36,7 +36,7 @@
           v-for="chat in chats"
           :key="chat.id"
           :style="{ borderRadius: '5px', color: 'inherit' }"
-          active-class="bg-shadow"
+          active-class="bg-shadow-2"
           class="q-ma-sm q-pa-sm"
           clickable
           @click="$router.push({ name: 'chat-detail', params: { chatId: chat.id } })"

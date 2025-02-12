@@ -2,17 +2,17 @@
   <q-page padding class="col-grow q-col-gutter-lg" style="max-width: 700px">
     <section>
       <div class="row items-center justify-between q-my-lg">
-        <div class="text-h5">Authentication Settings</div>
+        <h2 class="text-h5 q-my-none">Authentication Settings</h2>
         <div>
           <q-btn
-            :label="isEditing ? 'Apply' : 'Edit'"
-            :icon="isEditing ? 'check' : 'edit'"
+            :label="editing ? 'Apply' : 'Edit'"
+            :icon="editing ? 'check' : 'edit'"
             :loading="loading"
             color="primary"
             @click="toggleEdit(true)"
           />
           <q-btn
-            v-if="isEditing"
+            v-if="editing"
             label="Cancel"
             icon="close"
             color="negative"
@@ -24,10 +24,10 @@
         </div>
       </div>
 
-      <q-card flat bordered class="col-grow q-pa-lg">
-        <q-form ref="updateForm" class="q-gutter-y-sm" @submit="saveChanges">
+      <q-card flat bordered class="col-grow q-pa-md">
+        <q-form ref="updateForm" @submit="saveChanges">
           <!-- User ID Section -->
-          <div class="q-mb-lg">
+          <q-card-section class="q-mb-xs">
             <div class="text-subtitle1">ID</div>
             <q-input
               v-model="authStore.user.sub"
@@ -43,48 +43,49 @@
                 />
               </template>
             </q-input>
-          </div>
+          </q-card-section>
 
           <!-- Username Section -->
-          <div>
+          <q-card-section class="q-pb-none">
             <div class="text-subtitle1">Username</div>
             <q-input
               v-model="newUsername"
               maxlength="20"
               counter
               outlined
-              :readonly="!isEditing"
+              :readonly="!editing"
               :rules="usernameRules"
             />
-          </div>
+          </q-card-section>
 
           <!-- Password Section -->
-          <div>
+          <q-card-section class="q-pb-none">
             <div class="text-subtitle1 q-mb-sm">Old Password</div>
             <q-input
               v-model="oldPassword"
               autocomplete="off"
               type="Password"
               outlined
-              :readonly="!isEditing"
+              :readonly="!editing"
               :rules="[(val) => !!val || 'Old password required']"
             />
-          </div>
-          <div>
+          </q-card-section>
+
+          <q-card-section class="q-pb-none">
             <div class="text-subtitle1 q-mb-sm">New Password</div>
             <q-input
               v-model="newPassword"
               autocomplete="new-password"
               type="Password"
               outlined
-              :readonly="!isEditing"
+              :readonly="!editing"
               :rules="[
                 (val) => !!val || !confirmPassword || 'New password required',
                 (val) => val.length >= 8 || 'Password must be at least 8 characters',
                 (val) => val !== oldPassword || 'New password cannot be the same as old password',
               ]"
             >
-              <template #append v-if="isEditing">
+              <template #append v-if="editing">
                 <q-icon
                   :name="showPwd ? 'visibility' : 'visibility_off'"
                   class="cursor-pointer"
@@ -92,29 +93,29 @@
                 />
               </template>
             </q-input>
-          </div>
+          </q-card-section>
 
-          <div>
+          <q-card-section>
             <div class="text-subtitle1 q-mb-sm">Confirm New Password</div>
             <q-input
               v-model="confirmPassword"
               autocomplete="new-password"
               type="Password"
               outlined
-              :readonly="!isEditing"
+              :readonly="!editing"
               :rules="[
                 (val) => !!val || !newPassword || 'Confirm new password required',
                 (val) => val === newPassword || 'Passwords do not match',
               ]"
             />
-          </div>
+          </q-card-section>
         </q-form>
       </q-card>
     </section>
 
     <section>
       <div class="row items-center justify-between q-my-lg">
-        <div class="text-h5">Link Your Accounts</div>
+        <h3 class="text-h5 q-my-none">Link Your Accounts</h3>
       </div>
 
       <q-card flat bordered class="col-grow q-pa-lg">
@@ -148,9 +149,9 @@
       </q-card>
     </section>
 
-    <section>
+    <section class="q-mb-lg">
       <div class="row items-center justify-between q-my-lg">
-        <div class="text-h5 text-negative">Delete Account</div>
+        <h3 :class="$q.dark.isActive ? 'text-red' : 'text-negative'" class="text-h5 q-my-none">Delete Account</h3>
       </div>
 
       <q-card flat bordered class="col-grow q-pa-lg border-negative">
@@ -186,7 +187,7 @@ const authStore = useAuthStore()
 
 const updateForm = ref(null)
 const loading = ref(false)
-const isEditing = ref(false)
+const editing = ref(false)
 const showPwd = ref(false)
 const showUserId = ref(false)
 
@@ -199,7 +200,7 @@ const usernameLastChanged = ref(null)
 const userSSO = ref([])
 
 const usernameRules = [
-  (val) => !!val || !isEditing.value || 'Username is required',
+  (val) => !!val || !editing.value || 'Username is required',
   (val) => val.length >= 3 || 'Username must be at least 3 characters',
   (val) => val.length <= 20 || 'Username must be at most 20 characters',
   () =>
@@ -250,14 +251,14 @@ async function fetchUser() {
 }
 
 async function toggleEdit(save) {
-  if (isEditing.value && save) {
+  if (editing.value && save) {
     await saveChanges()
   } else if (!save) {
     // Restore original data when canceling
     fetchUser()
     updateForm.value.resetValidation()
   }
-  isEditing.value = !isEditing.value
+  editing.value = !editing.value
 }
 
 async function toggleSSO(provider) {
@@ -314,7 +315,7 @@ async function toggleSSO(provider) {
 async function saveChanges() {
   const formValid = await updateForm.value.validate()
   if (!formValid) {
-    isEditing.value = false // This will be toggled back to true
+    editing.value = false // This will be toggled back to true
     $q.notify({
       type: 'negative',
       message: 'Please fill in all required fields',

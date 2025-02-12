@@ -4,14 +4,14 @@
       <div class="text-h5">Profile Settings</div>
       <div>
         <q-btn
-          :label="isEditing ? 'Apply' : 'Edit'"
-          :icon="isEditing ? 'check' : 'edit'"
+          :label="editing ? 'Apply' : 'Edit'"
+          :icon="editing ? 'check' : 'edit'"
           :loading="loading"
           color="primary"
           @click="toggleEdit(true)"
         />
         <q-btn
-          v-if="isEditing"
+          v-if="editing"
           label="Cancel"
           icon="close"
           color="negative"
@@ -32,7 +32,7 @@
             <user-avatar :src="avatarUrl" size="80px" bordered />
             <q-card-actions>
               <q-btn
-                :disable="!isEditing"
+                :disable="!editing"
                 label="Upload Image"
                 color="secondary"
                 icon="upload"
@@ -42,7 +42,7 @@
               />
               <q-btn
                 v-if="avatarUrl"
-                :disable="!isEditing"
+                :disable="!editing"
                 label="Remove"
                 color="grey-6"
                 icon="delete"
@@ -82,7 +82,7 @@
                 outlined
                 required
                 autofocus
-                :readonly="!isEditing"
+                :readonly="!editing"
                 :rules="[(val) => !!val || 'First name is required']"
               />
             </div>
@@ -91,7 +91,7 @@
                 v-model="lastname"
                 label="Last name"
                 outlined
-                :readonly="!isEditing"
+                :readonly="!editing"
                 :rules="[(val) => !!val || 'Last name is required']"
               />
             </div>
@@ -127,7 +127,7 @@ const authStore = useAuthStore()
 const layoutStore = useLayoutStore()
 
 const loading = ref(false)
-const isEditing = ref(false)
+const editing = ref(false)
 
 const email = ref('')
 const firstname = ref('')
@@ -168,13 +168,13 @@ async function fetchUser() {
 }
 
 async function toggleEdit(save) {
-  if (isEditing.value && save) {
+  if (editing.value && save) {
     await saveChanges()
   } else if (!save) {
     // Restore original data when canceling
     fetchUser()
   }
-  isEditing.value = !isEditing.value
+  editing.value = !editing.value
 }
 
 function previewImage(file) {

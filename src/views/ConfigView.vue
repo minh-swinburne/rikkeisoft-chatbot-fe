@@ -7,10 +7,17 @@
     </q-header>
 
     <q-page-container>
-      <q-page padding class="max-width-70 q-pa-md">
+      <q-page padding class="q-pa-md q-mx-auto" style="max-width: 700px;">
         <q-card flat bordered class="q-pa-md">
-          <q-tabs v-model="activeTab" class="q-mb-md" active-class="link">
-            <q-tab v-for="(tab, key) in tabs" :key="key" :name="key" :label="tab" />
+          <q-tabs
+            v-model="activeTab"
+            class="q-mb-md"
+            active-class="link"
+            outside-arrows
+            mobile-arrows
+            inline-label
+          >
+            <q-tab v-for="(tab, key) in tabs" :key="key" :name="key" :label="tab" no-caps />
           </q-tabs>
           <q-separator />
           <q-tab-panels v-model="activeTab">
@@ -22,78 +29,124 @@
                   <q-space />
 
                   <q-btn
-                    v-if="isEditing"
+                    v-if="editing"
                     :loading="loading"
-                    label="Apply"
-                    icon="check"
-                    color="primary"
+                    label="Cancel"
+                    icon="close"
+                    flat
+                    @click="toggleEdit()"
+                  />
+
+                  <q-btn
+                    v-else
+                    :loading="loading"
+                    :text-color="$q.dark.isActive ? 'white' : 'black'"
+                    icon="refresh"
+                    color="shadow"
                     unelevated
-                    @click="toggleEdit(true)"
+                    round
+                    @click="loadConfig(activeTab, true)"
                   />
 
                   <q-btn
                     :loading="loading"
-                    :flat="isEditing"
-                    :label="isEditing ? 'Cancel' : 'Edit'"
-                    :icon="isEditing ? 'close' : 'edit'"
-                    :class="{ 'q-ml-sm': $q.screen.gt.xs }"
-                    color="negative"
+                    :label="editing ? 'Apply' : 'Edit'"
+                    :icon="editing ? 'check' : 'edit'"
+                    color="primary"
+                    class="q-ml-sm"
                     unelevated
-                    @click="toggleEdit(false)"
+                    @click="toggleEdit(editing)"
                   />
                 </div>
-                <q-input
-                  v-model="config.instructions"
-                  :readonly="!isEditing"
-                  type="textarea"
-                  label="Instructions"
-                  class="instruction-textarea"
-                  autogrow
-                  outlined
-                />
 
-                <q-input
-                  v-if="config.messageTemplate"
-                  v-model="config.messageTemplate"
-                  :readonly="!isEditing"
-                  type="textarea"
-                  label="Message Template"
-                  class="q-mt-md"
-                  autogrow
-                  outlined
-                />
+                <div class="q-mt-md">
+                  <div class="text-subtitle1 q-mb-sm">System Prompt</div>
+                  <q-input
+                    v-model="config.instructions"
+                    :readonly="!editing"
+                    type="textarea"
+                    input-style="padding-top: 6px"
+                    autogrow
+                    outlined
+                  />
+                </div>
 
-                <q-select
-                  v-model="config.model"
-                  :options="config.modelOptions"
-                  :readonly="!isEditing"
-                  label="Model"
-                  class="q-mt-md"
-                  outlined
-                />
+                <div v-if="config.messageTemplate" class="q-my-lg">
+                  <div class="text-subtitle1 q-mb-sm q-pt-sm">Message Template</div>
+                  <q-input
+                    v-model="config.messageTemplate"
+                    :readonly="!editing"
+                    type="textarea"
+                    input-style="padding-top: 6px"
+                    autogrow
+                    outlined
+                  />
+                </div>
 
-                <q-input
-                  v-model.number="config.maxTokens"
-                  :readonly="!isEditing"
-                  type="number"
-                  label="Max Tokens"
-                  min="1"
-                  max="8192"
-                  class="q-mt-md"
-                  outlined
-                />
+                <div class="row items-center q-my-lg q-gutter-y-sm">
+                  <div class="col-12 col-sm-6 text-subtitle1">Model</div>
+                  <q-select
+                    v-model="config.model"
+                    :options="config.modelOptions"
+                    :readonly="!editing"
+                    class="col-grow"
+                    outlined
+                  />
+                </div>
 
-                <q-input
-                  v-model.number="config.temperature"
-                  :readonly="!isEditing"
-                  type="number"
-                  label="Temperature"
-                  step="0.1"
-                  min="0"
-                  max="1"
-                  class="q-mt-md"
-                  outlined
-                />
+                <div v-if="config.lengthLimit" class="row items-center q-my-lg q-gutter-y-sm">
+                  <div class="col-12 col-sm-9 text-subtitle1">Length Limit</div>
+                  <q-input
+                    v-model.number="config.lengthLimit"
+                    :readonly="!editing"
+                    :input-class="$q.screen.gt.xs ? 'text-right' : ''"
+                    class="col-grow"
+                    type="number"
+                    step="100"
+                    min="100"
+                    max="5000"
+                    outlined
+                  />
+                </div>
+
+                <div class="row items-center q-my-lg q-gutter-y-sm">
+                  <div class="col-12 col-sm-9 text-subtitle1">Max Tokens</div>
+                  <q-input
+                    v-model.number="config.maxTokens"
+                    :readonly="!editing"
+                    :input-class="$q.screen.gt.xs ? 'text-right' : ''"
+                    class="col-grow"
+                    type="number"
+                    min="1"
+                    max="8192"
+                    outlined
+                  />
+                </div>
+
+                <div class="row items-center q-my-lg q-gutter-y-sm">
+                  <div class="col-12 col-sm-9 text-subtitle1">Temperature</div>
+                  <q-input
+                    v-model.number="config.temperature"
+                    :readonly="!editing"
+                    :input-class="$q.screen.gt.xs ? 'text-right' : ''"
+                    class="col-grow"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="1"
+                    outlined
+                  />
+                </div>
+
+                <div class="row items-center q-my-lg q-gutter-y-sm">
+                  <div class="col text-subtitle1">Stream</div>
+                  <q-toggle
+                    v-model="config.stream"
+                    :disable="!editing"
+                    color="primary"
+                    class="col-grow"
+                  />
+                </div>
               </q-form>
             </q-tab-panel>
           </q-tab-panels>
@@ -107,58 +160,76 @@
 import AppNavbar from '@/components/AppNavbar.vue'
 import { apiClient } from '@/plugins/api'
 import { useQuasar } from 'quasar'
+import { useRouter, useRoute } from 'vue-router'
 import { onMounted, ref, watch } from 'vue'
 
 const $q = useQuasar()
+const $route = useRoute()
+const $router = useRouter()
 
 const tabs = {
   answer_generation: 'Answer Generation',
+  message_summarization: 'Message Summarization',
   question_suggestion: 'Question Suggestion',
   name_generation: 'Chat Name Generation',
 }
 
-const activeTab = ref('answer_generation')
-const isEditing = ref(false)
+const activeTab = ref($route.query.tab || Object.keys(tabs)[0])
+const editing = ref(false)
 const loading = ref(true)
 const config = ref({
   instructions: '',
   messageTemplate: null,
+  lengthLimit: null,
   modelOptions: [],
   model: '',
   maxTokens: 1,
   temperature: 0.5,
+  stream: false,
 })
 
 onMounted(() => {
+  if ($route.query.tab && tabs[$route.query.tab]) {
+    activeTab.value = $route.query.tab
+  }
   loadConfig(activeTab.value)
 })
 
 watch(activeTab, (newTab) => {
+  $router.replace({ query: { tab: newTab } })
   loadConfig(newTab)
 })
 
+watch(() => $route.query.tab, (newTab) => {
+  if (newTab && tabs[newTab]) {
+    activeTab.value = newTab
+  }
+})
+
 async function toggleEdit(save = false) {
-  if (isEditing.value && save) {
+  if (editing.value && save) {
     console.log('Saving config...')
     await saveConfig(activeTab.value)
   } else {
     console.log('Loading config...')
     await loadConfig(activeTab.value)
   }
-  isEditing.value = !isEditing.value
+  editing.value = !editing.value
 }
 
-async function loadConfig(tab) {
+async function loadConfig(tab, refresh = false) {
   loading.value = true
   try {
-    const response = await apiClient.config.getConfig(tab)
+    const response = await apiClient.config.getConfig(tab, refresh)
     config.value = {
       instructions: response.data.system_prompt,
       messageTemplate: response.data.message_template?.join('\n') || null,
+      lengthLimit: response.data.length_limit ?? null,
       modelOptions: response.data.model_options,
       model: response.data.params.model,
       maxTokens: response.data.params.max_tokens,
       temperature: response.data.params.temperature,
+      stream: response.data.params.stream,
     }
     console.log('Config loaded:', response.data)
   } catch (error) {
@@ -192,15 +263,6 @@ async function saveConfig(tab) {
 </script>
 
 <style>
-.instruction-textarea textarea {
-  min-height: 200px;
-}
-
-.max-width-70 {
-  max-width: 70%;
-  margin: 0 auto; /* Optional: centers the list */
-}
-
 @media (max-width: 599px) {
   .q-page-container .q-btn {
     width: 100%;

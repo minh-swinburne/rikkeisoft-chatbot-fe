@@ -472,7 +472,7 @@ function parseMessage(content) {
   justify-self: flex-end;
 }
 
-.q-message-text a, .link {
+.q-message-text a {
   color: $primary;
 }
 
@@ -483,7 +483,7 @@ function parseMessage(content) {
 }
 
 .body--dark {
-  .q-message-text a, .link {
+  .q-message-text a {
     color: $link;
   }
 }

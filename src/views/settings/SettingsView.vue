@@ -36,10 +36,10 @@
 </template>
 
 <script setup>
-import AppNavbar from '@/components/AppNavbar.vue'
 import { useLayoutStore } from '@/plugins/stores/layout'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import AppNavbar from '@/components/AppNavbar.vue'
 
 const $router = useRouter()
 const layoutStore = useLayoutStore()

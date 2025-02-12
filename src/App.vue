@@ -33,15 +33,9 @@ a {
   text-decoration: none;
 }
 
-// ::-webkit-scrollbar {
-//   background: transparent;
-// }
-// ::-webkit-scrollbar-thumb {
-//   width: 8px;
-//   border-radius: 4px;
-//   background-color: lightgrey;
-//   background-clip: padding-box;
-// }
+.link {
+  color: $primary;
+}
 
 .q-page .q-list {
   background: white;
@@ -49,6 +43,11 @@ a {
 
 .q-field--error {
   margin-bottom: 8px;
+}
+
+.q-tabs .q-tabs__arrow {
+  display: flex;
+  align-items: center;
 }
 
 input:is(:-webkit-autofill, :autofill) {
@@ -70,10 +69,14 @@ input:is(:-webkit-autofill, :autofill) {
   a {
     color: white;
   }
-  
+
   input:is(:-webkit-autofill, :autofill) {
     -webkit-text-fill-color: white;
     box-shadow: inset 0 0 0 500px $grey-17 !important;
+  }
+
+  .link {
+    color: $link;
   }
 
   .q-header,

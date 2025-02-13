@@ -79,7 +79,6 @@
               :type="showPwd ? 'text' : 'password'"
               outlined
               :readonly="!editing"
-              :type="showPwd ? 'text' : 'password'"
               :rules="editing ? newPasswordRules : []"
             >
               <template #append v-if="editing">

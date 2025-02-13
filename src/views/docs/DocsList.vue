@@ -191,8 +191,8 @@
           <div class="row q-gutter-sm justify-end">
             <q-btn
               :loading="previewing"
-              :icon="document.link_url ? 'open_in_new' : 'visibility'"
               color="secondary"
+              icon="visibility"
               label="Preview"
               unelevated
               @click="previewDocument(document)"
@@ -206,6 +206,7 @@
               @click="downloadDocument(document)"
             />
             <q-btn
+              v-if="authStore.isAdmin"
               color="warning"
               icon="edit"
               label="Edit"
@@ -213,6 +214,7 @@
               @click="editDocument(document)"
             />
             <q-btn
+              v-if="authStore.isAdmin"
               :loading="deleting && document == currentDocument"
               color="negative"
               icon="delete"
@@ -316,13 +318,16 @@
 </template>
 
 <script setup>
-import UserAvatar from '@/components/UserAvatar.vue'
-import { apiClient } from '@/plugins/api'
 import _ from 'lodash'
-import { date, useQuasar } from 'quasar'
+import { apiClient } from '@/plugins/api'
+import { useAuthStore } from '@/plugins/stores/auth'
+import { useQuasar } from 'quasar'
 import { computed, onMounted, ref } from 'vue'
+import UserAvatar from '@/components/UserAvatar.vue'
+
 
 const $q = useQuasar()
+const authStore = useAuthStore()
 
 const documents = ref([])
 const currentDocument = ref(null)

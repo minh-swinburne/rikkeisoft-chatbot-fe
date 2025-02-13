@@ -177,41 +177,44 @@
           </q-item-label>
         </q-item-section>
 
-        <q-item-section class="col-grow q-mt-md">
-          <div class="row q-gutter-sm justify-end">
-            <q-btn
-              :loading="previewing"
-              color="secondary"
-              icon="visibility"
-              label="Preview"
-              unelevated
-              @click="previewDocument(document)"
-            />
-            <q-btn
-              :loading="downloading && document == currentDocument"
-              color="positive"
-              icon="download"
-              label="Download"
-              unelevated
-              @click="downloadDocument(document)"
-            />
-            <q-btn
-              color="warning"
-              icon="edit"
-              label="Edit"
-              unelevated
-              @click="editDocument(document)"
-            />
-            <q-btn
-              :loading="deleting && document == currentDocument"
-              color="negative"
-              icon="delete"
-              label="Delete"
-              unelevated
-              @click="deleteDocument(document)"
-            />
-          </div>
-        </q-item-section>
+        <q-item-section class="col-auto self-end">
+  <div class="row q-gutter-sm justify-end">
+    <q-btn
+      :loading="previewing"
+      color="secondary"
+      icon="visibility"
+      label="Preview"
+      unelevated
+      @click="previewDocument(document)"
+    />
+    <q-btn
+      :loading="downloading && document == currentDocument"
+      color="positive"
+      icon="download"
+      label="Download"
+      unelevated
+      @click="downloadDocument(document)"
+    />
+    <q-btn
+      v-if="authStore.isAdmin"
+      color="warning"
+      icon="edit"
+      label="Edit"
+      unelevated
+      @click="editDocument(document)"
+    />
+    <q-btn
+      v-if="authStore.isAdmin"
+      :loading="deleting && document == currentDocument"
+      color="negative"
+      icon="delete"
+      label="Delete"
+      unelevated
+      @click="deleteDocument(document)"
+    />
+  </div>
+</q-item-section>
+
       </q-item>
     </q-list>
 
@@ -310,9 +313,12 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
 import _ from 'lodash'
 import { useQuasar } from 'quasar'
+import { useAuthStore } from '@/plugins/stores/auth'
 import { computed, onMounted, ref } from 'vue'
 
+
 const $q = useQuasar()
+const authStore = useAuthStore()
 
 const documents = ref([])
 const currentDocument = ref(null)

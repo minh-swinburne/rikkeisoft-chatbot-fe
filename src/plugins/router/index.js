@@ -47,7 +47,7 @@ const routes = [
     path: '/docs',
     name: 'docs',
     component: () => import('@/views/docs/DocsView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    meta: { requiresAuth: true, requiresAdmin: false },
     children: [
       {
         path: 'list',

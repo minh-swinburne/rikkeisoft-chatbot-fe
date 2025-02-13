@@ -47,7 +47,7 @@ const routes = [
     path: '/docs',
     name: 'docs',
     component: () => import('@/views/docs/DocsView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: false },
+    meta: { requiresAuth: true },
     children: [
       {
         path: 'list',
@@ -58,6 +58,7 @@ const routes = [
         path: 'upload',
         name: 'docs-upload',
         component: () => import('@/views/docs/DocsUpload.vue'),
+        meta: { requiresAdmin: true },
       },
     ],
   },

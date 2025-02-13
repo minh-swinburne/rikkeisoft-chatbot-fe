@@ -131,7 +131,12 @@
                 <q-icon :name="`img:${provider.logo}`" size="24px" class="q-mr-sm" />
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{ provider.name }} <span v-if="linkedProviders[key]" class="text-caption text-italic">({{ censorEmail(linkedProviders[key].email) }})</span></q-item-label>
+                <q-item-label
+                  >{{ provider.name }}
+                  <span v-if="linkedProviders[key]" class="text-caption text-italic"
+                    >({{ censorEmail(linkedProviders[key].email) }})</span
+                  ></q-item-label
+                >
               </q-item-section>
               <q-item-section side>
                 <q-btn
@@ -151,21 +156,21 @@
 
     <section class="q-mb-lg">
       <div class="row items-center justify-between q-my-lg">
-        <h3 :class="$q.dark.isActive ? 'text-red' : 'text-negative'" class="text-h5 q-my-none">Delete Account</h3>
+        <h3 :class="$q.dark.isActive ? 'text-red' : 'text-negative'" class="text-h5 q-my-none">
+          Delete Account
+        </h3>
       </div>
 
       <q-card flat bordered class="col-grow q-pa-lg border-negative">
         <q-card-section>
-          <div class="text-subtitle1">Once you delete your account, all your chats will be completely deleted, but the documents you uploaded will remain. This action cannot be undone.</div>
+          <div class="text-subtitle1">
+            Once you delete your account, all your chats will be completely deleted, but the
+            documents you uploaded will remain. This action cannot be undone.
+          </div>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn
-            label="Delete Account"
-            color="negative"
-            unelevated
-            @click="deleteAccount"
-          />
+          <q-btn label="Delete Account" color="negative" unelevated @click="deleteAccount" />
         </q-card-actions>
       </q-card>
     </section>
@@ -173,13 +178,13 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useQuasar } from 'quasar'
-import { useRouter } from 'vue-router'
-import { censorEmail } from '@/utils'
 import { apiClient } from '@/plugins/api'
-import { useAuthStore } from '@/plugins/stores/auth'
 import { ssoProviders } from '@/plugins/sso/index'
+import { useAuthStore } from '@/plugins/stores/auth'
+import { censorEmail } from '@/utils'
+import { useQuasar } from 'quasar'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const $q = useQuasar()
 const $router = useRouter()
@@ -201,8 +206,8 @@ const userSSO = ref([])
 
 const usernameRules = [
   (val) => !!val || !editing.value || 'Username is required',
-  (val) => val.length >= 3 || 'Username must be at least 3 characters',
-  (val) => val.length <= 20 || 'Username must be at most 20 characters',
+  (val) => !val || val.length >= 3 || 'Username must be at least 3 characters',
+  (val) => !val || val.length <= 20 || 'Username must be at most 20 characters',
   () =>
     username.value === newUsername.value ||
     !usernameLastChanged.value ||
@@ -218,15 +223,15 @@ const usernameChangedDelta = computed(() => {
 
 const linkedProviders = computed(() => {
   return userSSO.value.reduce((acc, sso) => {
-    acc[sso.provider] = sso;
-    return acc;
-  }, {});
-});
+    acc[sso.provider] = sso
+    return acc
+  }, {})
+})
 
 // Load user data when component mounts
 onMounted(async () => {
   await fetchUser()
-  console.log(userSSO.value)
+  // console.log(userSSO.value)
 })
 
 async function fetchUser() {
@@ -263,25 +268,28 @@ async function toggleEdit(save) {
 
 async function toggleSSO(provider) {
   loading.value = true
-  try {
-    if (linkedProviders.value[provider]) {
-      // Unlink account
-      $q.dialog({
-        title: 'Unlink Account',
-        message: 'Are you sure you want to unlink this account?',
-        persistent: true,
-        ok: {
-          color: 'negative',
-          label: 'Unlink',
-          unelevated: true,
-          iconRight: 'link_off',
-        },
-        cancel: {
-          color: $q.dark.isActive ? 'white' : 'black',
-          label: 'Cancel',
-          flat: true,
-        },
-      }).onOk(async () => {
+  if (linkedProviders.value[provider]) {
+    // Unlink account
+    $q.dialog({
+      title: 'Unlink Account',
+      message: 'Are you sure you want to unlink this account?',
+      persistent: true,
+      ok: {
+        color: 'negative',
+        label: 'Unlink',
+        unelevated: true,
+        iconRight: 'link_off',
+      },
+      cancel: {
+        color: $q.dark.isActive ? 'white' : 'black',
+        label: 'Cancel',
+        flat: true,
+      },
+    }).onOk(async () => {
+      try {
+        if (userSSO.value.length === 1 && !username.value) {
+          throw new Error('You cannot unlink last account without username')
+        }
         await apiClient.users.unlinkSSO(provider)
         userSSO.value = userSSO.value.filter((sso) => sso.provider !== provider)
 
@@ -289,8 +297,18 @@ async function toggleSSO(provider) {
           type: 'positive',
           message: 'Account unlinked successfully',
         })
-      })
-    } else {
+      } catch (error) {
+        console.error('Error unlinking account:', error.response?.data?.detail || error.message)
+        $q.notify({
+          type: 'negative',
+          message: error.response?.data?.detail || error.message || 'Failed to unlink account',
+        })
+      } finally {
+        loading.value = false
+      }
+    })
+  } else {
+    try {
       // Link account
       const response = await ssoProviders[provider].link()
       userSSO.value.push(response.data)
@@ -300,15 +318,15 @@ async function toggleSSO(provider) {
         type: 'positive',
         message: 'Account linked successfully',
       })
+    } catch (error) {
+      console.error('Error linking account:', error.response?.data?.detail)
+      $q.notify({
+        type: 'negative',
+        message: error.response?.data?.detail || 'Failed to link account',
+      })
+    } finally {
+      loading.value = false
     }
-  } catch (error) {
-    console.error('Error linking account:', error.response?.data?.detail)
-    $q.notify({
-      type: 'negative',
-      message: error.response?.data?.detail || 'Failed to link account',
-    })
-  } finally {
-    loading.value = false
   }
 }
 

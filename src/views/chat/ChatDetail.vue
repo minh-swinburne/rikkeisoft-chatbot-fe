@@ -226,7 +226,7 @@ const renderer = {
   },
 }
 marked.use({ renderer })
-console.log(marked('Hello, [World](https://example.com "Title for Tooltip")!'))
+// console.log(marked('Hello, [World](https://example.com "Title for Tooltip")!'))
 
 onMounted(() => {
   // Check for initialMessage in the route query and send it if present
@@ -258,7 +258,7 @@ watch(
   () => $route.params.chatId,
   (newChatId, oldChatId) => {
     if (newChatId !== oldChatId) {
-      console.log('hahaha')
+      // console.log('hahaha')
       reloadChat()
     }
   },
@@ -392,7 +392,7 @@ async function fetchMessages() {
     messages.value = camelize(response.data)
     scrollToBottom(true)
   } catch (error) {
-    if (error.status === 404 || error.status === 403) {
+    if (error.status === 404) {
       console.log('Chat not found. Redirecting to chat start...')
       $router.push({ name: 'chat-start' })
     } else {
@@ -433,7 +433,7 @@ function parseMessage(content) {
   const tokens = marked.lexer(content); // Tokenize the Markdown content
   let parts = [];
   // console.log('Parsing message:', content)
-  console.log('Tokens:', tokens)
+  // console.log('Tokens:', tokens)
 
   tokens.forEach((token) => {
     if (token.type === "code") {

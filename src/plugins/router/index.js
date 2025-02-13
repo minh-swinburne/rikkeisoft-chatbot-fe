@@ -97,28 +97,12 @@ const routes = [
         component: () => import('@/views/user/UserList.vue'),
       },
       {
-        path: 'profile',
+        path: 'profile/:userId',
         name: 'user-profile',
         component: () => import('@/views/user/UserProfile.vue'),
       },
     ],
   },
-  // {
-  //   path: '/profile',
-  //   name: 'profile',
-  //   component: () => import('@/views/ProfileView.vue'),
-  //   meta: { requiresAuth: true },
-  //   // children: [
-  //   //   {
-  //   //     path: 'me',
-  //   //     // component: () => import("@/views/profile/ProfileDetail.vue"),
-  //   //   },
-  //   //   {
-  //   //     path: ':userId',
-  //   //     // component: () => import("@/views/profile/ProfileDetail.vue"),
-  //   //   },
-  //   // ],
-  // },
   {
     path: '/error',
     name: 'error',

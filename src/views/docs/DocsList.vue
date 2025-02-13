@@ -3,8 +3,8 @@
     <div class="col-grow items-center q-mb-lg" style="width: 100%">
       <div class="row q-col-gutter-lg">
         <div class="col-grow">
-          <q-input v-model="searchQuery" label="Search" clearable dense>
-            <template #prepend>
+          <q-input v-model="searchQuery" label="Search" dense>
+            <template #append>
               <q-icon name="search" />
             </template>
           </q-input>
@@ -132,7 +132,7 @@
         class="q-py-md"
         style="flex-wrap: wrap"
       >
-        <q-item-section class="col-12 q-mt-sm">
+        <q-item-section class="col-grow q-mt-sm" style="width: 100%">
           <q-item-label class="text-h6" lines="1">{{ document.title }}</q-item-label>
 
           <q-item-label caption lines="2" class="q-mb-sm">{{ document.description }}</q-item-label>
@@ -379,7 +379,6 @@ const paginatedDocuments = computed(() => {
 const filteredDocuments = computed(() => {
   return documents.value.filter((doc) => {
     const matchesSearch =
-      !searchQuery.value ||
       doc.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       doc.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       doc.id.includes(searchQuery.value)

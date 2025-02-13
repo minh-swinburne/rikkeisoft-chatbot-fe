@@ -24,11 +24,11 @@
         <q-item-label header class="flex justify-between items-center">
           Chat History
           <q-btn
-            flat
-            round
+            :color="$q.dark.isActive ? 'grey-5' : 'grey-8'"
             icon="add"
             size="sm"
-            :color="$q.dark.isActive ? 'grey-5' : 'grey-8'"
+            flat
+            round
             @click="createNewChat"
           />
         </q-item-label>
@@ -36,10 +36,10 @@
           v-for="chat in chats"
           :key="chat.id"
           :style="{ borderRadius: '5px', color: 'inherit' }"
+          :to="{ name: 'chat-detail', params: { chatId: chat.id } }"
           active-class="bg-shadow-2"
           class="q-ma-sm q-pa-sm"
           clickable
-          @click="$router.push({ name: 'chat-detail', params: { chatId: chat.id } })"
           v-ripple
         >
           <q-item-section>
@@ -53,7 +53,7 @@
               dense
               rounded
               no-icon-animation
-              @click.stop
+              @click.stop.prevent
             >
               <q-list>
                 <q-item clickable v-close-popup @click.stop="renameChat(chat)">

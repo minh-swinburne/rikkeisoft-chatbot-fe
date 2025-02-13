@@ -221,7 +221,7 @@ const renderer = {
   },
 
   codespan: ({ text }) => {
-    console.log('Code block:', text)
+    // console.log('Code block:', text)
     return `<code class="bg-shadow q-px-xs rounded-borders">${text}</code>`
   },
 }

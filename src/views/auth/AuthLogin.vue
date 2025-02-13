@@ -109,7 +109,7 @@ async function login() {
 
     $q.notify({
       type: 'negative',
-      message: 'Login failed',
+      message: error.response?.data?.detail || 'Login failed',
     })
 
     throw error

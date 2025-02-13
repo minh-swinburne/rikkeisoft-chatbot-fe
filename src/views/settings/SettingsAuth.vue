@@ -54,20 +54,20 @@
               counter
               outlined
               :readonly="!editing"
-              :rules="usernameRules"
+              :rules="editing ? usernameRules : []"
             />
           </q-card-section>
 
           <!-- Password Section -->
           <q-card-section class="q-pb-none">
-            <div class="text-subtitle1 q-mb-sm">Old Password</div>
+            <div class="text-subtitle1 q-mb-sm">Current Password</div>
             <q-input
               v-model="oldPassword"
               autocomplete="off"
               type="Password"
               outlined
               :readonly="!editing"
-              :rules="[(val) => !!val || 'Old password required']"
+              :rules="editing ? oldPasswordRules : []"
             />
           </q-card-section>
 
@@ -79,11 +79,7 @@
               type="Password"
               outlined
               :readonly="!editing"
-              :rules="[
-                (val) => !!val || !confirmPassword || 'New password required',
-                (val) => val.length >= 8 || 'Password must be at least 8 characters',
-                (val) => val !== oldPassword || 'New password cannot be the same as old password',
-              ]"
+              :rules="editing ? newPasswordRules : []"
             >
               <template #append v-if="editing">
                 <q-icon
@@ -103,10 +99,7 @@
               type="Password"
               outlined
               :readonly="!editing"
-              :rules="[
-                (val) => !!val || !newPassword || 'Confirm new password required',
-                (val) => val === newPassword || 'Passwords do not match',
-              ]"
+              :rules="editing ? confirmPasswordRules : []"
             />
           </q-card-section>
         </q-form>
@@ -205,14 +198,27 @@ const usernameLastChanged = ref(null)
 const userSSO = ref([])
 
 const usernameRules = [
-  (val) => !!val || !editing.value || 'Username is required',
-  (val) => !val || val.length >= 3 || 'Username must be at least 3 characters',
-  (val) => !val || val.length <= 20 || 'Username must be at most 20 characters',
+  (val) => !!val || 'Username is required',
+  (val) => val.length >= 3 || 'Username must be at least 3 characters',
+  (val) => val.length <= 20 || 'Username must be at most 20 characters',
   () =>
     username.value === newUsername.value ||
     !usernameLastChanged.value ||
     usernameChangedDelta.value >= 30 ||
-    'You can only change your username once a month',
+    'You can only change your username once in 30 days. Last change was ' + usernameChangedDelta.value + ' days ago',
+]
+
+const oldPasswordRules = [(val) => !!val || !username.value || 'Current password required']
+
+const newPasswordRules = [
+  (val) => !!val || (username.value && username.value !== newUsername.value) || 'New password required',
+  (val) => !val || val.length >= 8 || 'Password must be at least 8 characters',
+  (val) => val !== oldPassword.value || 'New password cannot be the same as old password',
+]
+
+const confirmPasswordRules = [
+  (val) => !!val || !newPassword.value || 'Confirm new password required',
+  (val) => val === newPassword.value || 'Passwords do not match',
 ]
 
 const usernameChangedDelta = computed(() => {
@@ -242,6 +248,9 @@ async function fetchUser() {
     username.value = userResponse.data.username
     newUsername.value = userResponse.data.username
     userSSO.value = ssoResponse.data
+    oldPassword.value = ''
+    newPassword.value = ''
+    confirmPassword.value = ''
 
     usernameLastChanged.value = userResponse.data.username_last_changed
       ? new Date(userResponse.data.username_last_changed)
@@ -344,9 +353,9 @@ async function saveChanges() {
     loading.value = true
 
     const response = await apiClient.users.updateCurrentUser({
-      username: newUsername.value,
-      old_password: oldPassword.value,
-      new_password: newPassword.value,
+      username: newUsername.value || null,
+      old_password: oldPassword.value || null,
+      new_password: newPassword.value || null,
     })
 
     const { access_token, refresh_token } = response.data
@@ -362,7 +371,7 @@ async function saveChanges() {
     console.error('Error updating account:', error)
     $q.notify({
       type: 'negative',
-      message: 'Failed to update profile',
+      message: error.response?.data?.detail || 'Failed to update profile',
     })
   } finally {
     loading.value = false

@@ -89,10 +89,9 @@
             <div class="col-12 col-sm-6">
               <q-input
                 v-model="lastname"
+                :readonly="!editing"
                 label="Last name"
                 outlined
-                :readonly="!editing"
-                :rules="[(val) => !!val || 'Last name is required']"
               />
             </div>
           </div>
@@ -213,9 +212,9 @@ async function saveChanges() {
 
     console.log(avatarUrl.value)
     const response = await apiClient.users.updateCurrentUser({
-      firstname: firstname.value,
-      lastname: lastname.value,
-      avatar_url: avatarUrl.value,
+      firstname: firstname.value || null,
+      lastname: lastname.value || null,
+      avatar_url: avatarUrl.value || null,
     })
 
     const { access_token, refresh_token } = response.data

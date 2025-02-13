@@ -3,8 +3,8 @@
     <div class="col-grow items-center q-mb-lg" style="width: 100%">
       <div class="row q-col-gutter-lg">
         <div class="col-grow">
-          <q-input v-model="searchQuery" label="Search" clearable dense>
-            <template #prepend>
+          <q-input v-model="searchQuery" label="Search" dense>
+            <template #append>
               <q-icon name="search" />
             </template>
           </q-input>
@@ -132,7 +132,7 @@
         class="q-py-md"
         style="flex-wrap: wrap"
       >
-        <q-item-section class="col-grow q-mt-sm">
+        <q-item-section class="col-grow q-mt-sm" style="width: 100%">
           <q-item-label class="text-h6" lines="1">{{ document.title }}</q-item-label>
           <q-item-label caption lines="2" class="q-mb-sm">{{ document.description }}</q-item-label>
           <q-item-label>
@@ -177,44 +177,43 @@
           </q-item-label>
         </q-item-section>
 
-        <q-item-section class="col-auto self-end">
-  <div class="row q-gutter-sm justify-end">
-    <q-btn
-      :loading="previewing"
-      color="secondary"
-      icon="visibility"
-      label="Preview"
-      unelevated
-      @click="previewDocument(document)"
-    />
-    <q-btn
-      :loading="downloading && document == currentDocument"
-      color="positive"
-      icon="download"
-      label="Download"
-      unelevated
-      @click="downloadDocument(document)"
-    />
-    <q-btn
-      v-if="authStore.isAdmin"
-      color="warning"
-      icon="edit"
-      label="Edit"
-      unelevated
-      @click="editDocument(document)"
-    />
-    <q-btn
-      v-if="authStore.isAdmin"
-      :loading="deleting && document == currentDocument"
-      color="negative"
-      icon="delete"
-      label="Delete"
-      unelevated
-      @click="deleteDocument(document)"
-    />
-  </div>
-</q-item-section>
-
+        <q-item-section class="col-grow q-mt-md">
+          <div class="row q-gutter-sm justify-end">
+            <q-btn
+              :loading="previewing"
+              color="secondary"
+              icon="visibility"
+              label="Preview"
+              unelevated
+              @click="previewDocument(document)"
+            />
+            <q-btn
+              :loading="downloading && document == currentDocument"
+              color="positive"
+              icon="download"
+              label="Download"
+              unelevated
+              @click="downloadDocument(document)"
+            />
+            <q-btn
+              v-if="authStore.isAdmin"
+              color="warning"
+              icon="edit"
+              label="Edit"
+              unelevated
+              @click="editDocument(document)"
+            />
+            <q-btn
+              v-if="authStore.isAdmin"
+              :loading="deleting && document == currentDocument"
+              color="negative"
+              icon="delete"
+              label="Delete"
+              unelevated
+              @click="deleteDocument(document)"
+            />
+          </div>
+        </q-item-section>
       </q-item>
     </q-list>
 
@@ -370,7 +369,6 @@ const paginatedDocuments = computed(() => {
 const filteredDocuments = computed(() => {
   return documents.value.filter((doc) => {
     const matchesSearch =
-      !searchQuery.value ||
       doc.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       doc.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       doc.id.includes(searchQuery.value)

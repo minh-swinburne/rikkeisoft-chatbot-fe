@@ -11,15 +11,15 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useLayoutStore } from '@/plugins/stores/layout'
 import defaultAvatar from '@/assets/default_avatar.jpg'
+import { useLayoutStore } from '@/plugins/stores/layout'
+import { computed } from 'vue'
 
 const props = defineProps(['src', 'alt', 'bordered'])
 const layoutStore = useLayoutStore()
 
 const avatarSrc = computed(() => {
-  return /^data:image\//.test(props.src)
+  return /^data:image\//.test(props.src) || /^https:\/\/lh3.googleusercontent.com/.test(props.src)
     ? props.src
     : `${props.src}?t=${layoutStore.avatarCacheBust}`
 })

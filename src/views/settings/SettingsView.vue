@@ -22,6 +22,9 @@
           v-ripple
           @click="$router.push(tab.path)"
         >
+          <q-item-section avatar>
+            <q-icon :name="tab.icon" />
+          </q-item-section>
           <q-item-section>
             <q-item-label>{{ tab.name }}</q-item-label>
           </q-item-section>
@@ -45,8 +48,8 @@ const $router = useRouter()
 const layoutStore = useLayoutStore()
 
 const tabs = [
-  { name: 'My Profile', path: { name: 'settings-profile' } },
-  { name: 'Authentication', path: { name: 'settings-auth' } },
+  { name: 'My Profile', icon: 'badge', path: { name: 'settings-profile' } },
+  { name: 'Authentication', icon: 'lock', path: { name: 'settings-auth' } },
 ]
 
 const leftDrawerOpen = computed({

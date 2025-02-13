@@ -180,7 +180,7 @@ async function register() {
 
     $q.notify({
       type: 'negative',
-      message: 'Registration failed',
+      message: error.response?.data?.detail || 'Registration failed',
     })
 
     throw error

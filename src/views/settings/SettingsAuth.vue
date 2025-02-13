@@ -79,6 +79,7 @@
               :type="showPwd ? 'text' : 'password'"
               outlined
               :readonly="!editing"
+              :type="showPwd ? 'text' : 'password'"
               :rules="editing ? newPasswordRules : []"
             >
               <template #append v-if="editing">
@@ -96,7 +97,7 @@
             <q-input
               v-model="confirmPassword"
               autocomplete="new-password"
-              type="Password"
+              type="password"
               outlined
               :readonly="!editing"
               :rules="editing ? confirmPasswordRules : []"

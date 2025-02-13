@@ -4,8 +4,8 @@
       :src="avatarSrc || defaultAvatar"
       :error-src="defaultAvatar"
       :alt="props.alt"
-      fit="fill"
       loading-show-delay="1000"
+      style="width: 100%; height: 100%"
     />
   </q-avatar>
 </template>

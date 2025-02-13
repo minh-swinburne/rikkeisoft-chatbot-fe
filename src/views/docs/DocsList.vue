@@ -3,8 +3,8 @@
     <div class="col-grow items-center q-mb-lg" style="width: 100%">
       <div class="row q-col-gutter-lg">
         <div class="col-grow">
-          <q-input v-model="searchQuery" label="Search" clearable dense>
-            <template #prepend>
+          <q-input v-model="searchQuery" label="Search" dense>
+            <template #append>
               <q-icon name="search" />
             </template>
           </q-input>
@@ -132,14 +132,22 @@
         class="q-py-md"
         style="flex-wrap: wrap"
       >
-        <q-item-section class="col-grow q-mt-sm">
+        <q-item-section class="col-grow q-mt-sm" style="width: 100%">
           <q-item-label class="text-h6" lines="1">{{ document.title }}</q-item-label>
+
           <q-item-label caption lines="2" class="q-mb-sm">{{ document.description }}</q-item-label>
-          <q-item-label>
+
+          <q-item-label class="q-mb-xs">
             <strong>ID: </strong>
             <span class="text-caption">{{ document.id }}</span>
           </q-item-label>
-          <q-item-label>
+
+          <q-item-label class="q-mb-xs">
+            <strong>Type: </strong>
+            <span>{{ document.file_type }}</span>
+          </q-item-label>
+
+          <q-item-label class="q-mb-xs">
             <strong>Categories:</strong>
             <q-chip
               v-for="(category, index) in document.categories"
@@ -150,9 +158,12 @@
               {{ category.name }}
             </q-chip>
           </q-item-label>
-          <q-item-label>
-            <strong>Created:</strong> {{ formatDate(document.created_date) }}
+
+          <q-item-label class="q-mb-xs">
+            <strong>Created on:</strong>
+            {{ date.formatDate(document.created_date, 'MMM Do, YYYY (ddd)') }}
           </q-item-label>
+
           <q-item-label>
             <strong>Creator:</strong>
             <q-chip class="bg-shadow" clickable v-ripple>
@@ -161,17 +172,16 @@
                 class="row items-center"
               >
                 <user-avatar :src="document.creator_user.avatar_url" alt="Creator Avatar" />
-                <!-- <q-avatar>
-                      <q-img
-                        :src="document.creator_user.avatar_url"
-                        :error-src="`https://cdn.quasar.dev/logo-v2/svg/logo${$q.dark.isActive ? '-dark' : ''}.svg`"
-                        alt="Creator Avatar"
-                      />
-                    </q-avatar> -->
                 {{ document.creator_user.full_name }}
               </router-link>
             </q-chip>
           </q-item-label>
+
+          <q-item-label class="q-mb-sm">
+            <strong>Last Modified:</strong>
+            {{ date.formatDate(document.last_modified, 'MMM Do, YYYY (ddd), HH:mm ([GMT] Z)') }}
+          </q-item-label>
+
           <q-item-label>
             <strong>Access:</strong> {{ document.restricted ? 'Admin Only' : 'Everyone' }}
           </q-item-label>
@@ -196,6 +206,7 @@
               @click="downloadDocument(document)"
             />
             <q-btn
+              v-if="authStore.isAdmin"
               color="warning"
               icon="edit"
               label="Edit"
@@ -203,6 +214,7 @@
               @click="editDocument(document)"
             />
             <q-btn
+              v-if="authStore.isAdmin"
               :loading="deleting && document == currentDocument"
               color="negative"
               icon="delete"
@@ -306,13 +318,16 @@
 </template>
 
 <script setup>
-import UserAvatar from '@/components/UserAvatar.vue'
-import { apiClient } from '@/plugins/api'
 import _ from 'lodash'
+import { apiClient } from '@/plugins/api'
+import { useAuthStore } from '@/plugins/stores/auth'
 import { useQuasar } from 'quasar'
 import { computed, onMounted, ref } from 'vue'
+import UserAvatar from '@/components/UserAvatar.vue'
+
 
 const $q = useQuasar()
+const authStore = useAuthStore()
 
 const documents = ref([])
 const currentDocument = ref(null)
@@ -364,7 +379,6 @@ const paginatedDocuments = computed(() => {
 const filteredDocuments = computed(() => {
   return documents.value.filter((doc) => {
     const matchesSearch =
-      !searchQuery.value ||
       doc.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       doc.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       doc.id.includes(searchQuery.value)
@@ -377,7 +391,9 @@ const filteredDocuments = computed(() => {
           )
         : doc.categories.some((cat) => filterCatSelected.value.includes(cat.name)))
 
-    const matchesCreator = doc.creator_user.full_name.toLowerCase().includes(filterCreator.value.toLowerCase())
+    const matchesCreator = doc.creator_user.full_name
+      .toLowerCase()
+      .includes(filterCreator.value.toLowerCase())
     const matchesAccess = filterAccess.value ? filterAccess.value.value === doc.restricted : true
 
     return matchesSearch && matchesCategories && matchesCreator && matchesAccess
@@ -393,12 +409,6 @@ function clearFilters() {
   filterCatSelected.value = []
   filterCreator.value = ''
   filterAccess.value = false
-}
-
-function formatDate(dateString) {
-  if (!dateString) return 'Invalid Date'
-  const date = new Date(dateString)
-  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 async function fetchDocuments() {
@@ -419,6 +429,11 @@ async function fetchDocuments() {
 
 async function previewDocument(document) {
   try {
+    if (document.link_url) {
+      // Open external link in new tab
+      window.open(document.link_url, '_blank')
+      return
+    }
     previewing.value = true
     const response = await apiClient.docs.previewDoc(document.id)
     previewUrl.value = response.data.url

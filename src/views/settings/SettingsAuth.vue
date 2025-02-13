@@ -76,7 +76,7 @@
             <q-input
               v-model="newPassword"
               autocomplete="new-password"
-              type="Password"
+              :type="showPwd ? 'text' : 'password'"
               outlined
               :readonly="!editing"
               :rules="editing ? newPasswordRules : []"

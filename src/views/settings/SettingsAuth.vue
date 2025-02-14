@@ -361,6 +361,14 @@ async function saveChanges() {
     const { access_token, refresh_token } = response.data
     authStore.login(access_token, refresh_token)
 
+    if (newUsername.value !== username.value) {
+      username.value = newUsername.value
+      usernameLastChanged.value = new Date()
+    }
+    oldPassword.value = ''
+    newPassword.value = ''
+    confirmPassword.value = ''
+
     $q.notify({
       type: 'positive',
       message: 'Account updated successfully',

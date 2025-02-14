@@ -301,13 +301,13 @@ function updateScrollArea() {
 }
 
 function scrollToBottom(force = false) {
-  console.log(chatScrollArea.value.getScroll())
+  // console.log(chatScrollArea.value.getScroll())
   setTimeout(() => {
     if (chatScrollArea.value) {
       const scrollInfo = chatScrollArea.value.getScroll()
       if (force || scrollInfo.verticalPercentage > 0.9) {
         const scrollSpeed = 2000 / 500 // 500ms to scroll 2000px
-        console.log('Scrolling to bottom...', scrollInfo.verticalSize)
+        // console.log('Scrolling to bottom...', scrollInfo.verticalSize)
         chatScrollArea.value.setScrollPosition(
           'vertical',
           scrollInfo.verticalSize,
@@ -391,7 +391,7 @@ async function sendMessage(query) {
         scrollToBottom()
       }
 
-      console.log('Streaming completed. Bot response:', botResponse)
+      console.log('Streaming completed.')
     } else {
       console.log('Non-streaming response received.')
       const responseData = await chatResponse.json()

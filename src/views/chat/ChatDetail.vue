@@ -180,7 +180,7 @@
 <script setup>
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
-import { camelize } from '@/utils'
+import { camelize, escapeHtml } from '@/utils'
 import { marked } from 'marked'
 import { date, useQuasar } from 'quasar'
 import { useRoute, useRouter } from 'vue-router'
@@ -222,7 +222,7 @@ const renderer = {
 
   codespan: ({ text }) => {
     // console.log('Code block:', text)
-    return `<code class="bg-shadow q-px-xs rounded-borders">${text}</code>`
+    return `<code class="bg-shadow q-px-xs rounded-borders">${escapeHtml(text)}</code>`
   },
 }
 marked.use({ renderer })
@@ -432,8 +432,8 @@ function randomWidth(bias = 75, weight = 1) {
 function parseMessage(content) {
   const tokens = marked.lexer(content); // Tokenize the Markdown content
   let parts = [];
-  // console.log('Parsing message:', content)
-  // console.log('Tokens:', tokens)
+  console.log('Parsing message:', content)
+  console.log('Tokens:', tokens)
 
   tokens.forEach((token) => {
     if (token.type === "code") {

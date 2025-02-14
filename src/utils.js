@@ -23,4 +23,14 @@ function censorEmail(email) {
   return `${local.slice(0, 3)}****${local.slice(-2)}@${domain}`;
 }
 
-export { camelize, censorEmail }
+function escapeHtml(unsafe) {
+  return unsafe.replace(/[&<"']/g, m => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[m]));
+}
+
+export { camelize, censorEmail, escapeHtml }

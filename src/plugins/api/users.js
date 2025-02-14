@@ -30,5 +30,7 @@ export const usersAPI = (client) => {
     linkSSO: (provider, authData) => client.post(`${prefix}/me/sso/${provider}`, authData),
 
     unlinkSSO: (provider) => client.delete(`${prefix}/me/sso/${provider}`),
+
+    listDocsByUser: (userId) => client.get(`${prefix}/${userId}/docs`),
   }
 }

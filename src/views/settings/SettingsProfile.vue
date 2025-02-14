@@ -1,28 +1,5 @@
 <template>
   <q-page padding class="col-grow" style="max-width: 800px">
-    <div class="row items-center justify-between q-my-lg">
-      <div class="text-h5">Profile Settings</div>
-      <div>
-        <q-btn
-          :label="editing ? 'Apply' : 'Edit'"
-          :icon="editing ? 'check' : 'edit'"
-          :loading="loading"
-          color="primary"
-          @click="toggleEdit(true)"
-        />
-        <q-btn
-          v-if="editing"
-          label="Cancel"
-          icon="close"
-          color="negative"
-          flat
-          class="q-ml-sm"
-          :loading="loading"
-          @click="toggleEdit(false)"
-        />
-      </div>
-    </div>
-
     <q-card flat bordered class="col-grow q-pa-lg">
       <q-form @submit="saveChanges" class="q-gutter-y-sm">
         <!-- Avatar Section -->

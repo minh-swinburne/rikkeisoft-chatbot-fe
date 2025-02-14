@@ -17,5 +17,6 @@ export const docsAPI = (client) => {
     previewDoc: (id) => client.get(`${prefix}/${id}/preview`),
 
     downloadDoc: (id) => client.get(`${prefix}/${id}/download`),
+
   }
 }

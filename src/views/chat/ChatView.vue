@@ -2,24 +2,12 @@
   <q-layout view="hHh LpR fFf">
     <q-header bordered>
       <q-toolbar>
-        <q-btn
-          icon="menu"
-          aria-label="Menu"
-          flat
-          dense
-          round
-          @click="toggleLeftDrawer"
-        />
-        <app-navbar />
+        <q-btn icon="menu" aria-label="Menu" flat dense round @click="toggleLeftDrawer" />
+        <AppNavbar />
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-      :width="280"
-    >
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered :width="280">
       <q-list>
         <q-item-label header class="flex justify-between items-center">
           Chat History

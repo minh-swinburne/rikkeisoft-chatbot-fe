@@ -2,7 +2,7 @@
   <q-layout view="hHh LpR fFf">
     <q-header bordered>
       <q-toolbar>
-        <app-navbar />
+        <AppNavbar />
       </q-toolbar>
     </q-header>
 
@@ -129,7 +129,7 @@
       </div>
 
       <!-- Footer -->
-      <q-footer class="text-white q-px-lg q-pt-sm q-pb-xs static-footer" >
+      <q-footer class="text-white q-px-lg q-pt-sm q-pb-xs static-footer">
         <div class="row items-center justify-around q-col-gutter-md">
           <!-- Company Info -->
           <div class="col-12 col-sm-4 text-center">
@@ -140,8 +140,8 @@
           </div>
 
           <!-- Contact Links -->
-          <div class="col-12 col-sm-4 ">
-            <q-list dense class="bg-primary ">
+          <div class="col-12 col-sm-4">
+            <q-list dense class="bg-primary">
               <q-item clickable tag="a" href="mailto:yourcompany@gmail.com" target="_blank">
                 <q-item-section avatar>
                   <q-icon name="email" color="white" />

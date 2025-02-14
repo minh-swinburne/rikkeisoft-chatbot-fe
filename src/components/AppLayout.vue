@@ -10,7 +10,7 @@
           round
           @click="toggleLeftDrawer"
         />
-        <app-navbar />
+        <AppNavbar />
       </q-toolbar>
     </q-header>
 

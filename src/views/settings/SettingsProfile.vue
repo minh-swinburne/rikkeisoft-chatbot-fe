@@ -1,12 +1,35 @@
 <template>
   <q-page padding class="col-grow" style="max-width: 800px">
+    <div class="row items-center justify-between q-my-lg">
+      <div class="text-h5">Profile Settings</div>
+      <div>
+        <q-btn
+          :label="editing ? 'Apply' : 'Edit'"
+          :icon="editing ? 'check' : 'edit'"
+          :loading="loading"
+          color="primary"
+          @click="toggleEdit(true)"
+        />
+        <q-btn
+          v-if="editing"
+          label="Cancel"
+          icon="close"
+          color="negative"
+          flat
+          class="q-ml-sm"
+          :loading="loading"
+          @click="toggleEdit(false)"
+        />
+      </div>
+    </div>
+
     <q-card flat bordered class="col-grow q-pa-lg">
       <q-form @submit="saveChanges" class="q-gutter-y-sm">
         <!-- Avatar Section -->
         <div class="q-mb-lg">
           <div class="text-subtitle1 q-mb-sm">Avatar <span class="text-grey-6"></span></div>
           <div class="row items-center q-gutter-x-md">
-            <user-avatar :src="avatarUrl" size="80px" bordered />
+            <UserAvatar :src="avatarUrl" size="80px" bordered />
             <q-card-actions>
               <q-btn
                 :disable="!editing"
@@ -64,12 +87,7 @@
               />
             </div>
             <div class="col-12 col-sm-6">
-              <q-input
-                v-model="lastname"
-                :readonly="!editing"
-                label="Last name"
-                outlined
-              />
+              <q-input v-model="lastname" :readonly="!editing" label="Last name" outlined />
             </div>
           </div>
         </div>

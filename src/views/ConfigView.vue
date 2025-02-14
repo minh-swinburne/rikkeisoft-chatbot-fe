@@ -2,7 +2,7 @@
   <q-layout view="hHh LpR fFf">
     <q-header bordered>
       <q-toolbar>
-        <app-navbar />
+        <AppNavbar />
       </q-toolbar>
     </q-header>
 

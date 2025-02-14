@@ -171,7 +171,7 @@
                 :to="{ name: 'user-profile', params: { userId: document.creator_user.id } }"
                 class="row items-center"
               >
-                <user-avatar :src="document.creator_user.avatar_url" alt="Creator Avatar" />
+                <UserAvatar :src="document.creator_user.avatar_url" alt="Creator Avatar" />
                 {{ document.creator_user.full_name }}
               </router-link>
             </q-chip>
@@ -318,13 +318,12 @@
 </template>
 
 <script setup>
-import _ from 'lodash'
+import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
-import { useQuasar, date } from 'quasar'
+import _ from 'lodash'
+import { date, useQuasar } from 'quasar'
 import { computed, onMounted, ref } from 'vue'
-import UserAvatar from '@/components/UserAvatar.vue'
-
 
 const $q = useQuasar()
 const authStore = useAuthStore()

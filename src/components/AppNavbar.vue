@@ -46,7 +46,7 @@
 
     <q-btn-dropdown v-if="authStore.user" persistent no-caps flat>
       <template #label>
-        <user-avatar :src="authStore.user?.avatar_url" size="30px" class="q-mr-sm" bordered />
+        <UserAvatar :src="authStore.user?.avatar_url" size="30px" class="q-mr-sm" bordered />
         <span>{{ authStore.user?.firstname }} {{ authStore.user?.lastname }}</span>
       </template>
       <q-list>

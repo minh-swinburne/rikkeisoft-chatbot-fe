@@ -2,7 +2,7 @@
   <q-layout view="hHh LpR fFf">
     <q-header bordered>
       <q-toolbar>
-        <app-navbar />
+        <AppNavbar />
       </q-toolbar>
     </q-header>
 
@@ -12,7 +12,7 @@
           <q-card-section>
             <router-view />
           </q-card-section>
-          <q-card-actions align="center" style="gap: 0.5rem;">
+          <q-card-actions align="center" style="gap: 0.5rem">
             <q-btn icon="arrow_back" label="Back" flat @click="$router.back()" />
             <q-btn to="/" icon="home" color="primary" label="Home" unelevated replace />
           </q-card-actions>
@@ -23,8 +23,8 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import AppNavbar from '@/components/AppNavbar.vue'
+import { useRouter } from 'vue-router'
 
 const $router = useRouter()
 </script>

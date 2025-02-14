@@ -6,12 +6,7 @@
         <!-- Left column - Avatar section -->
         <div class="col-12 col-md-3">
           <div class="text-center">
-            <user-avatar 
-              :src="avatarUrl" 
-              size="200px" 
-              bordered 
-              class="profile-avatar"
-            />
+            <UserAvatar :src="avatarUrl" size="200px" bordered class="profile-avatar" />
             <div class="text-h6 q-mt-md">{{ firstname }} {{ lastname }}</div>
             <div class="text-subtitle2 text-grey-7">{{ email }}</div>
             <!-- Moved Join Date Section here -->
@@ -43,25 +38,15 @@
                       />
                     </div>
                     <div class="col-12 col-sm-6">
-                      <q-input
-                        v-model="lastname"
-                        label="Last name"
-                        outlined
-                        :readonly="true"
-                      />
+                      <q-input v-model="lastname" label="Last name" outlined :readonly="true" />
                     </div>
                   </div>
                 </div>
-  
+
                 <!-- Email Section -->
                 <div>
                   <div class="text-subtitle1 q-mb-sm">Email</div>
-                  <q-input
-                    v-model="email"
-                    type="email"
-                    outlined
-                    :readonly="true"
-                  />
+                  <q-input v-model="email" type="email" outlined :readonly="true" />
                 </div>
               </q-form>
             </q-card-section>
@@ -92,14 +77,13 @@
 <script setup>
 import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
-import { useQuasar } from 'quasar'
-import { date } from 'quasar'
+import { date, useQuasar } from 'quasar'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 const $route = useRoute()
 const $q = useQuasar()
-const userId = $route.params.userId 
+const userId = $route.params.userId
 
 const email = ref('')
 const firstname = ref('')
@@ -143,8 +127,6 @@ async function fetchDocuments() {
     })
   }
 }
-
-
 </script>
 
 <style scoped>

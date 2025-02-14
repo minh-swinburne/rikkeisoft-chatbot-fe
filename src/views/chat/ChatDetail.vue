@@ -84,7 +84,13 @@
             :stamp="parseTime(message.time)"
           >
             <template #avatar>
-              <user-avatar v-if="message.role === 'user'" :src="authStore.user.avatar_url" size="40px" class="q-mx-sm" bordered />
+              <UserAvatar
+                v-if="message.role === 'user'"
+                :src="authStore.user.avatar_url"
+                size="40px"
+                class="q-mx-sm"
+                bordered
+              />
               <q-avatar v-else size="40px" class="bordered q-mx-sm">
                 <q-img src="@/assets/logo.svg" width="25px" position="0.5px 0.5px" />
               </q-avatar>
@@ -164,7 +170,7 @@
       </q-fab>
 
       <q-form class="q-pa-md" style="width: 100%">
-        <chat-input
+        <ChatInput
           ref="chatInput"
           v-model="userInput"
           :style="{ width: 'calc(100% - 32px)' }"
@@ -178,23 +184,21 @@
 </template>
 
 <script setup>
+import ChatInput from '@/components/ChatInput.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
 import { camelize, escapeHtml } from '@/utils'
+import { VCodeBlock } from '@wdns/vue-code-block'
 import { marked } from 'marked'
 import { date, useQuasar } from 'quasar'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ref, watch, computed, nextTick, onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
-import { VCodeBlock } from '@wdns/vue-code-block'
-import ChatInput from '@/components/ChatInput.vue'
-import UserAvatar from '@/components/UserAvatar.vue'
 
 const $q = useQuasar()
 const $route = useRoute()
 const $router = useRouter()
 const authStore = useAuthStore()
-const chatStickyRef = useTemplateRef('chatSticky')
-const chatInputRef = useTemplateRef('chatInput')
 
 const emit = defineEmits(['send', 'rename'])
 
@@ -202,17 +206,21 @@ const messages = ref([])
 const suggestions = ref([])
 const userInput = ref('')
 const waiting = ref(false)
-const chatScrollArea = ref(null)
-const maxHeightScrollArea = ref('calc(100vh - 50px - 88px)')
-const chatStickyWidth = ref('100vw')
 const loading = ref(true)
+const chatStickyWidth = ref('100vw')
+const maxHeightScrollArea = ref('calc(100vh - 50px - 88px)')
+
+const chatScrollArea = ref(null)
+const chatSticky = ref(null)
+const chatInput = ref(null)
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time)),
 )
 
 const renderer = {
-  link: ({ href, title, text }) => `<a href="${href}" title="${title}" class="link" target="_blank">${text}</a>`,
+  link: ({ href, title, text }) =>
+    `<a href="${href}" title="${title}" class="link" target="_blank">${text}</a>`,
 
   heading: ({ tokens, depth: level }) => {
     const text = tokens.map((token) => token.text).join('')
@@ -269,9 +277,13 @@ function reloadChat() {
   fetchSuggestions()
 }
 
+function applySuggestion(suggestion) {
+  sendMessage(suggestion)
+}
+
 function updateStickyWidth() {
-  if (chatStickyRef.value) {
-    chatStickyWidth.value = `${chatStickyRef.value.$el.getBoundingClientRect().width}px`
+  if (chatSticky.value) {
+    chatStickyWidth.value = `${chatSticky.value.$el.getBoundingClientRect().width}px`
     // console.log('Sticky width:', chatStickyWidth.value)
   }
 }
@@ -280,16 +292,34 @@ function updateScrollArea() {
   // Add a small delay to allow the input to update its height
   setTimeout(() => {
     const padding = 32
-    const textInputHeight = chatInputRef.value
-      ? parseInt(getComputedStyle(chatInputRef.value.$el).height)
+    const textInputHeight = chatInput.value
+      ? parseInt(getComputedStyle(chatInput.value.$el).height)
       : 56
 
     maxHeightScrollArea.value = `calc(100vh - 50px - ${textInputHeight + padding}px)`
   }, 50)
 }
 
-function applySuggestion(suggestion) {
-  sendMessage(suggestion)
+function scrollToBottom(force = false) {
+  console.log(chatScrollArea.value.getScroll())
+  setTimeout(() => {
+    if (chatScrollArea.value) {
+      const scrollInfo = chatScrollArea.value.getScroll()
+      if (force || scrollInfo.verticalPercentage > 0.9) {
+        const scrollSpeed = 2000 / 500 // 500ms to scroll 2000px
+        console.log('Scrolling to bottom...', scrollInfo.verticalSize)
+        chatScrollArea.value.setScrollPosition(
+          'vertical',
+          scrollInfo.verticalSize,
+          force ? (scrollInfo.verticalSize - scrollInfo.verticalPosition) / scrollSpeed : 50,
+        )
+      }
+    }
+  }, 50)
+}
+
+function randomWidth(bias = 75, weight = 1) {
+  return Math.floor(Math.random() * (100 - bias) + bias) * weight + '%'
 }
 
 function parseTime(time) {
@@ -328,16 +358,15 @@ async function sendMessage(query) {
   userInput.value = ''
   waiting.value = true
 
+  scrollToBottom(true)
+
   try {
     const confResponse = await apiClient.config.checkStream('answer_generation')
     const streaming = confResponse.data
     const chatResponse = await apiClient.chats.sendMessage($route.params.chatId, query)
 
-    scrollToBottom(true)
-
     if (streaming) {
       console.log('Streaming response...')
-
       const reader = chatResponse.body.getReader()
       const decoder = new TextDecoder('utf-8')
 
@@ -416,38 +445,25 @@ async function fetchSuggestions() {
   }
 }
 
-function scrollToBottom(force = false) {
-  nextTick(() => {
-    if (chatScrollArea.value && (force || chatScrollArea.value.getScroll().verticalPercentage > 0.9)) {
-      console.log('Scrolling to bottom...')
-      chatScrollArea.value.setScrollPercentage('vertical', 1, 300)
-    }
-  })
-}
-
-function randomWidth(bias = 75, weight = 1) {
-  return Math.floor(Math.random() * (100 - bias) + bias) * weight + '%'
-}
-
 function parseMessage(content) {
-  const tokens = marked.lexer(content); // Tokenize the Markdown content
-  let parts = [];
-  console.log('Parsing message:', content)
-  console.log('Tokens:', tokens)
+  const tokens = marked.lexer(content) // Tokenize the Markdown content
+  let parts = []
+  // console.log('Parsing message:', content)
+  // console.log('Tokens:', tokens)
 
   tokens.forEach((token) => {
-    if (token.type === "code") {
+    if (token.type === 'code') {
       parts.push({
-        type: "code",
-        lang: token.lang || "plaintext", // Default to plaintext if no language is detected
+        type: 'code',
+        lang: token.lang || 'plaintext', // Default to plaintext if no language is detected
         content: token.text,
-      });
+      })
     } else {
-      parts.push({ type: "text", content: token.raw });
+      parts.push({ type: 'text', content: token.raw })
     }
-  });
+  })
 
-  return parts;
+  return parts
 }
 </script>
 
@@ -477,7 +493,8 @@ function parseMessage(content) {
 }
 
 .q-message-text :not(li) > {
-  ul, ol {
+  ul,
+  ol {
     margin-top: -8px;
   }
 }

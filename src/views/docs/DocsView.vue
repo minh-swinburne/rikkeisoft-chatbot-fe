@@ -1,7 +1,7 @@
 <template>
-  <app-layout :tabs="tabs" label="Documents">
+  <AppLayout :tabs="tabs" label="Documents">
     <router-view />
-  </app-layout>
+  </AppLayout>
 </template>
 
 <script setup>

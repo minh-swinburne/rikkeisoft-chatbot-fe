@@ -19,7 +19,7 @@ $q.dark.set(layoutStore.isDark)
 
 <style lang="scss">
 #app {
-  font-family: Roboto, Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-family: ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica,Apple Color Emoji,Arial,sans-serif,Segoe UI Emoji,Segoe UI Symbol;
   background-color: $light;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

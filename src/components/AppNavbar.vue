@@ -109,7 +109,7 @@ const tab = ref($route.path)
 const navItems = [
   { name: 'Chat', path: { name: 'chat' } },
   { name: 'Documents', path: { name: 'docs' } },
-  // { name: 'Users', path: { name: 'users-list' } },
+  { name: 'Users', path: { name: 'user' } },
   { name: 'Config', path: { name: 'config' } },
 ]
 

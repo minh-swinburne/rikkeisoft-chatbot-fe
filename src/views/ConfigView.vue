@@ -7,7 +7,7 @@
     </q-header>
 
     <q-page-container>
-      <q-page padding class="q-pa-md q-mx-auto" style="max-width: 700px;">
+      <q-page padding class="q-px-md q-py-xl q-mx-auto" style="max-width: 700px;">
         <q-card flat bordered class="q-pa-md">
           <q-tabs
             v-model="activeTab"

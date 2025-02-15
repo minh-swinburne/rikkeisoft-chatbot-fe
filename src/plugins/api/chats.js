@@ -15,7 +15,10 @@ export const chatsAPI = (client) => {
     sendMessage: (chatId, query) =>
       client.fetch(`${prefix}/${chatId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream, text/plain, application/json',
+        },
         body: JSON.stringify({
           chat_id: chatId,
           role: 'user',

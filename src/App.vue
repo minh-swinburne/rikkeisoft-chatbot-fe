@@ -8,8 +8,8 @@
 </template>
 
 <script setup>
-import { useLayoutStore } from '@/plugins/stores/layout'
 import { useQuasar } from 'quasar'
+import { useLayoutStore } from '@/plugins/stores/layout'
 
 const $q = useQuasar()
 const layoutStore = useLayoutStore()

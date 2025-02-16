@@ -2,7 +2,8 @@
   <q-form @submit.prevent="emit('submit', login)">
     <q-input
       v-model="username"
-      label="Username / Email"
+      autocomplete="username"
+      label="Username"
       outlined
       autofocus
       required

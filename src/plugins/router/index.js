@@ -142,6 +142,9 @@ router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin)
 
+  if (!isValidToken) {
+    authStore.logout()
+  }
   if (requiresAuth && !isValidToken) {
     next({ name: 'auth-login' })
     return

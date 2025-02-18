@@ -277,20 +277,7 @@
             use-chips
             multiple
             outlined
-          >
-            <template #selected-item="scope">
-              <q-chip
-                v-if="editFormData.categories"
-                class="bg-shadow"
-                removable
-                dense
-                @remove="scope.removeAtIndex(scope.index)"
-                :tabindex="scope.tabindex"
-              >
-                {{ scope.opt }}
-              </q-chip>
-            </template>
-          </q-select>
+          />
 
           <q-option-group
             v-model="editFormData.restricted"
@@ -378,9 +365,10 @@ const paginatedDocuments = computed(() => {
 const filteredDocuments = computed(() => {
   return documents.value.filter((doc) => {
     const matchesSearch =
+      !searchQuery.value ||
       doc.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       doc.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      doc.id.includes(searchQuery.value)
+      doc.id.includes(searchQuery.value.toLowerCase())
 
     const matchesCategories =
       filterCatSelected.value.length === 0 ||

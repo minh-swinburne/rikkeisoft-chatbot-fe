@@ -14,6 +14,8 @@ export const usersAPI = (client) => {
 
     revokeRole: (userId, role) => client.put(`${prefix}/${userId}/role/revoke`, role),
 
+    deleteUser: (userId) => client.delete(`${prefix}/${userId}`),
+
     deleteCurrentUser: () => client.delete(`${prefix}/me`),
 
     uploadAvatar: (avatarFile) =>

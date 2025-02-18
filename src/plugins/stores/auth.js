@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
   // **Getters**
   const isAuthenticated = computed(() => !!user.value)
   const isAdmin = computed(() => user.value?.roles.includes('admin'))
+  const isSystemAdmin = computed(() => user.value?.roles.includes('system_admin'))
 
   // **Actions**
   function hydrateUser() {
@@ -80,6 +81,7 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken,
     isAuthenticated,
     isAdmin,
+    isSystemAdmin,
     hydrateUser,
     login,
     logout,

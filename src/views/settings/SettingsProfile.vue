@@ -71,6 +71,21 @@
           </div>
         </div>
 
+        <!-- Roles Section -->
+        <div class="q-mb-sm">
+          <div class="text-subtitle1 q-mb-sm">
+            Roles:
+            <q-chip
+              v-for="role in roles"
+              :key="role.id"
+              :color="role.name === 'system_admin' ? 'primary' : role.name === 'admin' ? 'secondary' : 'positive'"
+              class="text-uppercase text-bold"
+            >
+              {{ role.name === 'system_admin' ? 'System Admin' : role.name === 'admin' ? 'Admin' : 'Employee' }}
+            </q-chip>
+          </div>
+        </div>
+
         <!-- Name Section - First and Last name in same row -->
         <div>
           <div class="text-subtitle1 q-mb-sm">Name</div>
@@ -129,6 +144,7 @@ const lastname = ref('')
 const joinedDate = ref('')
 const avatarUrl = ref('')
 const avatarFile = ref(null)
+const roles = ref([])
 
 // Load user data when component mounts
 onMounted(async () => {
@@ -149,6 +165,7 @@ async function fetchUser() {
     firstname.value = userData.firstname
     lastname.value = userData.lastname
     avatarUrl.value = userData.avatar_url
+    roles.value = userData.roles
     joinedDate.value = new Date(userData.created_time.slice(0, 10))
 
     console.log(typeof joinedDate.value)

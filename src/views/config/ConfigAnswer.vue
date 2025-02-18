@@ -1,13 +1,5 @@
 <template>
-  <q-layout view="hHh LpR fFf">
-    <q-header bordered>
-      <q-toolbar>
-        <AppNavbar />
-      </q-toolbar>
-    </q-header>
-
-    <q-page-container>
-      <q-page padding class="q-px-md q-py-xl q-mx-auto" style="max-width: 700px;">
+      <q-page padding class="col-grow" style="max-width: 800px">
         <q-card flat bordered class="q-pa-md">
           <q-tabs
             v-model="activeTab"
@@ -25,9 +17,9 @@
               <q-form @submit.prevent="saveConfig(tab)">
                 <div class="row items-center justify-between q-mb-md">
                   <h5 class="q-my-none">{{ tab }}</h5>
-
+  
                   <q-space />
-
+  
                   <q-btn
                     v-if="editing"
                     :loading="loading"
@@ -36,7 +28,7 @@
                     flat
                     @click="toggleEdit()"
                   />
-
+  
                   <q-btn
                     v-else
                     :loading="loading"
@@ -47,7 +39,7 @@
                     round
                     @click="loadConfig(activeTab, true)"
                   />
-
+  
                   <q-btn
                     :loading="loading"
                     :label="editing ? 'Apply' : 'Edit'"
@@ -58,7 +50,7 @@
                     @click="toggleEdit(editing)"
                   />
                 </div>
-
+  
                 <div class="q-mt-md">
                   <div class="text-subtitle1 q-mb-sm">System Prompt</div>
                   <q-input
@@ -70,7 +62,7 @@
                     outlined
                   />
                 </div>
-
+  
                 <div v-if="config.messageTemplate" class="q-my-lg">
                   <div class="text-subtitle1 q-mb-sm q-pt-sm">Message Template</div>
                   <q-input
@@ -82,7 +74,7 @@
                     outlined
                   />
                 </div>
-
+  
                 <div class="row items-center q-my-lg q-gutter-y-sm">
                   <div class="col-12 col-sm-6 text-subtitle1">Model</div>
                   <q-select
@@ -93,7 +85,7 @@
                     outlined
                   />
                 </div>
-
+  
                 <div v-if="config.lengthLimit" class="row items-center q-my-lg q-gutter-y-sm">
                   <div class="col-12 col-sm-9 text-subtitle1">Length Limit</div>
                   <q-input
@@ -108,7 +100,7 @@
                     outlined
                   />
                 </div>
-
+  
                 <div class="row items-center q-my-lg q-gutter-y-sm">
                   <div class="col-12 col-sm-9 text-subtitle1">Max Tokens</div>
                   <q-input
@@ -122,7 +114,7 @@
                     outlined
                   />
                 </div>
-
+  
                 <div class="row items-center q-my-lg q-gutter-y-sm">
                   <div class="col-12 col-sm-9 text-subtitle1">Temperature</div>
                   <q-input
@@ -137,7 +129,7 @@
                     outlined
                   />
                 </div>
-
+  
                 <div class="row items-center q-my-lg q-gutter-y-sm">
                   <div class="col text-subtitle1">Stream</div>
                   <q-toggle
@@ -152,12 +144,9 @@
           </q-tab-panels>
         </q-card>
       </q-page>
-    </q-page-container>
-  </q-layout>
 </template>
 
 <script setup>
-import AppNavbar from '@/components/AppNavbar.vue'
 import { apiClient } from '@/plugins/api'
 import { useQuasar } from 'quasar'
 import { useRouter, useRoute } from 'vue-router'
@@ -168,10 +157,9 @@ const $route = useRoute()
 const $router = useRouter()
 
 const tabs = {
-  answer_generation: 'Answer Generation',
-  message_summarization: 'Message Summarization',
-  question_suggestion: 'Question Suggestion',
-  name_generation: 'Chat Name Generation',
+  general_config: 'General Chat Configuration',
+  coding_config: 'Coding Chat Configuration',
+  docs_config: 'Documentation Chat Configuration',
 }
 
 const activeTab = ref($route.query.tab || Object.keys(tabs)[0])
@@ -219,8 +207,9 @@ async function toggleEdit(save = false) {
 
 async function loadConfig(tab, refresh = false) {
   loading.value = true
+  const task = $router.currentRoute.value.name
   try {
-    const response = await apiClient.config.getConfig(tab, refresh)
+    const response = await apiClient.config.getConfig(task, tab, refresh)
     config.value = {
       instructions: response.data.system_prompt,
       messageTemplate: response.data.message_template?.join('\n') || null,
@@ -244,8 +233,9 @@ async function loadConfig(tab, refresh = false) {
 
 async function saveConfig(tab) {
   loading.value = true
+  const task = $router.currentRoute.value.name
   try {
-    const response = await apiClient.config.updateConfig(tab, config.value)
+    const response = await apiClient.config.updateConfig(task, tab, config.value)
     console.log('Updated config:', response.data)
     $q.notify({
       type: 'positive',

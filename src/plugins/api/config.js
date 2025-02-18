@@ -2,10 +2,11 @@ export const configAPI = (client) => {
   const prefix = 'config'
 
   return {
-    getConfig: (tab, refresh = false) => client.get(`${prefix}/${tab}?refresh=${refresh}`),
+    getConfig: (task, tab, refresh = false) =>
+      client.get(`${prefix}/${task}?refresh=${refresh}?tab=${tab}`),
 
-    updateConfig: (tab, config) =>
-      client.put(`${prefix}/${tab}`, {
+    updateConfig: (task, tab, config) =>
+      client.put(`${prefix}/${task}?tab=${tab}`, {
         system_prompt: config.instructions,
         message_template: config.messageTemplate?.split('\n') || null,
         length_limit: config.lengthLimit ?? null,
@@ -15,6 +16,6 @@ export const configAPI = (client) => {
         stream: config.stream,
       }),
 
-    checkStream: (tab) => client.get(`${prefix}/${tab}/stream`),
+    checkStream: (task, tab) => client.get(`${prefix}/${task}/stream?tab=${tab}`),
   }
 }

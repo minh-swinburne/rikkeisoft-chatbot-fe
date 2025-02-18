@@ -14,7 +14,7 @@
           <q-btn
             :color="$q.dark.isActive ? 'grey-5' : 'grey-8'"
             icon="add"
-            size="sm"
+            size="12px"
             flat
             round
             @click="createNewChat"

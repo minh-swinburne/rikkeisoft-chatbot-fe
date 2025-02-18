@@ -145,29 +145,56 @@
         <q-btn fab icon="keyboard_arrow_down" color="primary" />
       </q-page-scroller>
 
-      <q-fab icon="lightbulb" color="primary" class="q-mx-md" direction="left" unelevated>
-        <q-card
-          :style="{
-            width: `calc(${chatStickyWidth} - 100px)`,
-            alignSelf: 'flex-end',
-          }"
-          class="no-shadow"
-          bordered
-        >
-          <q-card-section class="q-pa-sm">
-            <div class="row q-col-gutter-sm">
-              <div v-for="(suggestion, index) in suggestions" :key="index" class="col-auto">
-                <q-chip
-                  :label="suggestion"
-                  class="bg-shadow"
-                  @click="applySuggestion(suggestion)"
-                  clickable
-                />
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </q-fab>
+        <div class="column">
+          <q-fab icon="forum" color="primary" class="q-mx-md" direction="left" unelevated>
+                <q-list padding style="width: 250px;">
+                  <q-item clickable v-close-popup = "3" @click="selectedmodel('Chat Plus')">
+                    <q-item-section avatar>
+                      <q-avatar icon="fas fa-robot" />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>Chat Plus</q-item-label>
+                      <q-item-label caption>Smartest model & most reliable</q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item clickable v-close-popup = "3" @click="selectedmodel('Draw IO')">
+                    <q-item-section avatar>
+                      <q-avatar icon="draw" />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>Draw IO</q-item-label>
+                      <q-item-label caption>Chatbot that can draw</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+          </q-fab>
+
+          <br>
+          <q-fab icon="lightbulb" color="primary" class="q-mx-md" direction="left" unelevated>
+            <q-card
+              :style="{
+                width: `calc(${chatStickyWidth} - 100px)`,
+                alignSelf: 'flex-end',
+              }"
+              class="no-shadow"
+              bordered
+            >
+              <q-card-section class="q-pa-sm">
+                <div class="row q-col-gutter-sm">
+                  <div v-for="(suggestion, index) in suggestions" :key="index" class="col-auto">
+                    <q-chip
+                      :label="suggestion"
+                      class="bg-shadow"
+                      @click="applySuggestion(suggestion)"
+                      clickable
+                    />
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-fab>
+        </div>
 
       <q-form class="q-pa-md" style="width: 100%">
         <ChatInput
@@ -199,7 +226,6 @@ const $q = useQuasar()
 const $route = useRoute()
 const $router = useRouter()
 const authStore = useAuthStore()
-
 const emit = defineEmits(['send', 'rename'])
 
 const messages = ref([])
@@ -213,6 +239,7 @@ const maxHeightScrollArea = ref('calc(100vh - 50px - 88px)')
 const chatScrollArea = ref(null)
 const chatSticky = ref(null)
 const chatInput = ref(null)
+const selectedModel = ref('Chat Plus')
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time)),
@@ -345,6 +372,11 @@ function parseTime(time) {
   return timeString
 }
 
+function selectedmodel(model) {
+  selectedModel.value = model
+  console.log('Selected model:', model)
+}
+
 async function sendMessage(query) {
   if (!query) return
   console.log('Sending message:', query)
@@ -361,9 +393,9 @@ async function sendMessage(query) {
   scrollToBottom(true)
 
   try {
-    const confResponse = await apiClient.config.checkStream('answer_generation')
+    const confResponse = await apiClient.config.checkStream('answer_generation', selectedModel.value)
     const streaming = confResponse.data
-    const chatResponse = await apiClient.chats.sendMessage($route.params.chatId, query)
+    const chatResponse = await apiClient.chats.sendMessage($route.params.chatId, query, selectedModel.value)
 
     if (streaming) {
       console.log('Streaming response...')

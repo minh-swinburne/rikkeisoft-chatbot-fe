@@ -12,8 +12,8 @@ export const chatsAPI = (client) => {
 
     listMessages: (chatId) => client.get(`${prefix}/${chatId}`),
 
-    sendMessage: (chatId, query) =>
-      client.fetch(`${prefix}/${chatId}`, {
+    sendMessage: (chatId, query, type) =>
+      client.fetch(`${prefix}/${chatId}?type=${type}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

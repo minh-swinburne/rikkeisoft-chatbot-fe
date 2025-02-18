@@ -3,7 +3,7 @@ export const configAPI = (client) => {
 
   return {
     getConfig: (task, tab, refresh = false) =>
-      client.get(`${prefix}/${task}?refresh=${refresh}?tab=${tab}`),
+      client.get(`${prefix}/${task}?tab=${tab}&refresh=${refresh}`),
 
     updateConfig: (task, tab, config) =>
       client.put(`${prefix}/${task}?tab=${tab}`, {

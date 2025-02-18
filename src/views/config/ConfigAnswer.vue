@@ -29,9 +29,9 @@ import ConfigForm from '@/components/ConfigForm.vue'
 const $route = useRoute()
 
 const tabs = {
-  general_config: 'General Chat Configuration',
-  coding_config: 'Coding Chat Configuration',
-  docs_config: 'Documentation Chat Configuration',
+  general: 'General Assistant',
+  coder: 'Coder Assistant',
+  docs: 'Documents Assistant',
 }
 
 const activeTab = ref($route.query.tab || Object.keys(tabs)[0])

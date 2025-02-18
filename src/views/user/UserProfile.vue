@@ -1,18 +1,24 @@
 <template>
-  <q-page padding class="q-px-md q-py-xl q-mx-auto" style="max-width: 1100px">
+  <q-page padding class="col-grow q-px-md q-py-xl q-mx-auto" :style="{ maxWidth: `min(100%, ${ $q.screen.gt.sm ? '1000px' : '666px' })` }">
     <!-- Main content wrapper -->
     <div class="row q-col-gutter-lg">
       <!-- Left column - Avatar section -->
       <div class="col-12 col-md-3">
         <div class="text-center">
           <UserAvatar :src="avatarUrl" size="200px" bordered class="profile-avatar" />
+
           <div class="text-h6 q-mt-md">{{ firstname }} {{ lastname }}</div>
+
           <div class="text-subtitle2 text-grey-7">{{ email }}</div>
-          <!-- Moved Join Date Section here -->
-          <div class="text-subtitle2 text-grey-7 q-mt-sm">
+
+          <div class="text-subtitle2 text-grey-7 q-my-sm">
             <q-icon name="calendar_today" size="xs" class="q-mr-xs" />
             <span>Joined {{ date.formatDate(joinedDate, 'MMMM D, YYYY') }}</span>
           </div>
+
+          <q-chip v-if="roles.some((role) => role.name === 'system_admin')" color="primary" class="text-uppercase text-bold">System Admin</q-chip>
+          <q-chip v-else-if="roles.some((role) => role.name === 'admin')" color="secondary" class="text-uppercase text-bold">Admin</q-chip>
+          <q-chip v-else color="positive" class="text-uppercase text-bold">Employee</q-chip>
         </div>
       </div>
 
@@ -53,10 +59,11 @@
 
         <!-- Document List Card -->
         <q-card flat bordered>
-          <q-card-section class="q-pb-none">
+          <q-card-section>
             <div class="text-h6">Documents</div>
           </q-card-section>
-          <q-card-section class="q-py-none">
+
+          <q-card-section class="q-pt-none">
             <q-list separator>
               <q-item class="q-pa-md" v-for="document in documents" :key="document.id">
                 <q-item-section>
@@ -88,6 +95,7 @@ const firstname = ref('')
 const lastname = ref('')
 const joinedDate = ref('')
 const avatarUrl = ref('')
+const roles = ref([])
 const documents = ref([])
 
 onMounted(async () => {
@@ -99,10 +107,12 @@ async function fetchUser() {
   try {
     const response = await apiClient.users.getUser(userId)
     const userData = response.data
+
     email.value = userData.email
     firstname.value = userData.firstname
     lastname.value = userData.lastname
     avatarUrl.value = userData.avatar_url
+    roles.value = userData.roles
     joinedDate.value = new Date(userData.created_time.slice(0, 10))
   } catch (error) {
     console.error('Error fetching user profile:', error)

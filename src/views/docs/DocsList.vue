@@ -198,6 +198,7 @@
               @click="previewDocument(document)"
             />
             <q-btn
+              v-if="authStore.isAdmin"
               :loading="downloading && document == currentDocument"
               color="positive"
               icon="download"

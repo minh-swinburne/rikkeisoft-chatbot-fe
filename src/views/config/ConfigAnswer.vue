@@ -1,32 +1,34 @@
 <template>
-      <q-page padding class="col-grow" style="max-width: 800px">
-        <q-card flat bordered class="q-pa-md">
-          <q-tabs
-            v-model="activeTab"
-            class="q-mb-md"
-            active-class="link"
-            outside-arrows
-            mobile-arrows
-            inline-label
-          >
-            <q-tab v-for="(tab, key) in tabs" :key="key" :name="key" :label="tab" no-caps />
-          </q-tabs>
-          <q-separator />
-          <q-tab-panels v-model="activeTab">
-            <q-tab-panel v-for="(tab, key) in tabs" :key="key" :name="key">
-              <ConfigForm :tab="tab" />
-            </q-tab-panel>
-          </q-tab-panels>
-        </q-card>
-      </q-page>
+  <q-page padding class="col-grow" style="max-width: 800px">
+    <q-card flat bordered class="q-pa-md">
+      <q-tabs
+        v-model="activeTab"
+        class="q-mb-md"
+        active-class="link"
+        outside-arrows
+        mobile-arrows
+        inline-label
+      >
+        <q-tab v-for="(name, tab) in tabs" :key="tab" :name="tab" :label="name" no-caps />
+      </q-tabs>
+      <q-separator />
+      <q-tab-panels v-model="activeTab">
+        conmemay
+        <q-tab-panel v-for="(name, tab) in tabs" :key="tab" :name="tab">
+          <ConfigForm :name="name" :tab="tab" task="answer_generation" />
+        </q-tab-panel>
+      </q-tab-panels>
+    </q-card>
+  </q-page>
 </template>
 
 <script setup>
-import {  useRoute } from 'vue-router'
-import {  ref } from 'vue'
 import ConfigForm from '@/components/ConfigForm.vue'
+import { onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const $route = useRoute()
+const $router = useRouter()
 
 const tabs = {
   general: 'General Assistant',
@@ -34,7 +36,26 @@ const tabs = {
   docs: 'Documents Assistant',
 }
 
-const activeTab = ref($route.query.tab || Object.keys(tabs)[0])
+const activeTab = ref(Object.keys(tabs)[0])
+
+onMounted(() => {
+  if ($route.query.tab && tabs[$route.query.tab]) {
+    activeTab.value = $route.query.tab
+  }
+})
+
+watch(activeTab, (newTab) => {
+  $router.replace({ query: { tab: newTab } })
+})
+
+watch(
+  () => $route.query.tab,
+  (newTab) => {
+    if (newTab && tabs[newTab]) {
+      activeTab.value = newTab
+    }
+  },
+)
 </script>
 
 <style>

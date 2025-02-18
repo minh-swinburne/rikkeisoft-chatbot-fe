@@ -1,7 +1,7 @@
 <template>
-  <q-form @submit.prevent="saveConfig(tab)">
+  <q-form @submit.prevent="saveConfig">
     <div class="row items-center justify-between q-mb-md">
-      <h5 class="q-my-none">{{ tab }}</h5>
+      <h5 class="q-my-none">{{ props.name }}</h5>
 
       <q-space />
 
@@ -22,7 +22,7 @@
         color="shadow"
         unelevated
         round
-        @click="loadConfig(activeTab, true)"
+        @click="loadConfig(true)"
       />
 
       <q-btn
@@ -130,29 +130,16 @@
 <script setup>
 import { apiClient } from '@/plugins/api'
 import { useQuasar } from 'quasar'
-import { useRouter, useRoute } from 'vue-router'
-import { onMounted, ref, watch } from 'vue'
-import ConfigForm from '@/components/ConfigForm.vue'
+import { onMounted, ref } from 'vue'
 
 const $q = useQuasar()
-const $route = useRoute()
-const $router = useRouter()
 
 const props = defineProps({
+  name: String,
+  task: String,
   tab: String,
 })
 
-const tabs = {
-  general_config: 'General Chat Configuration',
-  coding_config: 'Coding Chat Configuration',
-  docs_config: 'Documentation Chat Configuration',
-}
-
-const tab = props.tab
-
-console.log(tab)
-
-const activeTab = ref($route.query.tab || Object.keys(tabs)[0])
 const editing = ref(false)
 const loading = ref(true)
 const config = ref({
@@ -167,39 +154,24 @@ const config = ref({
 })
 
 onMounted(() => {
-  if ($route.query.tab && tabs[$route.query.tab]) {
-    activeTab.value = $route.query.tab
-  }
-  loadConfig(activeTab.value)
-})
-
-watch(activeTab, (newTab) => {
-  $router.replace({ query: { tab: newTab } })
-  loadConfig(newTab)
-})
-
-watch(() => $route.query.tab, (newTab) => {
-  if (newTab && tabs[newTab]) {
-    activeTab.value = newTab
-  }
+  loadConfig()
 })
 
 async function toggleEdit(save = false) {
   if (editing.value && save) {
     console.log('Saving config...')
-    await saveConfig(activeTab.value)
+    await saveConfig()
   } else {
     console.log('Loading config...')
-    await loadConfig(activeTab.value)
+    await loadConfig()
   }
   editing.value = !editing.value
 }
 
-async function loadConfig(tab, refresh = false) {
+async function loadConfig(refresh = false) {
   loading.value = true
-  const task = $router.currentRoute.value.name
   try {
-    const response = await apiClient.config.getConfig(task, tab, refresh)
+    const response = await apiClient.config.getConfig(props.task, props.tab, refresh)
     config.value = {
       instructions: response.data.system_prompt,
       messageTemplate: response.data.message_template?.join('\n') || null,
@@ -210,7 +182,7 @@ async function loadConfig(tab, refresh = false) {
       temperature: response.data.params.temperature,
       stream: response.data.params.stream,
     }
-    console.log('Config loaded:', response.data)
+    // console.log('Config loaded:', response.data)
   } catch (error) {
     console.error('Error fetching config:', error)
     $q.notify({
@@ -221,15 +193,14 @@ async function loadConfig(tab, refresh = false) {
   loading.value = false
 }
 
-async function saveConfig(tab) {
+async function saveConfig() {
   loading.value = true
-  const task = $router.currentRoute.value.name
   try {
-    const response = await apiClient.config.updateConfig(task, tab, config.value)
+    const response = await apiClient.config.updateConfig(props.task, props.tab, config.value)
     console.log('Updated config:', response.data)
     $q.notify({
       type: 'positive',
-      message: `${tabs[tab]} configuration updated successfully.`,
+      message: `${props.tab} configuration updated successfully.`,
     })
   } catch (error) {
     console.error('Error updating config:', error.response || error)

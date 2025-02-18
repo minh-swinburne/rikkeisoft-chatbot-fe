@@ -1,7 +1,7 @@
 <template>
   <q-page padding class="col-grow" style="max-width: 800px">
     <q-card flat bordered class="q-pa-md">
-      <ConfigForm :tab="'Chat Suggestion Configuration'" />
+      <ConfigForm task="question_suggestion" name="Chat Suggestion Configuration" />
     </q-card>
   </q-page>
 </template>

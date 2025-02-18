@@ -1,7 +1,7 @@
 <template>
   <q-page padding class="col-grow" style="max-width: 800px">
     <q-card flat bordered class="q-pa-md">
-      <ConfigForm :tab="'Chat Name Generation Configuration'" />
+      <ConfigForm task="name_generation" name="Chat Name Generation Configuration" />
     </q-card>
   </q-page>
 </template>

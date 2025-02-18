@@ -65,8 +65,30 @@ const routes = [
   {
     path: '/config',
     name: 'config',
-    component: () => import('@/views/ConfigView.vue'),
+    component: () => import('@/views/config/ConfigView.vue'),
     meta: { requiresAuth: true, requiresAdmin: true },
+    children: [
+      {
+        path: 'answer',
+        name: 'config-answer',
+        component: () => import('@/views/config/ConfigAnswer.vue'),
+      },
+      {
+        path: 'suggestion',
+        name: 'config-suggestion',
+        component: () => import('@/views/config/ConfigSuggestion.vue'),
+      },
+      {
+        path: 'summary',
+        name: 'config-summary',
+        component: () => import('@/views/config/ConfigSummary.vue'),
+      },
+      {
+        path: 'name',
+        name: 'config-name',
+        component: () => import('@/views/config/ConfigName.vue'),
+      },
+    ],
   },
   {
     path: '/settings',
@@ -160,6 +182,8 @@ router.beforeEach(async (to, from, next) => {
   const route = router.getRoutes().find((route) => route.name === to.name)
   // Redirect to the first child route if it exists
   if (route.children.length > 0) {
+    console.log('Redirecting to the first child route...')
+    console.log(`${route.path}/${route.children[0].path}`)
     next(`${route.path}/${route.children[0].path}`)
   } else {
     next()

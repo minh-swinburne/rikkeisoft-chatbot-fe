@@ -148,23 +148,33 @@
         <div class="column">
           <q-fab icon="forum" color="primary" class="q-mx-md" direction="left" unelevated>
                 <q-list padding style="width: 250px;">
-                  <q-item clickable v-close-popup = "3" @click="selectedmodel('Chat Plus')">
+                  <q-item clickable v-close-popup = "3" @click="selectedmodel('General_config')">
                     <q-item-section avatar>
-                      <q-avatar icon="fas fa-robot" />
+                      <q-avatar icon="chat" />
                     </q-item-section>
                     <q-item-section>
-                      <q-item-label>Chat Plus</q-item-label>
-                      <q-item-label caption>Smartest model & most reliable</q-item-label>
+                      <q-item-label>General Chatbot</q-item-label>
+                      <q-item-label caption>Chat general</q-item-label>
                     </q-item-section>
                   </q-item>
 
-                  <q-item clickable v-close-popup = "3" @click="selectedmodel('Draw IO')">
+                  <q-item clickable v-close-popup = "3" @click="selectedmodel('Coding_config')">
                     <q-item-section avatar>
-                      <q-avatar icon="draw" />
+                      <q-avatar icon="code" />
                     </q-item-section>
                     <q-item-section>
-                      <q-item-label>Draw IO</q-item-label>
-                      <q-item-label caption>Chatbot that can draw</q-item-label>
+                      <q-item-label>Coding Chatbot</q-item-label>
+                      <q-item-label caption>Chatbot for coding</q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item clickable v-close-popup = "3" @click="selectedmodel('Document_config')">
+                    <q-item-section avatar>
+                      <q-avatar icon="description" />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>Document Chatbot</q-item-label>
+                      <q-item-label caption>Chatbot for document</q-item-label>
                     </q-item-section>
                   </q-item>
                 </q-list>
@@ -239,7 +249,7 @@ const maxHeightScrollArea = ref('calc(100vh - 50px - 88px)')
 const chatScrollArea = ref(null)
 const chatSticky = ref(null)
 const chatInput = ref(null)
-const selectedModel = ref('Chat Plus')
+const selectedModel = ref('General_config')
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time)),

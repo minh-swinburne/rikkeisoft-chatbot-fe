@@ -1,7 +1,7 @@
 <template>
   <q-page padding class="col-grow" style="max-width: 800px">
-    <q-card flat bordered class="q-pa-md">
-      <ConfigForm task="question_suggestion" name="Chat Suggestion Configuration" />
+    <q-card flat bordered class="tw:px-8 tw:py-10">
+      <ConfigForm task="question_suggestion" name="Question Suggestion" />
     </q-card>
   </q-page>
 </template>

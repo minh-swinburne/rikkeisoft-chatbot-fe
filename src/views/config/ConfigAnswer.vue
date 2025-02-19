@@ -31,9 +31,9 @@ const $route = useRoute()
 const $router = useRouter()
 
 const tabs = {
-  general: 'General Assistant',
-  coder: 'Coder Assistant',
-  docs: 'Documents Assistant',
+  general: 'General Chatbot',
+  coder: 'Coder Chatbot',
+  docs: 'Documents Chatbot',
 }
 
 const activeTab = ref(Object.keys(tabs)[0])

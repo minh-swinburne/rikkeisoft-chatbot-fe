@@ -200,7 +200,7 @@ async function saveConfig() {
     console.log('Updated config:', response.data)
     $q.notify({
       type: 'positive',
-      message: `${props.tab} configuration updated successfully.`,
+      message: `Configuration for ${props.name} updated successfully.`,
     })
   } catch (error) {
     console.error('Error updating config:', error.response || error)

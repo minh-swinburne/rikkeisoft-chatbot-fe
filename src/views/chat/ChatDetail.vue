@@ -273,7 +273,7 @@ marked.use({ renderer })
 onMounted(() => {
   // Check for initialMessage in the route query and send it if present
   const initialMessage = $route.query.initialMessage
-  chatType.value = $route.query.initialChatType
+  chatType.value = $route.query.initialChatType || 'general'
 
   if (initialMessage) {
     console.log('Initial message:', initialMessage)

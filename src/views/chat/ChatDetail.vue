@@ -141,7 +141,7 @@
         justifyContent: 'between',
       }"
     >
-      <div></div>
+      <div style="width: 80px;"></div>
       <q-space />
 
       <transition>

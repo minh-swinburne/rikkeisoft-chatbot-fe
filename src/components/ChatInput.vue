@@ -6,9 +6,9 @@
     :input-style="{ maxHeight: `${maxHeight}px` }"
     placeholder="Ask something..."
     input-class="chat-input q-pl-sm q-py-md"
+    autogrow
     outlined
     rounded
-    autogrow
     @keydown.enter.prevent="handleEnter"
   >
     <template #append>

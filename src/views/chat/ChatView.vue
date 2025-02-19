@@ -7,7 +7,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered :width="280">
+    <q-drawer v-model="leftDrawerOpen" :width="280" show-if-above bordered>
       <q-list>
         <q-item-label header class="flex justify-between items-center">
           Chat History
@@ -57,7 +57,7 @@
       </q-list>
     </q-drawer>
 
-    <q-page-container>
+    <q-page-container :class="$q.dark.isActive ? '' : 'bg-white'">
       <router-view @send="fetchChats" @rename="generateName" />
     </q-page-container>
   </q-layout>
@@ -114,7 +114,7 @@ async function fetchChats() {
 async function generateName(chatId) {
   const index = chats.value.findIndex((chat) => chat.id === chatId)
   console.log('Generating new chat name...')
-  console.log(chats.value[index])
+  // console.log(chats.value[index])
 
   try {
     const confResponse = await apiClient.config.checkStream('name_generation')

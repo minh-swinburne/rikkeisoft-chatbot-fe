@@ -43,7 +43,7 @@
         </div>
       </div>
 
-      <q-table :rows="filteredUsers" :columns="columns" row-key="id">
+      <q-table :rows="filteredUsers" :columns="columns" row-key="id" bordered flat>
         <template #body-cell-avatar="props">
           <q-td>
             <UserAvatar :src="props.row.avatar_url" size="30px" />
@@ -55,16 +55,18 @@
             <q-chip
               v-if="props.row.roles.some((role) => role.name === 'system_admin')"
               color="primary"
-              class="text-uppercase text-bold"
+              class="text-uppercase text-bold text-white"
               >System Admin</q-chip
             >
             <q-chip
               v-else-if="props.row.roles.some((role) => role.name === 'admin')"
               color="secondary"
-              class="text-uppercase text-bold"
+              class="text-uppercase text-bold text-white"
               >Admin</q-chip
             >
-            <q-chip v-else color="positive" class="text-uppercase text-bold">Employee</q-chip>
+            <q-chip v-else color="positive" class="text-uppercase text-bold text-white"
+              >Employee</q-chip
+            >
           </q-td>
         </template>
 

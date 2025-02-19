@@ -64,7 +64,7 @@
           <q-chat-message
             v-for="(message, index) in sortedMessages"
             :key="index"
-            :name="message.role === 'assistant' ? 'Bot' : authStore.user.firstname"
+            :name="message.role === 'assistant' ? 'RikkeiGPT' : authStore.user.firstname"
             :sent="message.role === 'user'"
             :text-color="$q.dark.isActive ? 'white' : 'black'"
             :bg-color="
@@ -103,7 +103,7 @@
                   :lang="part.lang"
                   :theme="$q.dark.isActive ? 'github-dark-dimmed' : 'github'"
                 />
-                <div v-else v-html="marked(part.content)"></div>
+                <div v-else v-html="marked(part.content)" style="line-height: 1.5;"></div>
               </template>
             </div>
           </q-chat-message>
@@ -130,6 +130,59 @@
           </template>
         </q-chat-message>
       </div>
+
+      <div class="column absolute-bottom-right tw:gap-3">
+        <q-fab
+          icon="smart_toy"
+          color="primary"
+          direction="left"
+          unelevated
+        >
+          <q-list class="tw:rounded-md" style="width: 250px">
+            <q-item
+              v-for="(chat, type) in chatTypes"
+              :key="type"
+              :active="chatType === type"
+              active-class="bg-shadow-2 tw:text-inherit!"
+              class="q-ma-sm q-pa-sm tw:rounded-md"
+              clickable
+              @click="setChatType(type)"
+            >
+              <q-item-section avatar>
+                <q-avatar :icon="chat.icon" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ chat.name }}</q-item-label>
+                <q-item-label caption>{{ chat.desc }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-fab>
+
+        <q-fab icon="lightbulb" color="primary" direction="left" unelevated>
+          <q-card
+            :style="{
+              width: `calc(${chatStickyWidth} - 100px)`,
+              alignSelf: 'flex-end',
+            }"
+            class="no-shadow"
+            bordered
+          >
+            <q-card-section class="q-pa-sm">
+              <div class="row q-col-gutter-sm">
+                <div v-for="(suggestion, index) in suggestions" :key="index" class="col-auto">
+                  <q-chip
+                    :label="suggestion"
+                    class="bg-shadow"
+                    @click="applySuggestion(suggestion)"
+                    clickable
+                  />
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-fab>
+      </div>
     </q-scroll-area>
 
     <q-page-sticky
@@ -144,67 +197,6 @@
       <q-page-scroller reverse position="bottom" :scroll-offset="20" :offset="[0, 18]">
         <q-btn fab icon="keyboard_arrow_down" color="primary" />
       </q-page-scroller>
-
-        <div class="column">
-          <q-fab icon="forum" color="primary" class="q-mx-md" direction="left" unelevated>
-                <q-list padding style="width: 250px;">
-                  <q-item clickable v-close-popup = "3" @click="selectedmodel('General_config')">
-                    <q-item-section avatar>
-                      <q-avatar icon="chat" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>General Chatbot</q-item-label>
-                      <q-item-label caption>Chat general</q-item-label>
-                    </q-item-section>
-                  </q-item>
-
-                  <q-item clickable v-close-popup = "3" @click="selectedmodel('Coding_config')">
-                    <q-item-section avatar>
-                      <q-avatar icon="code" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>Coding Chatbot</q-item-label>
-                      <q-item-label caption>Chatbot for coding</q-item-label>
-                    </q-item-section>
-                  </q-item>
-
-                  <q-item clickable v-close-popup = "3" @click="selectedmodel('Document_config')">
-                    <q-item-section avatar>
-                      <q-avatar icon="description" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>Document Chatbot</q-item-label>
-                      <q-item-label caption>Chatbot for document</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-          </q-fab>
-
-          <br>
-          <q-fab icon="lightbulb" color="primary" class="q-mx-md" direction="left" unelevated>
-            <q-card
-              :style="{
-                width: `calc(${chatStickyWidth} - 100px)`,
-                alignSelf: 'flex-end',
-              }"
-              class="no-shadow"
-              bordered
-            >
-              <q-card-section class="q-pa-sm">
-                <div class="row q-col-gutter-sm">
-                  <div v-for="(suggestion, index) in suggestions" :key="index" class="col-auto">
-                    <q-chip
-                      :label="suggestion"
-                      class="bg-shadow"
-                      @click="applySuggestion(suggestion)"
-                      clickable
-                    />
-                  </div>
-                </div>
-              </q-card-section>
-            </q-card>
-          </q-fab>
-        </div>
 
       <q-form class="q-pa-md" style="width: 100%">
         <ChatInput
@@ -249,7 +241,12 @@ const maxHeightScrollArea = ref('calc(100vh - 50px - 88px)')
 const chatScrollArea = ref(null)
 const chatSticky = ref(null)
 const chatInput = ref(null)
-const selectedModel = ref('General_config')
+const chatType = ref('general')
+const chatTypes = {
+  general: { name: 'General Chatbot', icon: 'chat', desc: 'For general purposes' },
+  coder: { name: 'Coder Chatbot', icon: 'code', desc: 'Helps with coding' },
+  docs: { name: 'Document Chatbot', icon: 'description', desc: 'Finds info from documents' },
+}
 
 const sortedMessages = computed(() =>
   [...messages.value].sort((a, b) => new Date(a.time) - new Date(b.time)),
@@ -276,6 +273,7 @@ marked.use({ renderer })
 onMounted(() => {
   // Check for initialMessage in the route query and send it if present
   const initialMessage = $route.query.initialMessage
+  chatType.value = $route.query.initialChatType
 
   if (initialMessage) {
     console.log('Initial message:', initialMessage)
@@ -343,7 +341,7 @@ function scrollToBottom(force = false) {
     if (chatScrollArea.value) {
       const scrollInfo = chatScrollArea.value.getScroll()
       if (force || scrollInfo.verticalPercentage > 0.9) {
-        const scrollSpeed = 2000 / 500 // 500ms to scroll 2000px
+        const scrollSpeed = 1000 / 200 // 200ms to scroll 1000px
         // console.log('Scrolling to bottom...', scrollInfo.verticalSize)
         chatScrollArea.value.setScrollPosition(
           'vertical',
@@ -382,9 +380,9 @@ function parseTime(time) {
   return timeString
 }
 
-function selectedmodel(model) {
-  selectedModel.value = model
-  console.log('Selected model:', model)
+function setChatType(model) {
+  chatType.value = model
+  // console.log('Selected chat type:', model)
 }
 
 async function sendMessage(query) {
@@ -403,9 +401,13 @@ async function sendMessage(query) {
   scrollToBottom(true)
 
   try {
-    const confResponse = await apiClient.config.checkStream('answer_generation', selectedModel.value)
+    const confResponse = await apiClient.config.checkStream('answer_generation', chatType.value)
     const streaming = confResponse.data
-    const chatResponse = await apiClient.chats.sendMessage($route.params.chatId, query, selectedModel.value)
+    const chatResponse = await apiClient.chats.sendMessage(
+      $route.params.chatId,
+      query,
+      chatType.value,
+    )
 
     if (streaming) {
       console.log('Streaming response...')

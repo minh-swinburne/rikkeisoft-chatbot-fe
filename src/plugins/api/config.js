@@ -16,6 +16,6 @@ export const configAPI = (client) => {
         stream: config.stream,
       }),
 
-    checkStream: (task, tab) => client.get(`${prefix}/${task}/stream?tab=${tab}`),
+    checkStream: (task, tab = '') => client.get(`${prefix}/${task}/stream?tab=${tab}`),
   }
 }

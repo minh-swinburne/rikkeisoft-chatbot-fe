@@ -71,7 +71,7 @@
               message.role === 'assistant'
                 ? $q.dark.isActive
                   ? 'grey-15'
-                  : 'grey-3'
+                  : 'grey-2'
                 : $q.dark.isActive
                   ? 'dark-red'
                   : 'light-red'
@@ -130,8 +130,37 @@
           </template>
         </q-chat-message>
       </div>
+    </q-scroll-area>
 
-      <div class="column absolute-bottom-right tw:gap-3">
+    <q-page-sticky
+      ref="chatSticky"
+      position="bottom"
+      expand
+      :style="{
+        maxWidth: '100%',
+        justifyContent: 'between',
+      }"
+    >
+      <div></div>
+      <q-space />
+
+      <transition>
+        <q-btn
+          v-show="chatScrollArea && chatScrollArea.getScroll().verticalPercentage < 0.9"
+          :color="$q.dark.isActive ? 'grey-10' : 'white'"
+          :text-color="$q.dark.isActive ? '' : 'black'"
+          icon="expand_more"
+          direction="left"
+          class="q-mb-xs shadow-1 tw:self-end"
+          unelevated
+          fab-mini
+          @click="scrollToBottom(true)"
+        />
+      </transition>
+
+      <q-space />
+
+      <div class="column q-mr-lg tw:gap-3">
         <q-fab
           icon="smart_toy"
           color="primary"
@@ -183,22 +212,8 @@
           </q-card>
         </q-fab>
       </div>
-    </q-scroll-area>
 
-    <q-page-sticky
-      ref="chatSticky"
-      position="bottom"
-      expand
-      :style="{
-        maxWidth: '100%',
-        justifyContent: 'end',
-      }"
-    >
-      <q-page-scroller reverse position="bottom" :scroll-offset="20" :offset="[0, 18]">
-        <q-btn fab icon="keyboard_arrow_down" color="primary" />
-      </q-page-scroller>
-
-      <q-form class="q-pa-md" style="width: 100%">
+      <q-form class="q-pa-md col-12">
         <ChatInput
           ref="chatInput"
           v-model="userInput"
@@ -341,7 +356,7 @@ function scrollToBottom(force = false) {
     if (chatScrollArea.value) {
       const scrollInfo = chatScrollArea.value.getScroll()
       if (force || scrollInfo.verticalPercentage > 0.9) {
-        const scrollSpeed = 1000 / 200 // 200ms to scroll 1000px
+        const scrollSpeed = 1000 / 100 // 100ms to scroll 1000px
         // console.log('Scrolling to bottom...', scrollInfo.verticalSize)
         chatScrollArea.value.setScrollPosition(
           'vertical',

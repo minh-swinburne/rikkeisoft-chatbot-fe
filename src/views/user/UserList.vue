@@ -43,10 +43,81 @@
         </div>
       </div>
 
-      <q-table :rows="filteredUsers" :columns="columns" row-key="id" bordered flat>
+      <q-markup-table v-if="loading" bordered flat>
+        <thead>
+          <tr>
+            <th>
+              <q-skeleton animation="blink" width="50px" />
+            </th>
+            <th>
+              <q-skeleton animation="blink" />
+            </th>
+            <th>
+              <q-skeleton animation="blink" />
+            </th>
+            <th>
+              <q-skeleton animation="blink" width="75px" />
+            </th>
+            <th>
+              <q-skeleton animation="blink" />
+            </th>
+            <th>
+              <q-skeleton animation="blink" width="50px" />
+            </th>
+            <th>
+              <q-skeleton animation="blink" width="30px" />
+            </th>
+            <th>
+              <q-skeleton animation="blink" width="75px" />
+            </th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr v-for="n in 5" :key="n">
+            <td>
+              <q-skeleton animation="blink" type="QAvatar" size="30px" class="q-mx-auto" />
+            </td>
+            <td>
+              <q-skeleton animation="blink" type="text" :width="randomWidth(50)" />
+            </td>
+            <td>
+              <q-skeleton animation="blink" type="text" :width="randomWidth(75)" />
+            </td>
+            <td>
+              <q-skeleton animation="blink" type="text" :width="randomWidth(150)" />
+            </td>
+            <td>
+              <q-skeleton animation="blink" type="text" :width="randomWidth(50)" />
+            </td>
+            <td>
+              <q-skeleton animation="blink" type="QChip" width="85px" />
+            </td>
+            <td>
+              <q-skeleton animation="blink" type="text" width="150px" />
+            </td>
+            <td>
+              <q-skeleton animation="blink" type="text" width="100px" />
+            </td>
+            <td class="q-gutter-x-sm q-mr-md">
+              <q-skeleton animation="blink" type="circle" size="35px" class="tw:inline-block" />
+              <q-skeleton
+                v-if="authStore.isSystemAdmin"
+                animation="blink"
+                type="circle"
+                size="35px"
+                class="tw:inline-block"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </q-markup-table>
+
+      <q-table v-else :rows="filteredUsers" :columns="columns" row-key="id" bordered flat>
         <template #body-cell-avatar="props">
           <q-td>
-            <UserAvatar :src="props.row.avatar_url" size="30px" />
+            <UserAvatar :src="props.row.avatar_url" size="30px" class="q-mx-auto" />
           </q-td>
         </template>
 
@@ -197,6 +268,10 @@ onMounted(() => {
 function clearFilters() {
   filterRolesMatchAll.value = false
   filterRolesSelected.value = []
+}
+
+function randomWidth(bias = 75, weight = 1) {
+  return Math.floor(Math.random() * (100 - bias) + bias) * weight + 'px'
 }
 
 async function fetchUsers() {

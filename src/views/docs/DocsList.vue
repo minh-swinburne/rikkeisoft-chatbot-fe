@@ -80,7 +80,7 @@
 
     <!-- LOADING SKELETONS -->
     <q-list
-      v-if="isLoading"
+      v-if="loading"
       class="col-grow rounded-borders"
       style="width: 100%"
       bordered
@@ -325,7 +325,7 @@ const downloading = ref(false)
 const editting = ref(false)
 const deleting = ref(false)
 
-const isLoading = ref(true)
+const loading = ref(true)
 const currentPage = ref(1)
 const itemsPerPage = 5
 
@@ -403,7 +403,7 @@ async function fetchDocuments() {
   try {
     const response = await apiClient.docs.listDocs()
     documents.value = response.data
-    isLoading.value = false
+    loading.value = false
     console.log('Documents:', documents.value)
   } catch (error) {
     console.error('Error fetching documents:', error)
@@ -462,7 +462,7 @@ async function submitEditForm() {
     await apiClient.docs.editDoc(editFormData.value.id, { ...editFormData.value, id: _ })
 
     showEditForm.value = false
-    isLoading.value = true
+    loading.value = true
     fetchDocuments()
 
     $q.notify({

@@ -119,7 +119,7 @@ const menuItems = [
 ]
 
 const filteredNavItems = computed(() => {
-  return authStore.isAdmin
+  return authStore.isAdmin || authStore.isSystemAdmin
     ? navItems
     : navItems.filter(
       (item) => {

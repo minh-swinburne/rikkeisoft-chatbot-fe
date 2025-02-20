@@ -34,24 +34,25 @@
             <q-item-label lines="1">{{ chat.name }}</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-btn-dropdown
-              dropdown-icon="more_horiz"
+            <q-btn
+              icon="more_horiz"
               size="sm"
               flat
               dense
               rounded
-              no-icon-animation
               @click.stop.prevent
             >
-              <q-list>
-                <q-item clickable v-close-popup @click.stop="renameChat(chat)">
-                  <q-item-section>Rename</q-item-section>
-                </q-item>
-                <q-item clickable v-close-popup @click.stop="deleteChat(chat)">
-                  <q-item-section>Delete</q-item-section>
-                </q-item>
-              </q-list>
-            </q-btn-dropdown>
+              <q-menu>
+                <q-list>
+                  <q-item clickable v-close-popup @click.stop="renameChat(chat)">
+                    <q-item-section>Rename</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup @click.stop="deleteChat(chat)">
+                    <q-item-section>Delete</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
           </q-item-section>
         </q-item>
       </q-list>

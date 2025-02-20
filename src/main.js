@@ -8,6 +8,8 @@ import router from '@/plugins/router'
 import quasarOptions from '@/plugins/quasar'
 import vue3GoogleLogin from 'vue3-google-login'
 import googleConfig from '@/plugins/sso/googleConfig'
+
+// import '@/styles/base.scss'
 import '@/styles/tailwind.css'
 
 const app = createApp(App)

@@ -33,7 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (this.user?.provider === 'google') {
       googleLogout() // Logout from Google
     } else if (this.user?.provider === 'microsoft') {
-      console.log('Logging out from Microsoft...')
+      // console.log('Logging out from Microsoft...')
       msalInstance.initialize() // Initialize MSAL
       msalInstance.logoutPopup() // Logout from Microsoft
     }

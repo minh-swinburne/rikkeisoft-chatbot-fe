@@ -88,7 +88,7 @@ function toggleLeftDrawer() {
 }
 
 function sortChats() {
-  console.log('Sorting chats...')
+  // console.log('Sorting chats...')
   chats.value.sort((a, b) => new Date(b.lastAccess) - new Date(a.lastAccess))
   // console.log(chats.value);
 }
@@ -113,7 +113,7 @@ async function fetchChats() {
 
 async function generateName(chatId) {
   const index = chats.value.findIndex((chat) => chat.id === chatId)
-  console.log('Generating new chat name...')
+  // console.log('Generating new chat name...')
   // console.log(chats.value[index])
 
   try {
@@ -122,7 +122,7 @@ async function generateName(chatId) {
     const nameResponse = await apiClient.chats.getNewName(chatId)
 
     if (streaming) {
-      console.log('Streaming new name...')
+      // console.log('Streaming new name...')
 
       const reader = nameResponse.body.getReader()
       const decoder = new TextDecoder('utf-8')
@@ -145,10 +145,10 @@ async function generateName(chatId) {
         await new Promise((resolve) => setTimeout(resolve, delay))
       }
 
-      console.log('Streaming completed.')
-      console.log(newName)
+      // console.log('Streaming completed.')
+      // console.log(newName)
     } else {
-      console.log('Non-streaming response received.')
+      // console.log('Non-streaming response received.')
       // console.log(chats.value[0] === chats.value[index]);
       const responseData = await nameResponse.json()
       chats.value[index].name = responseData.name
@@ -185,7 +185,7 @@ async function renameChat(chat) {
           icon: 'check_circle',
         })
       } catch (error) {
-        console.log('Error renaming chat:', error)
+        // console.log('Error renaming chat:', error)
         $q.notify({
           color: 'negative',
           message: 'Error renaming chat',

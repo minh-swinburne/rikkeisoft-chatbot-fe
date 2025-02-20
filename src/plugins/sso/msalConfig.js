@@ -16,7 +16,7 @@ export const msalConfig = {
     loggerOptions: {
       loggerCallback: (level, message, containsPii) => {
         if (containsPii) return
-        console.log(level, message)
+        // console.log(level, message)
       },
       logLevel: 'info',
     },

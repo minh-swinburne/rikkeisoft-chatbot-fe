@@ -159,10 +159,10 @@ onMounted(() => {
 
 async function toggleEdit(save = false) {
   if (editing.value && save) {
-    console.log('Saving config...')
+    // console.log('Saving config...')
     await saveConfig()
   } else {
-    console.log('Loading config...')
+    // console.log('Loading config...')
     await loadConfig()
   }
   editing.value = !editing.value
@@ -197,7 +197,7 @@ async function saveConfig() {
   loading.value = true
   try {
     const response = await apiClient.config.updateConfig(props.task, props.tab, config.value)
-    console.log('Updated config:', response.data)
+    // console.log('Updated config:', response.data)
     $q.notify({
       type: 'positive',
       message: `Configuration for ${props.name} updated successfully.`,

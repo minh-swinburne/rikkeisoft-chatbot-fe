@@ -404,7 +404,7 @@ async function fetchDocuments() {
     const response = await apiClient.docs.listDocs()
     documents.value = response.data
     loading.value = false
-    console.log('Documents:', documents.value)
+    // console.log('Documents:', documents.value)
   } catch (error) {
     console.error('Error fetching documents:', error)
     $q.notify({
@@ -427,8 +427,8 @@ async function previewDocument(document) {
     previewUrl.value = response.data.url
     currentDocument.value = document
     showViewer.value = true
-    console.log('Preview response:', response)
-    console.log('Preview URL:', previewUrl.value)
+    // console.log('Preview response:', response)
+    // console.log('Preview URL:', previewUrl.value)
     previewing.value = false
   } catch (error) {
     console.error('Error previewing document:', error)

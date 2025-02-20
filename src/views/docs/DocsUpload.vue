@@ -174,7 +174,7 @@ async function submit() {
   const success = await uploadForm.value.validate()
   if (success) {
     uploading.value = true
-    console.log('Form submitted successfully!', uploading.value)
+    // console.log('Form submitted successfully!', uploading.value)
 
     // Construct FormData
     const formData = new FormData()
@@ -198,13 +198,13 @@ async function submit() {
 
     // Debug FormData entries
     for (let [key, value] of formData.entries()) {
-      console.log(`${key}:`, value)
+      // console.log(`${key}:`, value)
     }
 
     try {
       const response = await apiClient.docs.uploadDoc(formData)
 
-      console.log('Upload success:', response.data)
+      // console.log('Upload success:', response.data)
       $q.notify({
         type: 'positive',
         message: 'Document uploaded successfully!',

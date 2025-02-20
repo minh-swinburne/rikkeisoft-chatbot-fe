@@ -279,7 +279,7 @@ async function fetchUsers() {
     const response = await apiClient.users.listUsers()
     users.value = response.data
     loading.value = false
-    console.log('Users:', users.value)
+    // console.log('Users:', users.value)
   } catch (error) {
     console.error('Error fetching users:', error)
     $q.notify({

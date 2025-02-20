@@ -1,4 +1,13 @@
 <template>
+  <!-- 
+  General description: 
+  This component provides a form for uploading documents either via file upload or web link. 
+  It includes fields for document title, description, categories, creation date, and access control.
+
+  Methods:
+  - handleFileUpload: Handles the file input change event and sets the created date based on the file's last modified date.
+  - submit: Validates the form and submits the document data to the server.
+  -->
   <q-page padding class="row col-grow justify-center q-pa-md" style="max-width: 700px">
     <q-card flat bordered class="col-grow q-pa-md">
       <!-- Form Section -->

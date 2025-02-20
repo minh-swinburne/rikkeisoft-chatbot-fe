@@ -1,4 +1,12 @@
 <template>
+  <!--
+  General description:
+  This component represents the authentication view, including login and registration forms. It handles user authentication and redirects.
+
+  Methods:
+  - handleSubmit: Handles the form submission and redirects on success.
+  - authenticate: Authenticates the user using a specified provider.
+  -->
   <q-page class="flex flex-center">
     <div class="q-py-xl q-px-md">
       <q-card class="q-pa-lg" bordered flat>

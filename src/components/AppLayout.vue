@@ -1,4 +1,11 @@
 <template>
+  <!--
+  General description:
+  This component represents the main layout for the application. It includes a header, a drawer for navigation, and a container for nested routes.
+
+  Methods:
+  - toggleLeftDrawer: Toggles the visibility of the left drawer.
+  -->
   <q-layout view="hHh LpR fFf">
     <q-header bordered>
       <q-toolbar>

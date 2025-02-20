@@ -1,4 +1,11 @@
 <template>
+  <!--
+  General description:
+  This component represents the login form. It allows users to log in using their username and password or via SSO providers.
+
+  Methods:
+  - login: Authenticates the user with the provided username and password.
+  -->
   <q-form @submit.prevent="emit('submit', login)">
     <q-input
       v-model="username"

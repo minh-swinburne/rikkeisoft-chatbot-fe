@@ -1,4 +1,12 @@
 <template>
+  <!--
+  General description:
+  This component represents the chat input field. It allows users to type and send messages.
+
+  Methods:
+  - sendMessage: Emits the send event with the current message.
+  - handleEnter: Handles the Enter key press to send the message or insert a newline.
+  -->
   <q-input
     ref="input"
     v-model="message"

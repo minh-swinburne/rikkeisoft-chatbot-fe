@@ -1,4 +1,11 @@
 <template>
+  <!-- 
+  General description: 
+  This component displays a user avatar with optional border and error handling for image loading.
+  
+  Methods:
+  - None
+  -->
   <q-avatar :class="{ bordered: props.bordered }">
     <q-img
       :src="avatarSrc || defaultAvatar"

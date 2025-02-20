@@ -1,4 +1,8 @@
 <template>
+  <!-- 
+  General description: 
+  This component provides a layout for configuration settings with tabs for different configuration sections.
+  -->
   <AppLayout :tabs="tabs" label="Configuration">
     <router-view />
   </AppLayout>

@@ -1,4 +1,8 @@
 <template>
+  <!-- 
+  General description: 
+  This component provides a form for configuring the answer generation task with tabs for different chatbot types.
+  -->
   <q-page padding class="col-grow" style="max-width: 800px">
     <q-card flat bordered class="q-pa-md">
       <q-tabs

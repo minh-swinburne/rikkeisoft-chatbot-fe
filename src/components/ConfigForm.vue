@@ -1,4 +1,13 @@
 <template>
+  <!-- 
+  General description: 
+  This component provides a form to view and edit configuration settings for a task.
+  
+  Methods:
+  - toggleEdit: Toggles the editing state and optionally saves the configuration.
+  - loadConfig: Loads the configuration settings from the server.
+  - saveConfig: Saves the configuration settings to the server.
+  -->
   <q-form @submit.prevent="saveConfig">
     <div class="row items-center justify-between q-mb-md">
       <h5 class="q-my-none">{{ props.name }}</h5>

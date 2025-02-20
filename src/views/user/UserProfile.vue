@@ -1,4 +1,12 @@
 <template>
+  <!-- 
+  General description:
+  This component displays the user's profile information, including their avatar, name, email, roles, and documents they have uploaded.
+
+  Methods:
+  - fetchUser: Fetches the user's profile information from the server.
+  - fetchDocuments: Fetches the list of documents uploaded by the user.
+  -->
   <q-page padding class="col-grow q-px-md q-py-xl q-mx-auto" :style="{ maxWidth: `min(100%, ${ $q.screen.gt.sm ? '1000px' : '666px' })` }">
     <!-- Main content wrapper -->
     <div class="row q-col-gutter-lg">

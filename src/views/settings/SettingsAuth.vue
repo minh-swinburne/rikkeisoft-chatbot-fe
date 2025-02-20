@@ -1,4 +1,15 @@
 <template>
+  <!-- 
+  General description:
+  This component handles the authentication settings for the user, including updating username and password, linking/unlinking SSO accounts, and deleting the account.
+
+  Methods:
+  - fetchUser: Fetches the current user data and SSO accounts.
+  - toggleEdit: Toggles the edit mode and optionally saves changes.
+  - toggleSSO: Links or unlinks an SSO account.
+  - saveChanges: Validates and saves the changes to the user's account.
+  - deleteAccount: Deletes the user's account after confirmation.
+  -->
   <q-page padding class="col-grow q-col-gutter-lg" style="max-width: 700px">
     <section>
       <div class="row items-center justify-between q-my-lg">

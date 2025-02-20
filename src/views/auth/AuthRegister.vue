@@ -1,4 +1,11 @@
 <template>
+  <!-- 
+  General description:
+  This component handles user registration. It includes form fields for username, first name, last name, email, password, and confirm password. It also provides options for single sign-on (SSO) with different providers.
+
+  Methods:
+  - register: Handles the user registration process by sending the user details to the server and managing the response.
+  -->
   <q-form @submit.prevent="emit('submit', register)">
     <q-input
       v-model="username"

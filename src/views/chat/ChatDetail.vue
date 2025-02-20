@@ -1,7 +1,22 @@
 <template>
-    <!-- ChatDetail.vue: This component represents the detailed view of a chat conversation. 
-         It includes a scrollable area for displaying chat messages, a sticky footer for chat input, 
-         and various UI elements for loading states, message types, and user interactions. -->
+  <!--
+  General description:
+  This component represents the detailed view of a chat. It handles displaying chat messages, loading states, and user interactions such as sending messages and applying suggestions.
+
+  Methods:
+  - reloadChat: Fetches messages and suggestions for the current chat.
+  - applySuggestion: Sends a message based on a suggestion.
+  - updateStickyWidth: Updates the width of the sticky chat input area.
+  - updateScrollArea: Updates the scroll area height based on the chat input height.
+  - scrollToBottom: Scrolls the chat view to the bottom.
+  - randomWidth: Generates a random width for skeleton loading elements.
+  - parseTime: Formats the message timestamp.
+  - setChatType: Sets the current chat type.
+  - sendMessage: Sends a user message and handles the bot's response.
+  - fetchMessages: Fetches chat messages from the server.
+  - fetchSuggestions: Fetches message suggestions from the server.
+  - parseMessage: Parses the message content into parts.
+  -->
   <q-page class="flex flex-col">
     <q-scroll-area
       ref="chatScrollArea"

@@ -1,4 +1,11 @@
 <template>
+  <!-- 
+  General description: 
+  This component displays the application logo with different styles for dark and light themes.
+  
+  Methods:
+  - None
+  -->
   <q-avatar>
     <svg
       xmlns="http://www.w3.org/2000/svg"

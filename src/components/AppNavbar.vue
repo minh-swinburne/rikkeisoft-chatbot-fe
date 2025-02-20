@@ -1,4 +1,13 @@
 <template>
+  <!--
+  General description:
+  This component represents the application navbar. It includes navigation tabs, user profile, and dark mode toggle.
+
+  Methods:
+  - logout: Logs out the current user.
+  - toggleDarkMode: Toggles the dark mode.
+  - handleTabChange: Handles tab change and navigation.
+  -->
   <q-toolbar>
     <router-link to="/" class="row items-center text-white" style="text-decoration: none">
       <app-logo size="30px" />

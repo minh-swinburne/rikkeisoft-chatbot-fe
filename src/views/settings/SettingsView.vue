@@ -1,4 +1,11 @@
 <template>
+  <!-- 
+  General description:
+  This component serves as the main layout for the settings section, providing navigation tabs to different settings pages.
+
+  Methods:
+  None
+  -->
   <AppLayout :tabs="tabs" label="Settings">
     <router-view />
   </AppLayout>

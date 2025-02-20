@@ -1,4 +1,8 @@
 <template>
+  <!-- 
+  General description: 
+  This component provides a form for configuring the message summarization task.
+  -->
   <q-page padding class="col-grow" style="max-width: 800px">
     <q-card flat bordered class="tw:px-8 tw:py-10">
       <ConfigForm task="message_summarization" name="Message Summarization" />

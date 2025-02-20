@@ -1,4 +1,11 @@
 <template>
+  <!--
+  General description:
+  This component represents the main layout for user-related views. It includes a header and a container for nested routes.
+
+  Methods:
+  No specific methods are defined in this component.
+  -->
   <q-layout view="hHh LpR fFf">
     <q-header bordered>
       <q-toolbar>

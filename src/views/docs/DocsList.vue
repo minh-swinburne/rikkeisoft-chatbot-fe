@@ -1,4 +1,17 @@
 <template>
+  <!--
+  General description:
+  This component displays a list of documents with search and filter functionalities. It allows users to preview, download, edit, and delete documents.
+
+  Methods:
+  - clearFilters: Clears all applied filters.
+  - fetchDocuments: Fetches the list of documents from the server.
+  - previewDocument: Previews a document.
+  - editDocument: Opens the edit form for a document.
+  - submitEditForm: Submits the edit form and updates the document.
+  - downloadDocument: Downloads a document.
+  - deleteDocument: Deletes a document.
+  -->
   <q-page padding class="row justify-center items-start q-pa-md" style="max-width: 700px">
     <div class="col-grow items-center q-mb-lg" style="width: 100%">
       <div class="row q-col-gutter-lg">

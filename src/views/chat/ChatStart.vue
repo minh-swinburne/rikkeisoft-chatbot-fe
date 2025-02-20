@@ -1,4 +1,12 @@
 <template>
+  <!--
+  General description:
+  This component represents the starting view of the chat application. It allows users to select a chat type and start a new chat by entering a message.
+
+  Methods:
+  - setChatType: Sets the current chat type.
+  - startChat: Creates a new chat and redirects to the chat detail view with the initial message.
+  -->
   <q-page class="flex flex-center">
     <div class="text-center" style="width: 100%">
       <h1 class="text-h3 q-mb-md q-mx-md" :class="{ 'text-white': $q.dark.isActive }">

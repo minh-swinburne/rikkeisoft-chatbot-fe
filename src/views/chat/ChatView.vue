@@ -1,4 +1,17 @@
 <template>
+  <!--
+  General description:
+  This component represents the main chat view, including the chat history and the current chat details. It allows users to create, rename, and delete chats.
+
+  Methods:
+  - toggleLeftDrawer: Toggles the visibility of the left drawer.
+  - sortChats: Sorts the chats based on the last access time.
+  - createNewChat: Redirects to the new chat creation view.
+  - fetchChats: Fetches the list of chats from the server.
+  - generateName: Generates a new name for a chat.
+  - renameChat: Renames a chat.
+  - deleteChat: Deletes a chat.
+  -->
   <q-layout view="hHh LpR fFf">
     <q-header bordered>
       <q-toolbar>

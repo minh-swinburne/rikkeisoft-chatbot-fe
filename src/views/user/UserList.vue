@@ -1,4 +1,16 @@
 <template>
+  <!--
+  General description:
+  This component displays a list of users with search and filter functionalities. It allows admins to assign/revoke roles and delete users.
+
+  Methods:
+  - clearFilters: Clears all applied filters.
+  - randomWidth: Generates a random width for skeleton loading elements.
+  - fetchUsers: Fetches the list of users from the server.
+  - assignAdmin: Assigns the admin role to a user.
+  - revokeAdmin: Revokes the admin role from a user.
+  - deleteUser: Deletes a user.
+  -->
   <q-page
     padding
     class="row justify-center items-start q-pa-md"

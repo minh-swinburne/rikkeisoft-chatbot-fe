@@ -1,4 +1,13 @@
 <template>
+  <!--
+  General description:
+  This component represents the home view of the application. It includes sections for features, how it works, developers, and a footer.
+
+  Methods:
+  - typeText: Types out the text character by character.
+  - switchText: Switches to the next text after a delay.
+  - startCursorBlink: Starts the cursor blinking animation.
+  -->
   <q-layout view="hHh LpR fFf">
     <q-header bordered>
       <q-toolbar>

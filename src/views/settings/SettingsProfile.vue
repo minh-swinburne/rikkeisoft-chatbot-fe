@@ -1,4 +1,16 @@
 <template>
+  <!-- 
+  General description:
+  This component allows users to view and edit their profile settings, including their avatar, name, and email.
+
+  Methods:
+  - fetchUser: Fetches the current user's profile information from the server.
+  - toggleEdit: Toggles the edit mode and optionally saves changes.
+  - previewImage: Previews the selected avatar image.
+  - uploadAvatar: Uploads the selected avatar image to the server.
+  - removeAvatar: Removes the current avatar.
+  - saveChanges: Saves the changes made to the user's profile.
+  -->
   <q-page padding class="col-grow" style="max-width: 800px">
     <div class="row items-center justify-between q-my-lg">
       <div class="text-h5">Profile Settings</div>

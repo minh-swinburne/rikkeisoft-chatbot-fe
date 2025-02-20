@@ -105,6 +105,7 @@
                 />
                 <div v-else v-html="marked(part.content)" style="line-height: 1.5;"></div>
               </template>
+              <MessageCopyButton :content="message.content" :class="`tw:absolute! tw:bottom-0! ${message.role === 'user' ? 'tw:right-full!' : 'tw:left-full!'} tw:mx-`" />
             </div>
           </q-chat-message>
         </template>
@@ -151,7 +152,7 @@
           :text-color="$q.dark.isActive ? '' : 'black'"
           icon="expand_more"
           direction="left"
-          class="q-mb-xs shadow-1 tw:self-end"
+          class="q-mb-xs shadow-1 tw:self-end scroll-down-btn"
           unelevated
           fab-mini
           @click="scrollToBottom(true)"
@@ -230,6 +231,7 @@
 <script setup>
 import ChatInput from '@/components/ChatInput.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
+import MessageCopyButton from '@/components/MessageCopyButton.vue'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
 import { camelize, escapeHtml } from '@/utils'
@@ -563,4 +565,13 @@ function parseMessage(content) {
     color: $link;
   }
 }
+
+.q-page-sticky {
+  pointer-events: none;
+}
+
+.q-page-sticky > * {
+  pointer-events: auto;
+}
+
 </style>

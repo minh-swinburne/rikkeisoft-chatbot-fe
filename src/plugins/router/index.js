@@ -23,6 +23,11 @@ const routes = [
         name: 'auth-register',
         component: () => import('@/views/auth/AuthRegister.vue'),
       },
+      {
+        path: 'forgot',
+        name: 'auth-forgot',
+        component: () => import('@/views/auth/AuthForgot.vue'),
+      }
     ],
   },
   {

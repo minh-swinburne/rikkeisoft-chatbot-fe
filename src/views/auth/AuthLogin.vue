@@ -38,7 +38,23 @@
         unelevated
       />
     </div>
+
+    <div class="q-mt-md">
+    <q-btn
+      :to="{ name: 'auth-forgot' }"
+      class="full-width"
+      label="Forgot Password?"
+      no-caps
+      flat
+    />
+  </div>
   </q-form>
+
+  <div class="row items-center q-py-sm">
+          <div class="col"><q-separator /></div>
+          <div class="col-auto q-px-sm text-grey">OR</div>
+          <div class="col"><q-separator /></div>
+        </div>
 
   <q-btn
     v-for="(provider, key) in ssoProviders"
@@ -71,6 +87,8 @@
       flat
     />
   </div>
+
+
 </template>
 
 <script setup>

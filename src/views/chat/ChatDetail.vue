@@ -1,4 +1,7 @@
 <template>
+    <!-- ChatDetail.vue: This component represents the detailed view of a chat conversation. 
+         It includes a scrollable area for displaying chat messages, a sticky footer for chat input, 
+         and various UI elements for loading states, message types, and user interactions. -->
   <q-page class="flex flex-col">
     <q-scroll-area
       ref="chatScrollArea"
@@ -293,7 +296,7 @@ onMounted(() => {
   chatType.value = $route.query.initialChatType || 'general'
 
   if (initialMessage) {
-    console.log('Initial message:', initialMessage)
+    // console.log('Initial message:', initialMessage)
     loading.value = false
     sendMessage(initialMessage).then(() => {
       // console.log('Renaming chat...')
@@ -404,7 +407,7 @@ function setChatType(model) {
 
 async function sendMessage(query) {
   if (!query) return
-  console.log('Sending message:', query)
+  // console.log('Sending message:', query)
 
   messages.value.push({
     role: 'user',
@@ -427,7 +430,7 @@ async function sendMessage(query) {
     )
 
     if (streaming) {
-      console.log('Streaming response...')
+      // console.log('Streaming response...')
       const reader = chatResponse.body.getReader()
       const decoder = new TextDecoder('utf-8')
 
@@ -452,9 +455,9 @@ async function sendMessage(query) {
         scrollToBottom()
       }
 
-      console.log('Streaming completed.')
+      // console.log('Streaming completed.')
     } else {
-      console.log('Non-streaming response received.')
+      // console.log('Non-streaming response received.')
       const responseData = await chatResponse.json()
       const botResponse = responseData.content
 
@@ -476,14 +479,14 @@ async function sendMessage(query) {
 
 async function fetchMessages() {
   try {
-    console.log('Fetching messages...')
+    // console.log('Fetching messages...')
     loading.value = true
     const response = await apiClient.chats.listMessages($route.params.chatId)
     messages.value = camelize(response.data)
     scrollToBottom(true)
   } catch (error) {
     if (error.status === 404) {
-      console.log('Chat not found. Redirecting to chat start...')
+      // console.log('Chat not found. Redirecting to chat start...')
       $router.push({ name: 'chat-start' })
     } else {
       console.error('Error fetching messages:', error)

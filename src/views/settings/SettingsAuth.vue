@@ -322,7 +322,7 @@ async function toggleSSO(provider) {
       const response = await ssoProviders[provider].link()
       userSSO.value.push(response.data)
 
-      console.log('Account linked:', userSSO.value)
+      // console.log('Account linked:', userSSO.value)
       $q.notify({
         type: 'positive',
         message: 'Account linked successfully',

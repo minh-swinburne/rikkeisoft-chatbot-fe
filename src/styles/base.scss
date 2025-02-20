@@ -1,0 +1,41 @@
+@import './quasar.variables.scss';
+
+:root {
+  // Primary Colors
+  --primary: #{$primary};
+  --secondary: #{$secondary};
+  --accent: #{$accent};
+
+  // Light & Dark Mode Colors
+  --light: #{$light};
+  --dark: #{$dark};
+  --dark-page: #{$dark-page};
+
+  // Status Colors
+  --positive: #{$positive};
+  --negative: #{$negative};
+  --info: #{$info};
+  --warning: #{$warning};
+
+  // Shadows & Effects
+  --shadow: #{$shadow};
+  --shadow-2: #{$shadow-2};
+
+  // Links
+  --link: #{$link};
+  --link-dark: #{$link-dark};
+
+  // Custom Colors
+  --light-red: #{$light-red};
+  --dark-red: #{$dark-red};
+
+  --grey-15: #{$grey-15};
+  --grey-16: #{$grey-16};
+  --grey-17: #{$grey-17};
+}
+
+// Dark Mode Variables (Optional)
+.body--dark {
+  --background: var(--dark);
+  --text-color: var(--light);
+}

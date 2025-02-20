@@ -168,7 +168,7 @@ async function fetchUser() {
     roles.value = userData.roles
     joinedDate.value = new Date(userData.created_time.slice(0, 10))
 
-    console.log(typeof joinedDate.value)
+    // console.log(typeof joinedDate.value)
   } catch (error) {
     console.error('Error fetching user profile:', error)
     $q.notify({
@@ -222,7 +222,7 @@ async function saveChanges() {
       await apiClient.users.deleteAvatar()
     }
 
-    console.log(avatarUrl.value)
+    // console.log(avatarUrl.value)
     const response = await apiClient.users.updateCurrentUser({
       firstname: firstname.value || null,
       lastname: lastname.value || null,

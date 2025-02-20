@@ -174,7 +174,7 @@ router.beforeEach(async (to, from, next) => {
   if (isValidToken && !authStore.isAuthenticated) {
     authStore.hydrateUser()
   }
-  if (requiresAdmin && !authStore.isAdmin) {
+  if (requiresAdmin && !authStore.isAdmin && !authStore.isSystemAdmin) {
     next({ name: 'error-403' })
     return
   }

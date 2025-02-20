@@ -1,5 +1,9 @@
 <template>
-  <q-page padding class="row justify-center items-start q-pa-md" style="max-width: 1000px">
+  <q-page
+    padding
+    class="row justify-center items-start q-pa-md"
+    style="max-width: min(100%, 1000px)"
+  >
     <div class="col-grow items-center q-mb-lg" style="width: 100%">
       <div class="row q-col-gutter-lg tw:mb-5">
         <div class="col-grow">
@@ -68,7 +72,7 @@
               <q-skeleton animation="blink" width="30px" />
             </th>
             <th>
-              <q-skeleton animation="blink" width="75px" />
+              <q-skeleton animation="blink" width="100px" />
             </th>
             <th></th>
           </tr>
@@ -114,7 +118,17 @@
         </tbody>
       </q-markup-table>
 
-      <q-table v-else :rows="filteredUsers" :columns="columns" row-key="id" bordered flat>
+      <q-table
+        v-else
+        :rows="filteredUsers"
+        :columns="columns"
+        :table-header-class="$q.dark.isActive ? 'bg-grey-14' : 'bg-grey-3'"
+        row-key="id"
+        separator="none"
+        no-data-label="No users found"
+        class="table-stripe table-sticky-last-col"
+        flat
+      >
         <template #body-cell-avatar="props">
           <q-td>
             <UserAvatar :src="props.row.avatar_url" size="30px" class="q-mx-auto" />
@@ -142,21 +156,62 @@
         </template>
 
         <template #body-cell-actions="props">
-          <q-td class="q-gutter-x-sm q-mr-md">
+          <q-td
+            class="q-gutter-x-sm tw:pl-3! tw:bg-linear-to-r tw:from-transparent tw:to-inherit tw:to-[13px]"
+            no-hover
+          >
             <q-btn
               :to="{ name: 'user-profile', params: { userId: props.row.id } }"
               icon="open_in_new"
               target="_blank"
               fab-mini
-            />
-            <q-btn
-              v-if="authStore.isSystemAdmin"
-              color="negative"
-              icon="delete"
-              fab-mini
-              flat
-              @click="deleteUser(props.row)"
-            />
+            >
+              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 5]"
+                >View Profile</q-tooltip
+              >
+            </q-btn>
+
+            <q-btn v-if="authStore.isSystemAdmin" :loading="editing" icon="more_vert" fab-mini>
+              <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 5]">More</q-tooltip>
+
+              <q-menu style="width: 180px" auto-close>
+                <q-list>
+                  <q-item
+                    v-if="props.row.roles.some((role) => role.name === 'admin')"
+                    clickable
+                    v-ripple
+                    @click="revokeAdmin(props.row.id)"
+                  >
+                    <q-item-section avatar>
+                      <q-icon name="remove_moderator" />
+                    </q-item-section>
+
+                    <q-item-section>Revoke Admin</q-item-section>
+                  </q-item>
+
+                  <q-item v-else clickable v-ripple @click="assignAdmin(props.row.id)">
+                    <q-item-section avatar>
+                      <q-icon name="add_moderator" />
+                    </q-item-section>
+
+                    <q-item-section>Assign Admin</q-item-section>
+                  </q-item>
+
+                  <q-item
+                    class="text-negative"
+                    clickable
+                    v-ripple
+                    @click="deleteUser(props.row.id)"
+                  >
+                    <q-item-section avatar>
+                      <q-icon name="delete" />
+                    </q-item-section>
+
+                    <q-item-section>Delete</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
           </q-td>
         </template>
       </q-table>
@@ -177,7 +232,7 @@ const authStore = useAuthStore()
 const users = ref([])
 
 const loading = ref(true)
-const deleting = ref(false)
+const editing = ref(false)
 
 const searchQuery = ref('')
 const filterRolesMatchAll = ref(false)
@@ -224,7 +279,7 @@ const columns = [
   },
   {
     name: 'createdTime',
-    label: 'Joined',
+    label: 'Joined Date',
     align: 'left',
     field: 'created_time',
     sortable: true,
@@ -289,10 +344,57 @@ async function fetchUsers() {
   }
 }
 
-async function deleteUser(user) {
+async function assignAdmin(userId) {
+  console.log('Assigning admin to user:', userId)
   $q.dialog({
-    title: 'Confirm Deletion',
-    message: `Are you sure you want to delete user with ID <a href="/user/profile/${user.id}" target="_blank" class="link tw:underline">${user.id}</a>?`,
+    title: 'Assign Admin Role',
+    message: `
+      <p class="q-mb-sm">Are you sure you want to assign admin role to user with ID <a href="/user/profile/${userId}" target="_blank" class="link tw:underline">${userId}</a>? This user will have access to admin features, including:</p>
+      <ul class="tw:pl-5 tw:list-disc">
+        <li>Viewing all users</li>
+        <li>Viewing and managing all documents (download, edit, delete)</li>
+        <li>Uploading new documents</li>
+        <li>Viewing and managing chatbot configurations</li>
+      </ul>`,
+    html: true,
+    ok: {
+      color: 'primary',
+      label: 'Yes',
+      unelevated: true,
+    },
+    cancel: {
+      color: $q.dark.isActive ? 'white' : 'black',
+      label: 'No',
+      flat: true,
+    },
+  }).onOk(async () => {
+    editing.value = true
+    try {
+      await apiClient.users.assignRole(userId, 'admin')
+      const user = users.value.find((user) => user.id === userId)
+      user.roles.push({ name: 'admin' })
+
+      $q.notify({
+        type: 'positive',
+        message: 'Admin role assigned successfully',
+      })
+    } catch (error) {
+      console.error('Error assigning admin role:', error)
+      $q.notify({
+        type: 'negative',
+        message: 'Failed to assign admin role',
+      })
+    }
+    editing.value = false
+  })
+}
+
+async function revokeAdmin(userId) {
+  console.log('Revoking admin from user:', userId)
+  $q.dialog({
+    title: 'Revoke Admin Role',
+    message: `
+      <p class="q-mb-sm">Are you sure you want to revoke admin role from user with ID <a href="/user/profile/${userId}" target="_blank" class="link tw:underline">${userId}</a>? This user will lose access to admin features and will only have employee access.</p>`,
     html: true,
     ok: {
       color: 'negative',
@@ -305,14 +407,57 @@ async function deleteUser(user) {
       flat: true,
     },
   }).onOk(async () => {
-    deleting.value = true
+    editing.value = true
     try {
-      await apiClient.users.deleteUser(user.id)
-      users.value = users.value.filter((usr) => usr.id !== user.id)
+      await apiClient.users.revokeRole(userId, 'admin')
+      const user = users.value.find((user) => user.id === userId)
+      user.roles = user.roles.filter((role) => role.name !== 'admin')
 
       $q.notify({
         type: 'positive',
-        message: 'Document deleted successfully',
+        message: 'Admin role revoked successfully',
+      })
+    } catch (error) {
+      console.error('Error revoking admin role:', error)
+      $q.notify({
+        type: 'negative',
+        message: 'Failed to revoke admin role',
+      })
+    }
+    editing.value = false
+  })
+}
+
+async function deleteUser(userId) {
+  $q.dialog({
+    title: 'Confirm Deletion',
+    message: `
+      <p>Are you sure you want to delete user with ID <a href="/user/profile/${userId}" target="_blank" class="link tw:underline">${userId}</a>? This action will:</p>
+      <ul class="tw:pl-5 tw:list-disc">
+        <li>Permanently delete this user</li>
+        <li>Remove all chat history belonging to this user</li>
+        <li>Keep all documents uploaded by this user</li>
+      </ul>`,
+    html: true,
+    ok: {
+      color: 'negative',
+      label: 'Yes',
+      unelevated: true,
+    },
+    cancel: {
+      color: $q.dark.isActive ? 'white' : 'black',
+      label: 'No',
+      flat: true,
+    },
+  }).onOk(async () => {
+    editing.value = true
+    try {
+      await apiClient.users.deleteUser(userId)
+      users.value = users.value.filter((user) => user.id !== userId)
+
+      $q.notify({
+        type: 'positive',
+        message: 'User deleted successfully',
       })
     } catch (error) {
       console.error('Error deleting user:', error)
@@ -321,7 +466,7 @@ async function deleteUser(user) {
         message: 'Failed to delete user',
       })
     }
-    deleting.value = false
+    editing.value = false
   })
 }
 </script>

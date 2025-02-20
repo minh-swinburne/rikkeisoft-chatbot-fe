@@ -1,6 +1,6 @@
 {
   "name": "rikkeigpt-fe",
-  "version": "0.4.7",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
-    "bump": "npm version patch --no-git-tag-version",
+    "patch": "npm version patch --no-git-tag-version",
+    "minor": "npm version minor --no-git-tag-version",
+    "major": "npm version major --no-git-tag-version",
     "prepare": "husky"
   },
   "dependencies": {

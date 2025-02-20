@@ -198,7 +198,7 @@
               @click="previewDocument(document)"
             />
             <q-btn
-              v-if="authStore.isAdmin"
+              v-if="authorized"
               :loading="downloading && document == currentDocument"
               color="positive"
               icon="download"
@@ -207,7 +207,7 @@
               @click="downloadDocument(document)"
             />
             <q-btn
-              v-if="authStore.isAdmin"
+              v-if="authorized"
               color="warning"
               icon="edit"
               label="Edit"
@@ -215,7 +215,7 @@
               @click="editDocument(document)"
             />
             <q-btn
-              v-if="authStore.isAdmin"
+              v-if="authorized"
               :loading="deleting && document == currentDocument"
               color="negative"
               icon="delete"
@@ -354,6 +354,10 @@ const availableCategories = ref([
   'Technical Documentation',
 ])
 
+const authorized = computed(() => {
+  return authStore.isAdmin || authStore.isSystemAdmin
+})
+
 const totalPages = computed(() => {
   return Math.ceil(filteredDocuments.value.length / itemsPerPage)
 })
@@ -396,7 +400,7 @@ function clearFilters() {
   filterCatMatchAll.value = false
   filterCatSelected.value = []
   filterCreator.value = ''
-  filterAccess.value = false
+  filterAccess.value = null
 }
 
 async function fetchDocuments() {
@@ -510,52 +514,39 @@ async function downloadDocument(doc) {
 }
 
 async function deleteDocument(document) {
-  try {
-    $q.dialog({
-      title: 'Confirm Deletion',
-      message: `Are you sure you want to delete "${document.title}"?`,
-      ok: {
-        color: 'negative',
-        label: 'Yes',
-        unelevated: true,
-      },
-      cancel: {
-        color: $q.dark.isActive ? 'white' : 'black',
-        label: 'No',
-        flat: true,
-      },
-    }).onOk(async () => {
-      deleting.value = true
-      currentDocument.value = document
-      try {
-        await apiClient.docs.deleteDoc(document.id)
-        documents.value = documents.value.filter((doc) => doc.id !== document.id)
+  $q.dialog({
+    title: 'Confirm Deletion',
+    message: `Are you sure you want to delete "${document.title}"?`,
+    ok: {
+      color: 'negative',
+      label: 'Yes',
+      unelevated: true,
+    },
+    cancel: {
+      color: $q.dark.isActive ? 'white' : 'black',
+      label: 'No',
+      flat: true,
+    },
+  }).onOk(async () => {
+    deleting.value = true
+    currentDocument.value = document
+    try {
+      await apiClient.docs.deleteDoc(document.id)
+      documents.value = documents.value.filter((doc) => doc.id !== document.id)
 
-        $q.notify({
-          color: 'positive',
-          message: 'Document deleted successfully',
-          icon: 'check',
-        })
-      } catch (error) {
-        console.error('Error deleting document:', error)
-        $q.notify({
-          color: 'negative',
-          message: 'Failed to delete document',
-          icon: 'report_problem',
-        })
-      }
-      deleting.value = false
-    })
-  } catch (error) {
-    if (error) {
+      $q.notify({
+        type: 'positive',
+        message: 'Document deleted successfully',
+      })
+    } catch (error) {
       console.error('Error deleting document:', error)
       $q.notify({
-        color: 'negative',
+        type: 'negative',
         message: 'Failed to delete document',
-        icon: 'report_problem',
       })
     }
-  }
+    deleting.value = false
+  })
 }
 </script>
 

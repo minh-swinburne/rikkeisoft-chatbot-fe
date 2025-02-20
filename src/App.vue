@@ -44,6 +44,32 @@ p, #{$headings}, #{$text-classes}, .ellipsis {
   color: $primary;
 }
 
+.table-stripe {
+  tbody {
+    tr:nth-child(odd) {
+      background-color: white;
+      --tw-gradient-to: white;
+    }
+    tr:nth-child(even) {
+      background-color: $grey-2;
+      --tw-gradient-to: #{$grey-2};
+    }
+  }
+}
+
+.table-sticky-last-col {
+  th:last-child,
+  td:last-child {
+    position: sticky;
+    right: -1px;
+    z-index: 1;
+  }
+
+  td:last-child {
+    background-color: transparent !important;
+  }
+}
+
 .q-page .q-list {
   background: white;
 }
@@ -55,6 +81,10 @@ p, #{$headings}, #{$text-classes}, .ellipsis {
 .q-tabs .q-tabs__arrow {
   display: flex;
   align-items: center;
+}
+
+.q-item__section--avatar {
+  min-width: 40px !important;
 }
 
 input:is(:-webkit-autofill, :autofill) {
@@ -84,6 +114,19 @@ input:is(:-webkit-autofill, :autofill) {
 
   .link {
     color: $link;
+  }
+
+  .table-stripe {
+    tbody {
+      tr:nth-child(odd) {
+        background-color: $grey-15;
+        --tw-gradient-to: #{$grey-15};
+      }
+      tr:nth-child(even) {
+        background-color: $grey-16;
+        --tw-gradient-to: #{$grey-16};
+      }
+    }
   }
 
   .q-header,

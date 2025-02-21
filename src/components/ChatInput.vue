@@ -12,15 +12,15 @@
     v-model="message"
     :dark="$q.dark.isActive"
     :input-style="{ maxHeight: `${maxHeight}px` }"
+    :standout="`bg-shadow`"
     placeholder="Ask something..."
-    input-class="chat-input q-pl-sm q-py-md"
+    :input-class="`chat-input q-pl-sm q-py-md ${$q.dark.isActive ? 'text-white' : 'text-black'}`"
     autogrow
-    outlined
     rounded
     @keydown.enter.prevent="handleEnter"
   >
     <template #append>
-      <q-btn @click="sendMessage" icon="send" round flat />
+      <q-btn :color="$q.dark.isActive ? 'white' : 'black'" icon="send" round flat @click="sendMessage" />
     </template>
   </q-input>
 </template>

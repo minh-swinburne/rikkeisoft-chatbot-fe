@@ -42,7 +42,7 @@
                   :options="availableCategories"
                   class="q-mt-sm"
                   multiple
-                  outlined
+                  filled
                   dense
                 >
                   <template #selected-item="scope">
@@ -62,7 +62,7 @@
 
               <q-card-section class="q-py-none">
                 <div class="text-h6">Creator</div>
-                <q-input v-model="filterCreator" class="q-mt-sm" outlined dense />
+                <q-input v-model="filterCreator" class="q-mt-sm" filled dense />
               </q-card-section>
 
               <q-card-section>
@@ -76,7 +76,7 @@
                   color="primary"
                   class="q-mt-sm"
                   clearable
-                  outlined
+                  filled
                   dense
                 />
               </q-card-section>
@@ -92,13 +92,7 @@
     </div>
 
     <!-- LOADING SKELETONS -->
-    <q-list
-      v-if="loading"
-      class="col-grow rounded-borders"
-      style="width: 100%"
-      bordered
-      separator
-    >
+    <q-list v-if="loading" class="col-grow rounded-borders" style="width: 100%" bordered separator>
       <q-item v-for="i in itemsPerPage" :key="i" class="q-py-md column">
         <q-item-section class="col-grow q-mt-sm">
           <q-skeleton type="rect" width="100%" />
@@ -277,20 +271,15 @@
       </q-card-section>
       <q-card-section>
         <q-form class="q-gutter-md" @submit="submitEditForm">
-          <q-input v-model="editFormData.title" label="Title" outlined required />
-          <q-input
-            v-model="editFormData.description"
-            type="textarea"
-            label="Description"
-            outlined
-          />
+          <q-input v-model="editFormData.title" label="Title" filled required />
+          <q-input v-model="editFormData.description" type="textarea" label="Description" filled />
           <q-select
             v-model="editFormData.categories"
             :options="availableCategories"
             label="Categories"
             use-chips
             multiple
-            outlined
+            filled
           />
 
           <q-option-group

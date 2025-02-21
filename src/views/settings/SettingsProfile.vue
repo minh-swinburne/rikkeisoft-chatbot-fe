@@ -1,5 +1,5 @@
 <template>
-  <!-- 
+  <!--
   General description:
   This component allows users to view and edit their profile settings, including their avatar, name, and email.
 
@@ -90,10 +90,22 @@
             <q-chip
               v-for="role in roles"
               :key="role.id"
-              :color="role.name === 'system_admin' ? 'primary' : role.name === 'admin' ? 'secondary' : 'positive'"
+              :color="
+                role.name === 'system_admin'
+                  ? 'primary'
+                  : role.name === 'admin'
+                    ? 'secondary'
+                    : 'positive'
+              "
               class="text-uppercase text-bold"
             >
-              {{ role.name === 'system_admin' ? 'System Admin' : role.name === 'admin' ? 'Admin' : 'Employee' }}
+              {{
+                role.name === 'system_admin'
+                  ? 'System Admin'
+                  : role.name === 'admin'
+                    ? 'Admin'
+                    : 'Employee'
+              }}
             </q-chip>
           </div>
         </div>
@@ -106,7 +118,7 @@
               <q-input
                 v-model="firstname"
                 label="First name"
-                outlined
+                filled
                 required
                 autofocus
                 :readonly="!editing"
@@ -114,7 +126,7 @@
               />
             </div>
             <div class="col-12 col-sm-6">
-              <q-input v-model="lastname" :readonly="!editing" label="Last name" outlined />
+              <q-input v-model="lastname" :readonly="!editing" label="Last name" filled />
             </div>
           </div>
         </div>
@@ -125,7 +137,7 @@
           <q-input
             v-model="email"
             type="email"
-            outlined
+            filled
             :readonly="true"
             :rules="[(val) => !!val || 'Email is required', isValidEmail]"
           />

@@ -45,7 +45,7 @@
                   :options="filterRolesOptions"
                   class="q-mt-sm"
                   multiple
-                  outlined
+                  filled
                   dense
                 />
               </q-card-section>

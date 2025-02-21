@@ -559,22 +559,27 @@ function parseMessage(content) {
   }
 }
 
-.q-message-text {
-  padding: 12px;
-}
-
 .q-message-name--sent {
   justify-self: flex-end;
 }
 
-.q-message-text a {
-  color: $primary;
-}
+.q-message-text {
+  padding: 12px;
 
-.q-message-text :not(li) > {
-  ul,
-  ol {
-    margin-top: -8px;
+  a {
+    color: $primary;
+  }
+
+  :not(li) > {
+    ul,
+    ol {
+      margin-top: -8px;
+    }
+  }
+
+  .v-code-block {
+    margin-top: 8px;
+    margin-bottom: 16px;
   }
 }
 
@@ -591,5 +596,4 @@ function parseMessage(content) {
 .q-page-sticky > * {
   pointer-events: auto;
 }
-
 </style>

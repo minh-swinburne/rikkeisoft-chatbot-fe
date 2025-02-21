@@ -11,7 +11,7 @@
     <div class="q-py-xl q-px-md">
       <q-card class="q-pa-lg" bordered flat>
         <q-card-section>
-          <router-link to="/home" class="q-mb-md q-gutter-md flex flex-center">
+          <router-link to="/home" class="q-gutter-md flex flex-center">
             <q-img
               src="@/assets/rikkeiGPT.svg"
               alt="RikkeiGPT"

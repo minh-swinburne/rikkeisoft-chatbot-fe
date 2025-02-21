@@ -6,14 +6,16 @@
   Methods:
   - login: Authenticates the user with the provided username and password.
   -->
+  <h5 class="q-mb-md">Login</h5>
+
   <q-form @submit.prevent="emit('submit', login)">
     <q-input
       v-model="username"
       autocomplete="username"
       label="Username"
-      outlined
       autofocus
       required
+      outlined
       :rules="[(val) => !!val || 'Username or Email is required']"
     />
 
@@ -21,8 +23,8 @@
       v-model="password"
       autocomplete="current-password"
       label="Password"
-      outlined
       required
+      outlined
       :type="isPwd ? 'password' : 'text'"
       :rules="[(val) => !!val || 'Password is required']"
     >
@@ -47,21 +49,21 @@
     </div>
 
     <div class="q-mt-md">
-    <q-btn
-      :to="{ name: 'auth-forgot' }"
-      class="full-width"
-      label="Forgot Password?"
-      no-caps
-      flat
-    />
-  </div>
+      <q-btn
+        :to="{ name: 'auth-forgot' }"
+        class="full-width"
+        label="Forgot Password?"
+        no-caps
+        flat
+      />
+    </div>
   </q-form>
 
   <div class="row items-center q-py-sm">
-          <div class="col"><q-separator /></div>
-          <div class="col-auto q-px-sm text-grey">OR</div>
-          <div class="col"><q-separator /></div>
-        </div>
+    <div class="col"><q-separator /></div>
+    <div class="col-auto q-px-sm text-grey">OR</div>
+    <div class="col"><q-separator /></div>
+  </div>
 
   <q-btn
     v-for="(provider, key) in ssoProviders"
@@ -74,11 +76,7 @@
   >
     <template #default>
       <div class="row items-center no-wrap">
-        <q-icon
-          :name="`img:${provider.logo}`"
-          size="18px"
-          class="q-mr-sm"
-        />
+        <q-icon :name="`img:${provider.logo}`" size="18px" class="q-mr-sm" />
         <div>Continue with {{ provider.name }}</div>
       </div>
     </template>
@@ -94,8 +92,6 @@
       flat
     />
   </div>
-
-
 </template>
 
 <script setup>

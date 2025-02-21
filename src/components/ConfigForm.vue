@@ -1,8 +1,8 @@
 <template>
-  <!-- 
-  General description: 
+  <!--
+  General description:
   This component provides a form to view and edit configuration settings for a task.
-  
+
   Methods:
   - toggleEdit: Toggles the editing state and optionally saves the configuration.
   - loadConfig: Loads the configuration settings from the server.
@@ -53,7 +53,7 @@
         type="textarea"
         input-style="padding-top: 6px"
         autogrow
-        outlined
+        filled
       />
     </div>
 
@@ -65,7 +65,7 @@
         type="textarea"
         input-style="padding-top: 6px"
         autogrow
-        outlined
+        filled
       />
     </div>
 
@@ -76,7 +76,7 @@
         :options="config.modelOptions"
         :readonly="!editing"
         class="col-grow"
-        outlined
+        filled
       />
     </div>
 
@@ -91,7 +91,7 @@
         step="100"
         min="100"
         max="5000"
-        outlined
+        filled
       />
     </div>
 
@@ -105,7 +105,7 @@
         type="number"
         min="1"
         max="8192"
-        outlined
+        filled
       />
     </div>
 
@@ -120,18 +120,13 @@
         step="0.1"
         min="0"
         max="1"
-        outlined
+        filled
       />
     </div>
 
     <div class="row items-center q-my-lg q-gutter-y-sm">
       <div class="col text-subtitle1">Stream</div>
-      <q-toggle
-        v-model="config.stream"
-        :disable="!editing"
-        color="primary"
-        class="col-grow"
-      />
+      <q-toggle v-model="config.stream" :disable="!editing" color="primary" class="col-grow" />
     </div>
   </q-form>
 </template>
@@ -205,7 +200,7 @@ async function loadConfig(refresh = false) {
 async function saveConfig() {
   loading.value = true
   try {
-    const response = await apiClient.config.updateConfig(props.task, props.tab, config.value)
+    await apiClient.config.updateConfig(props.task, props.tab, config.value)
     // console.log('Updated config:', response.data)
     $q.notify({
       type: 'positive',

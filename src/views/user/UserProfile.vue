@@ -1,5 +1,5 @@
 <template>
-  <!-- 
+  <!--
   General description:
   This component displays the user's profile information, including their avatar, name, email, roles, and documents they have uploaded.
 
@@ -7,7 +7,11 @@
   - fetchUser: Fetches the user's profile information from the server.
   - fetchDocuments: Fetches the list of documents uploaded by the user.
   -->
-  <q-page padding class="col-grow q-px-md q-py-xl q-mx-auto" :style="{ maxWidth: `min(100%, ${ $q.screen.gt.sm ? '1000px' : '666px' })` }">
+  <q-page
+    padding
+    class="col-grow q-px-md q-py-xl q-mx-auto"
+    :style="{ maxWidth: `min(100%, ${$q.screen.gt.sm ? '1000px' : '666px'})` }"
+  >
     <!-- Main content wrapper -->
     <div class="row q-col-gutter-lg">
       <!-- Left column - Avatar section -->
@@ -24,8 +28,18 @@
             <span>Joined {{ date.formatDate(joinedDate, 'MMMM D, YYYY') }}</span>
           </div>
 
-          <q-chip v-if="roles.some((role) => role.name === 'system_admin')" color="primary" class="text-uppercase text-bold">System Admin</q-chip>
-          <q-chip v-else-if="roles.some((role) => role.name === 'admin')" color="secondary" class="text-uppercase text-bold">Admin</q-chip>
+          <q-chip
+            v-if="roles.some((role) => role.name === 'system_admin')"
+            color="primary"
+            class="text-uppercase text-bold"
+            >System Admin</q-chip
+          >
+          <q-chip
+            v-else-if="roles.some((role) => role.name === 'admin')"
+            color="secondary"
+            class="text-uppercase text-bold"
+            >Admin</q-chip
+          >
           <q-chip v-else color="positive" class="text-uppercase text-bold">Employee</q-chip>
         </div>
       </div>
@@ -44,14 +58,14 @@
                     <q-input
                       v-model="firstname"
                       label="First name"
-                      outlined
+                      filled
                       required
                       autofocus
                       :readonly="true"
                     />
                   </div>
                   <div class="col-12 col-sm-6">
-                    <q-input v-model="lastname" label="Last name" outlined :readonly="true" />
+                    <q-input v-model="lastname" label="Last name" filled :readonly="true" />
                   </div>
                 </div>
               </div>
@@ -59,7 +73,7 @@
               <!-- Email Section -->
               <div>
                 <div class="text-subtitle1 q-mb-sm">Email</div>
-                <q-input v-model="email" type="email" outlined :readonly="true" />
+                <q-input v-model="email" type="email" filled :readonly="true" />
               </div>
             </q-form>
           </q-card-section>

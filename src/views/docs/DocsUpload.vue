@@ -1,7 +1,7 @@
 <template>
-  <!-- 
-  General description: 
-  This component provides a form for uploading documents either via file upload or web link. 
+  <!--
+  General description:
+  This component provides a form for uploading documents either via file upload or web link.
   It includes fields for document title, description, categories, creation date, and access control.
 
   Methods:
@@ -9,16 +9,16 @@
   - submit: Validates the form and submits the document data to the server.
   -->
   <q-page padding class="row col-grow justify-center q-pa-md" style="max-width: 700px">
-    <q-card flat bordered class="col-grow q-pa-md">
+    <q-card flat bordered class="col-grow q-pa-lg">
       <!-- Form Section -->
       <q-form ref="uploadForm" @submit.prevent="submit">
         <!-- Tabs for File or Weblink Upload -->
-        <q-tabs v-model="activeTab" class="q-mb-md" active-color="primary">
+        <q-tabs v-model="activeTab" active-color="primary">
           <q-tab name="file" label="File Upload" />
           <q-tab name="link" label="Web Link Upload" />
         </q-tabs>
 
-        <q-separator />
+        <q-separator class="q-my-md" />
 
         <!-- File / Weblink Input Section -->
         <q-file
@@ -28,8 +28,8 @@
           label="Choose File *"
           accept=".pdf, .doc, .docx, .xls, .xlsx"
           class="q-mb-md"
-          outlined
           required
+          filled
           @input="handleFileUpload"
           :rules="[(val) => !!val || 'Field is required']"
         >
@@ -45,7 +45,7 @@
           label="Enter Weblink *"
           placeholder="https://example.com"
           class="q-mb-md"
-          outlined
+          filled
           required
           :rules="[(val) => !!val || 'Field is required']"
         />
@@ -56,7 +56,7 @@
           name="title"
           label="Document Title *"
           class="q-mb-md"
-          outlined
+          filled
           required
           :rules="[(val) => !!val || 'Field is required']"
         />
@@ -67,7 +67,7 @@
           label="Description"
           type="textarea"
           class="q-mb-md"
-          outlined
+          filled
         />
 
         <q-select
@@ -78,7 +78,7 @@
           class="q-mb-md"
           type="checkbox"
           multiple
-          outlined
+          filled
           required
           :rules="[(val) => val.length > 0 || 'Field is required']"
         />
@@ -91,7 +91,7 @@
           label="Day Created"
           type="date"
           class="q-mb-md"
-          outlined
+          filled
         />
 
         <q-input
@@ -99,7 +99,7 @@
           name="creator"
           label="Creator (Email) *"
           class="q-mb-md"
-          outlined
+          filled
           required
           :rules="[(val) => !!val || 'Field is required']"
         />
@@ -206,12 +206,12 @@ async function submit() {
     })
 
     // Debug FormData entries
-    for (let [key, value] of formData.entries()) {
-      // console.log(`${key}:`, value)
-    }
+    // for (let [key, value] of formData.entries()) {
+    //   console.log(`${key}:`, value)
+    // }
 
     try {
-      const response = await apiClient.docs.uploadDoc(formData)
+      await apiClient.docs.uploadDoc(formData)
 
       // console.log('Upload success:', response.data)
       $q.notify({

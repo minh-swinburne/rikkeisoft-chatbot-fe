@@ -1,5 +1,5 @@
 <template>
-  <!-- 
+  <!--
   General description:
   This component handles the authentication settings for the user, including updating username and password, linking/unlinking SSO accounts, and deleting the account.
 
@@ -44,7 +44,7 @@
               v-model="authStore.user.sub"
               :type="showUserId ? 'text' : 'password'"
               readonly
-              outlined
+              filled
             >
               <template #append>
                 <q-icon
@@ -63,7 +63,7 @@
               v-model="newUsername"
               maxlength="20"
               counter
-              outlined
+              filled
               :readonly="!editing"
               :rules="editing ? usernameRules : []"
             />
@@ -76,7 +76,7 @@
               v-model="oldPassword"
               autocomplete="off"
               type="Password"
-              outlined
+              filled
               :readonly="!editing"
               :rules="editing ? oldPasswordRules : []"
             />
@@ -88,7 +88,7 @@
               v-model="newPassword"
               autocomplete="new-password"
               :type="showPwd ? 'text' : 'password'"
-              outlined
+              filled
               :readonly="!editing"
               :rules="editing ? newPasswordRules : []"
             >
@@ -108,7 +108,7 @@
               v-model="confirmPassword"
               autocomplete="new-password"
               type="password"
-              outlined
+              filled
               :readonly="!editing"
               :rules="editing ? confirmPasswordRules : []"
             />
@@ -216,13 +216,16 @@ const usernameRules = [
     username.value === newUsername.value ||
     !usernameLastChanged.value ||
     usernameChangedDelta.value >= 30 ||
-    'You can only change your username once in 30 days. Last change was ' + usernameChangedDelta.value + ' days ago',
+    'You can only change your username once in 30 days. Last change was ' +
+      usernameChangedDelta.value +
+      ' days ago',
 ]
 
 const oldPasswordRules = [(val) => !!val || !username.value || 'Current password required']
 
 const newPasswordRules = [
-  (val) => !!val || (username.value && username.value !== newUsername.value) || 'New password required',
+  (val) =>
+    !!val || (username.value && username.value !== newUsername.value) || 'New password required',
   (val) => !val || val.length >= 8 || 'Password must be at least 8 characters',
   (val) => val !== oldPassword.value || 'New password cannot be the same as old password',
 ]

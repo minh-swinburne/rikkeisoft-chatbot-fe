@@ -1,6 +1,6 @@
 {
   "name": "rikkeigpt-fe",
-  "version": "0.5.4",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -21,6 +21,7 @@
     "@wdns/vue-code-block": "^2.3.5",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
+    "inferencejs": "^1.0.21",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "marked": "^15.0.6",

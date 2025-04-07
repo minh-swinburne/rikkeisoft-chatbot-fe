@@ -136,6 +136,13 @@ const routes = [
     name: 'diet',
     component: () => import('@/views/diet/DietView.vue'),
     meta: { requiresAuth: true },
+    children: [
+      {
+        path: 'detection',
+        name: 'diet-detection',
+        component: () => import('@/views/diet/DietDetection.vue'),
+      },
+    ],
   },
   {
     path: '/error',

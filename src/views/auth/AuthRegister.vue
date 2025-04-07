@@ -115,6 +115,12 @@
     </div>
   </q-form>
 
+  <div class="row items-center q-py-sm q-mt-sm">
+    <div class="col"><q-separator /></div>
+    <div class="col-auto q-px-sm text-grey">OR</div>
+    <div class="col"><q-separator /></div>
+  </div>
+
   <q-btn
     v-for="(provider, key) in ssoProviders"
     :key="key"

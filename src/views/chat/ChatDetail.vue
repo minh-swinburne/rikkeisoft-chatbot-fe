@@ -100,6 +100,7 @@
               boxShadow: 'none',
             }"
             :stamp="parseTime(message.time)"
+            class="q-mb-md"
           >
             <template #avatar>
               <UserAvatar
@@ -121,9 +122,12 @@
                   :lang="part.lang"
                   :theme="$q.dark.isActive ? 'github-dark-dimmed' : 'github'"
                 />
-                <div v-else v-html="marked(part.content)" style="line-height: 1.5;"></div>
+                <div v-else v-html="marked(part.content)" style="line-height: 1.5"></div>
               </template>
-              <MessageCopyButton :content="message.content" :class="`tw:absolute! tw:bottom-0! ${message.role === 'user' ? 'tw:right-full!' : 'tw:left-full!'} tw:mx-`" />
+              <ChatButtonCopy
+                :content="message.content"
+                :class="`tw:absolute! tw:bottom-0! ${message.role === 'user' ? 'tw:right-full!' : 'tw:left-full!'} tw:mx-1!`"
+              />
             </div>
           </q-chat-message>
         </template>
@@ -160,7 +164,7 @@
         justifyContent: 'between',
       }"
     >
-      <div style="width: 80px;"></div>
+      <div style="width: 80px"></div>
       <q-space />
 
       <transition>
@@ -180,12 +184,7 @@
       <q-space />
 
       <div class="column q-mr-lg tw:gap-3">
-        <q-fab
-          icon="smart_toy"
-          color="primary"
-          direction="left"
-          unelevated
-        >
+        <q-fab icon="smart_toy" color="primary" direction="left" unelevated>
           <q-list class="tw:rounded-md" style="width: 250px">
             <q-item
               v-for="(chat, type) in chatTypes"
@@ -247,9 +246,9 @@
 </template>
 
 <script setup>
+import ChatButtonCopy from '@/components/ChatButtonCopy.vue'
 import ChatInput from '@/components/ChatInput.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
-import MessageCopyButton from '@/components/MessageCopyButton.vue'
 import { apiClient } from '@/plugins/api'
 import { useAuthStore } from '@/plugins/stores/auth'
 import { camelize, escapeHtml } from '@/utils'

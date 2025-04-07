@@ -12,9 +12,9 @@
     v-model="message"
     :dark="$q.dark.isActive"
     :input-style="{ maxHeight: `${maxHeight}px` }"
-    :standout="`bg-shadow`"
-    placeholder="Ask something..."
     :input-class="`chat-input q-pl-sm q-py-md ${$q.dark.isActive ? 'text-white' : 'text-black'}`"
+    placeholder="Ask something..."
+    standout="bg-shadow"
     autogrow
     rounded
     @keydown.enter.prevent="handleEnter"

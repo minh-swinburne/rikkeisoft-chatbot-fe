@@ -1,21 +1,21 @@
 <template>
-  <!-- 
-  General description: 
+  <!--
+  General description:
   This component provides a button to copy a message to the clipboard with visual feedback.
-  
+
   Methods:
   - copyToClipboard: Copies the provided content to the clipboard and shows a notification.
   -->
   <q-btn
-    flat
-    round
-    dense
-    icon="content_copy"
     :color="$q.dark.isActive ? 'grey-5' : 'grey-7'"
-    class="message-copy-btn"
+    icon="content_copy"
+    class="chat-copy-btn"
+    size="sm"
+    round
+    flat
     @click="copyToClipboard"
   >
-    <q-tooltip>Copy message</q-tooltip>
+    <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 5]">Copy message</q-tooltip>
   </q-btn>
 </template>
 
@@ -37,7 +37,8 @@ const copyToClipboard = async () => {
       type: 'positive',
       message: 'Message copied to clipboard',
     })
-  } catch (err) {
+  } catch (error) {
+    console.error('Error copying message:', error)
     $q.notify({
       type: 'negative',
       message: 'Failed to copy message',
@@ -47,12 +48,12 @@ const copyToClipboard = async () => {
 </script>
 
 <style scoped>
-.message-copy-btn {
+.chat-copy-btn {
   opacity: 0;
   transition: opacity 0.2s ease;
 }
 
-.q-message:hover .message-copy-btn {
+.q-message:hover .chat-copy-btn {
   opacity: 1;
 }
 </style>

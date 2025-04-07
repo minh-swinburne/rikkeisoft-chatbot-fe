@@ -1,28 +1,29 @@
 <template>
-  <div class="text-h6">Forgot Password</div>
-  <div class="text-subtitle2 q-mt-xs">
+  <h5>Forgot Password</h5>
+  <div class="text-subtitle2 q-mt-xs q-mb-md">
     Enter your email address to receive a password reset link.
   </div>
 
   <q-form @submit="sendResetEmail">
     <q-input
       v-model="email"
-      label="Email"
-      filled
       type="email"
+      autocomplete="email"
+      label="Email"
+      clearable
+      outlined
       :rules="[
         (val) => !!val || 'Email is required',
         (val) => /.+@.+\..+/.test(val) || 'Email must be valid',
       ]"
-      class="q-mb-md"
     />
     <q-btn
-      type="submit"
-      label="Send Reset Email"
-      color="primary"
       :loading="authenticating"
-      unelevated
+      type="submit"
+      color="primary"
+      label="Send Reset Email"
       class="full-width"
+      unelevated
     />
   </q-form>
 
@@ -32,8 +33,8 @@
       v-model="confirmPassword"
       label="Confirm Password"
       type="password"
-      filled
       class="q-mb-lg"
+      filled
     />
     <q-btn
       label="Reset Password"
@@ -75,9 +76,13 @@ async function sendResetEmail() {
   } catch (error) {
     console.error('Error sending reset email:', error)
     $q.notify({
-      type: 'negative',
-      message: 'Failed to send password reset email.',
+      type: 'warning',
+      message: 'This feature is under development.',
     })
+    // $q.notify({
+    //   type: 'negative',
+    //   message: 'Failed to send password reset email.',
+    // })
   } finally {
     authenticating.value = false
   }

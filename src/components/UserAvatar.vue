@@ -1,8 +1,8 @@
 <template>
-  <!-- 
-  General description: 
+  <!--
+  General description:
   This component displays a user avatar with optional border and error handling for image loading.
-  
+
   Methods:
   - None
   -->

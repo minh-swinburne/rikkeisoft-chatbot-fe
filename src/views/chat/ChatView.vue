@@ -47,14 +47,7 @@
             <q-item-label lines="1">{{ chat.name }}</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-btn
-              icon="more_horiz"
-              size="sm"
-              flat
-              dense
-              rounded
-              @click.stop.prevent
-            >
+            <q-btn icon="more_horiz" size="sm" flat dense rounded @click.stop.prevent>
               <q-menu>
                 <q-list>
                   <q-item clickable v-close-popup @click.stop="renameChat(chat)">
@@ -199,7 +192,7 @@ async function renameChat(chat) {
           icon: 'check_circle',
         })
       } catch (error) {
-        // console.log('Error renaming chat:', error)
+        console.log('Error renaming chat:', error)
         $q.notify({
           color: 'negative',
           message: 'Error renaming chat',

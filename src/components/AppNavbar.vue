@@ -117,6 +117,7 @@ const tab = ref($route.path)
 
 const navItems = [
   { name: 'Chat', path: { name: 'chat' } },
+  { name: 'Diet', path: { name: 'diet' } },
   { name: 'Documents', path: { name: 'docs' } },
   { name: 'Users', path: { name: 'user' } },
   { name: 'Config', path: { name: 'config' } },
@@ -130,12 +131,10 @@ const menuItems = [
 const filteredNavItems = computed(() => {
   return authStore.isAdmin || authStore.isSystemAdmin
     ? navItems
-    : navItems.filter(
-      (item) => {
+    : navItems.filter((item) => {
         const route = $router.options.routes.find((route) => route.name === item.path.name)
         return !route.meta?.requiresAdmin
-      }
-    )
+      })
 })
 
 function logout() {

@@ -132,11 +132,7 @@
   >
     <template #default>
       <div class="row items-center no-wrap">
-        <q-icon
-          :name="`img:${provider.logo}`"
-          size="18px"
-          class="q-mr-sm"
-        />
+        <q-icon :name="`img:${provider.logo}`" size="18px" class="q-mr-sm" />
         <div>Continue with {{ provider.name }}</div>
       </div>
     </template>

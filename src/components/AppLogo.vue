@@ -1,16 +1,13 @@
 <template>
-  <!-- 
-  General description: 
+  <!--
+  General description:
   This component displays the application logo with different styles for dark and light themes.
-  
+
   Methods:
   - None
   -->
   <q-avatar>
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      :viewBox="`0 0 76.72102094272485 76.72102094272485`"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" :viewBox="`0 0 76.72102094272485 76.72102094272485`">
       <g
         :class="$q.dark.isActive ? 'dark' : 'light'"
         transform="matrix(1.0567632850241546,0,0,1.0567632850241546,-9.51086956521739,-9.193840378148545)"
@@ -46,9 +43,9 @@
 </template>
 
 <script setup>
-import { useQuasar } from "quasar";
+import { useQuasar } from 'quasar'
 
-const $q = useQuasar();
+const $q = useQuasar()
 </script>
 
 <style lang="scss" scoped>

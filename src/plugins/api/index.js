@@ -2,6 +2,7 @@ import { authAPI } from './auth'
 import { chatsAPI } from './chats'
 import { Client } from './client'
 import { configAPI } from './config'
+import { dietAPI } from './diet'
 import { docsAPI } from './docs'
 import { usersAPI } from './users'
 
@@ -17,4 +18,5 @@ export const apiClient = {
   users: usersAPI(client),
   chats: chatsAPI(client),
   config: configAPI(client),
+  diet: dietAPI(client),
 }

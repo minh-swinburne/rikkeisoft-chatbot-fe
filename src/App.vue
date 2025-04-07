@@ -19,10 +19,20 @@ $q.dark.set(layoutStore.isDark)
 
 <style lang="scss">
 $headings: h1, h2, h3, h4, h5, h6;
-$text-classes: ".text-h1", ".text-h2", ".text-h3", ".text-h4", ".text-h5", ".text-h6";
+$text-classes: '.text-h1', '.text-h2', '.text-h3', '.text-h4', '.text-h5', '.text-h6';
 
 #app {
-  font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Helvetica,Apple Color Emoji,Arial,sans-serif,Segoe UI Emoji,Segoe UI Symbol;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Helvetica,
+    Apple Color Emoji,
+    Arial,
+    sans-serif,
+    Segoe UI Emoji,
+    Segoe UI Symbol;
   background-color: $light;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -36,7 +46,10 @@ a {
   text-decoration: none;
 }
 
-p, #{$headings}, #{$text-classes}, .ellipsis {
+p,
+#{$headings},
+#{$text-classes},
+.ellipsis {
   padding-bottom: 2px;
 }
 

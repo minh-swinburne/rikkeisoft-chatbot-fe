@@ -27,7 +27,7 @@ const routes = [
         path: 'forgot',
         name: 'auth-forgot',
         component: () => import('@/views/auth/AuthForgot.vue'),
-      }
+      },
     ],
   },
   {
@@ -130,6 +130,12 @@ const routes = [
         component: () => import('@/views/user/UserProfile.vue'),
       },
     ],
+  },
+  {
+    path: '/diet',
+    name: 'diet',
+    component: () => import('@/views/diet/DietView.vue'),
+    meta: { requiresAuth: true },
   },
   {
     path: '/error',

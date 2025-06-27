@@ -82,7 +82,7 @@
           <q-chat-message
             v-for="(message, index) in sortedMessages"
             :key="index"
-            :name="message.role === 'assistant' ? 'RikkeiGPT' : authStore.user.firstname"
+            :name="message.role === 'assistant' ? 'SmartHealth' : authStore.user.firstname"
             :sent="message.role === 'user'"
             :text-color="$q.dark.isActive ? 'white' : 'black'"
             :bg-color="

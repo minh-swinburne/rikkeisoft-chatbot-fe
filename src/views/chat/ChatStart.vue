@@ -10,7 +10,7 @@
   <q-page class="flex flex-center">
     <div class="text-center" style="width: 100%">
       <h1 class="text-h3 q-mb-md q-mx-md" :class="{ 'text-white': $q.dark.isActive }">
-        Welcome to RikkeiGPT
+        Welcome to SmartHealth
       </h1>
       <p class="text-subtitle1" :class="{ 'text-grey-5': $q.dark.isActive }">
         Enter a message to start a new chat

@@ -13,8 +13,8 @@
         <q-card-section>
           <router-link to="/home" class="q-gutter-md flex flex-center">
             <q-img
-              src="@/assets/rikkeiGPT.svg"
-              alt="RikkeiGPT"
+              src="@/assets/SmartHealth.svg"
+              alt="SmartHealth"
               fit="fill"
               height="80px"
               width="200px"

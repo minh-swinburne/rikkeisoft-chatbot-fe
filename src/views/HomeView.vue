@@ -220,7 +220,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 const $q = useQuasar()
 
-const texts = ref(['Hello World!', 'Welcome to RikkeiGPT!']) // Sentences to type
+const texts = ref(['Hello World!', 'Welcome to SmartHealth!']) // Sentences to type
 const typedText = ref('') // Current text being typed
 const showCursor = ref(true) // Blinking cursor state
 const currentCharIndex = ref(0) // Current character in the text

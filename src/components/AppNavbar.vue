@@ -11,7 +11,7 @@
   <q-toolbar>
     <router-link to="/" class="row items-center text-white" style="text-decoration: none">
       <app-logo size="30px" />
-      <q-toolbar-title>RikkeiGPT</q-toolbar-title>
+      <q-toolbar-title>SmartHealth</q-toolbar-title>
     </router-link>
 
     <q-space />
